@@ -100,8 +100,9 @@ tupay/
 ├── tsconfig.json             cobertura de compartido/ para el editor
 ├── vite.config.ts            raíz en client/, salida a dist/cliente, proxy /api en desarrollo
 ├── eslint.config.js          reglas de lint para cliente y servidor
-├── assets/                   recursos visuales originales (tapitas, estadios, pelota, UI)
+├── assets/                   originales sin comprimir (fuente de verdad, no se publican)
 ├── scripts/dev.mjs           levanta Express y Vite juntos con `npm run dev`
+├── scripts/optimizar-recursos.mjs   genera client/src/recursos/ a partir de assets/
 ├── dist/                     salida de compilación (cliente y servidor), no versionada
 ├── compartido/               tipos de entrada y salida de la API (sin lógica)
 ├── client/src/
@@ -109,7 +110,7 @@ tupay/
 │   ├── componentes/          elementos visuales reutilizables
 │   ├── hooks/                estado y coordinación de la interfaz
 │   ├── pantallas/             Inicio, Partida, Temporada, Resultado
-│   ├── recursos/             imágenes con autor y licencia documentados
+│   ├── recursos/             imágenes listas para la web (equipos, estadios, juego, emotes, pantallas)
 │   └── estilos/              CSS propio
 ├── server/src/
 │   ├── rutas/                adaptación HTTP y respuestas JSON
@@ -151,6 +152,8 @@ Las dependencias del backend avanzan en un solo sentido: `rutas → servicios �
 | Azar con semilla | Hace reproducibles los eventos variables, el rival y las pruebas. |
 | Repositorio en memoria | Suficiente para el alcance del examen; se documenta como limitación. |
 | Temporada como capa sobre la partida | El calendario y la tabla son datos y orquestación; el partido en sí sigue siendo el mismo motor de física y reglas. |
+| Originales en `assets/`, versiones web en `client/src/recursos/` | Los originales pesan 46 MB y no deben publicarse; `scripts/optimizar-recursos.mjs` genera las versiones WebP (2,2 MB en total) que sí se empaquetan. Vite les pone hash y el navegador las cachea. |
+| Arcos como imagen sobrepuesta | Dibujar el arco por encima de todo crea el efecto de que la pelota entra al arco. El mismo archivo sirve para los dos lados: se voltea en espejo horizontal, no se rota. |
 | Partidos sin humanos resueltos por simulación rápida | Evita que jugar una Liga completa signifique jugar decenas de partidos que nadie observaría. |
 | CSS propio, sin React Router ni librerías de estado | Cumple la restricción del examen de no usar frameworks o bibliotecas externas para la interfaz. |
 | Un solo `package.json` en la raíz | Evita workspaces y dependencias duplicadas; `compartido/`, `client/` y `server/` se separan por su `tsconfig`, no por paquetes distintos. |
@@ -196,7 +199,7 @@ Las dependencias del backend avanzan en un solo sentido: `rutas → servicios �
 
 - [ ] **2.1 Configurar Playwright.** Ejecución headless para CI (`chromium`) y ejecución visual con Google Chrome para la defensa (`chrome`). Prueba inicial: la página carga y confirma la respuesta del servidor. Scripts `test:e2e` y `test:e2e:visual`. Commit: `test: configurar Playwright`.
 - [ ] **2.2 Crear el pipeline.** Tres trabajos claramente nombrados: `Lint (frontend y backend)`, `Pruebas E2E (headless)` y `Deploy a Render`. El despliegue depende de que los dos anteriores terminen bien. Guardar el reporte E2E como artefacto. Commit: `ci: validar, probar y desplegar la aplicación`.
-- [ ] **2.3 Configurar el servicio en Render.** Un único Web Service para frontend y backend (Build `npm ci && npm run build`, Start `npm start`, plan Free). Auto-Deploy en Off. Guardar la Deploy Hook URL como secreto `RENDER_DEPLOY_HOOK_URL` y la URL pública como variable `URL_PRODUCCION` en GitHub. No usar Docker.
+- [ ] **2.3 Configurar el servicio en Render.** Un único Web Service para frontend y backend (Build `npm ci --include=dev && npm run build`, Start `npm start`, plan Free). `--include=dev` es necesario porque Vite y TypeScript son dependencias de desarrollo y se necesitan para compilar; sin esa bandera, un `NODE_ENV=production` en el entorno las omitiría y el build fallaría. Auto-Deploy en Off. Guardar la Deploy Hook URL como secreto `RENDER_DEPLOY_HOOK_URL` y la URL pública como variable `URL_PRODUCCION` en GitHub. No usar Docker.
 - [ ] **2.4 Verificar el despliegue automático.** Un push a `main` dispara el pipeline, publica exactamente el commit aprobado y `/api/salud` responde con ese commit desde la URL pública. Commit: `ci: completar despliegue automático`.
 - [ ] **2.5 Preparar pruebas de producción.** `playwright.prod.config.ts` recibe la URL pública mediante variable de entorno y reutiliza las pruebas relevantes contra ella, con tiempos de espera largos por el arranque en frío de Render. Script `test:e2e:prod`. Commit: `test: ejecutar E2E contra producción`.
 - [ ] **2.6 Documentar la investigación.** Iniciar `docs/investigacion.md`: fuentes consultadas sobre Playwright y Render, cómo se ejecutan las pruebas local y headless, puerto, variables, arranque en frío, limitaciones del plan gratuito y motivo para no usar Docker. Medir cuánto tarda el pipeline completo. Commit: `docs: registrar investigación técnica`.
@@ -208,8 +211,8 @@ Las dependencias del backend avanzan en un solo sentido: `rutas → servicios �
 ### Fase 3 — Diseño funcional, visual y de API
 
 - [ ] **3.1 Crear el boceto.** Pantallas Inicio, Partida, Temporada y Resultado. En Partida, la cancha domina la pantalla, acompañada de marcador, turno, controles, tiros de poder y mensajes. En Temporada, el calendario y la tabla de posiciones. Commit: `docs: crear boceto de pantallas`.
-- [ ] **3.2 Definir la identidad visual.** Paleta, tipografía, estilo de tapitas, pelota, cancha y equipos. Crear los emblemas ilustrados propios de cada club o registrar su origen y licencia. Commit: `docs: definir identidad visual`.
-- [ ] **3.3 Definir el contrato compartido.** Tipos en `compartido/` para partida, equipo, tapita, pelota, turno, marcador, tiro, recorrido, evento, error, resultado, jornada y tabla de posiciones. Sin lógica de negocio en `compartido/`. Commit: `feat: definir contrato TypeScript de la API`.
+- [ ] **3.2 Definir la identidad visual.** Paleta, tipografía y estilo, apoyados en los recursos que ya existen: tapitas de los diez equipos, pelota, perro, arcos, charcos, seis estadios, siete emotes y las dos pantallas de presentación. Registrar su autoría propia y el criterio de no reproducir los escudos oficiales. Commit: `docs: definir identidad visual`.
+- [ ] **3.3 Definir el contrato compartido.** Tipos en `compartido/` para partida, equipo, tapita, pelota, turno, marcador, tiro, recorrido, evento, emote, error, resultado, jornada y tabla de posiciones. Sin lógica de negocio en `compartido/`. Commit: `feat: definir contrato TypeScript de la API`.
 - [ ] **3.4 Diseñar la API.** `docs/api.md` con método, ruta, entrada, salida, códigos de error y ejemplos JSON. Commit: `docs: diseñar API REST`.
 
   | Método | Ruta | Responsabilidad |
@@ -221,6 +224,7 @@ Las dependencias del backend avanzan en un solo sentido: `rutas → servicios �
   | GET | `/api/partidas/:id` | Estado actual del partido. |
   | POST | `/api/partidas/:id/tiros` | Validar y ejecutar un tiro. |
   | POST | `/api/partidas/:id/turno-rival` | Turno del servidor (modo 1 jugador). |
+  | POST | `/api/partidas/:id/emotes` | Lanzar una carita sobre las cinco tapitas del jugador; valida el enfriamiento de 15 segundos. |
   | POST | `/api/temporadas` | Crear una temporada: equipos participantes, equipo(s) humano(s), duración y perro por defecto. Genera el calendario. |
   | GET | `/api/temporadas/:id` | Calendario, tabla de posiciones y próximo partido pendiente de cada jugador. |
   | POST | `/api/temporadas/:id/jornadas/:jornadaId/jugar` | Si el partido involucra a una persona, crea el partido individual correspondiente; si no, lo resuelve por simulación rápida y actualiza la tabla. |
@@ -271,7 +275,7 @@ Esta fase construye el partido completo para Eliminatoria y para un partido suel
 - [ ] **6.1 Crear navegación interna.** `App` controla Inicio, Partida y Resultado mediante estado de React, sin React Router. Commit: `feat: navegar entre pantallas del juego`.
 - [ ] **6.2 Implementar Inicio.** Elegir 1 o 2 jugadores, modo (Eliminatoria o Liga), equipos, estadio, perro activado o no y, en Eliminatoria, la meta de goles. Instrucciones visibles antes de jugar. Commit: `feat: crear pantalla de inicio`.
 - [ ] **6.3 Crear `usePartida`.** Centraliza estado remoto, carga, errores y llamadas `fetch`. Los componentes visuales no llaman a la API directamente. Commit: `feat: coordinar partida con usePartida`.
-- [ ] **6.4 Dibujar la cancha en SVG.** Cancha, arcos, 5 tapitas por equipo y pelota, ocupando la mayor parte de la pantalla. Nombres accesibles o `data-testid` estables. Commit: `feat: dibujar cancha interactiva`.
+- [ ] **6.4 Dibujar la cancha en SVG.** Cancha, arcos, 5 tapitas por equipo y pelota, ocupando la mayor parte de la pantalla. Nombres accesibles o `data-testid` estables. Orden de capas, de atrás hacia adelante: fondo del estadio, charcos, pelota y tapitas, caritas de emote sobre cada tapita, y los arcos **por encima de todo**, para que la pelota se vea entrando al arco. El arco es un solo archivo: para el lado contrario se voltea en espejo horizontal, no se rota. Commit: `feat: dibujar cancha interactiva`.
 - [ ] **6.5 Implementar apuntado.** Arrastrar desde una tapita propia para elegir dirección y fuerza, con una guía visual; cancelar correctamente un gesto inválido. Commit: `feat: apuntar y ejecutar tiros`.
 - [ ] **6.6 Reproducir recorridos.** `useAnimacion` con `requestAnimationFrame`. Bloquear nuevos tiros durante la reproducción; al final, aplicar el estado confirmado por Express. Commit: `feat: animar recorridos del servidor`.
 - [ ] **6.7 Mostrar información completa.** Marcador, turno con cuenta regresiva, minuto o goles rumbo a la meta, tiros de poder, errores y eventos (incluido el perro), siempre visibles sin abrir la consola. Commit: `feat: mostrar estado y retroalimentación`.
@@ -302,7 +306,8 @@ Esta fase solo se inicia si el núcleo (fases 0 a 6) está completo, publicado y
 - [ ] **8.2 Rival aleatorio.** Estrategia sencilla del servidor para el modo 1 jugador y el endpoint de turno rival. Commit: `feat: rival controlado por el servidor`.
 - [ ] **8.3 Rival por muestreo y dificultades.** Candidatos dirigidos hacia la pelota, función de puntuación, error de puntería y tres dificultades (fácil, medio, difícil) como configuración. Commit: `feat: rival por muestreo con tres dificultades`.
 - [ ] **8.4 Tiro de poder.** Dos por jugador y por partido, con 50% más de fuerza máxima; libera un charco de una sola vez sin importar los golpes que le falten. Commit: `feat: tiro de poder`.
-- [ ] **8.5 Crear recursos visuales finales.** Tapitas, emblemas ilustrados de cada club, pelota y perro. Documentar herramientas usadas, autoría propia y cualquier licencia de terceros en `docs/decisiones.md`. Commit: `feat: integrar recursos visuales`.
+- [ ] **8.5 Integrar los recursos visuales.** Las imágenes ya existen: los originales están en `assets/` y las versiones web en `client/src/recursos/` (equipos, estadios, juego, emotes y pantallas). Falta conectarlas a las pantallas y documentar en `docs/decisiones.md` las herramientas usadas, la autoría propia y el criterio de no reproducir escudos oficiales. Commit: `feat: integrar recursos visuales`.
+- [ ] **8.6 Emotes.** `POST /api/partidas/:id/emotes`: el servidor valida el enfriamiento de 15 segundos y registra la carita elegida; React la dibuja sobre las cinco tapitas del jugador durante 5 segundos y luego la retira. Botón deshabilitado con el tiempo restante mientras dura el enfriamiento. Commit: `feat: emotes sobre las tapitas`.
 
 **Criterio de salida:** cada partido presenta alguna diferencia visible y estratégica, y el juego tiene una identidad reconocible sin comprometer el núcleo.
 
@@ -355,9 +360,10 @@ Si aparece un bloqueo, se recorta en este orden:
 1. temporada de Liga completa (queda Liga como partido suelto, que ya cumple el núcleo);
 2. dificultad avanzada del rival por muestreo (queda la aleatoria);
 3. estadios con efectos físicos (queda el estadio de referencia de Cochabamba);
-4. tiro de poder;
-5. control del equipo rival por el segundo jugador (queda solo contra el servidor);
-6. mejoras visuales y sonoras decorativas.
+4. emotes (son expresión, no cambian el resultado de ninguna jugada);
+5. tiro de poder;
+6. control del equipo rival por el segundo jugador (queda solo contra el servidor);
+7. mejoras visuales y sonoras decorativas.
 
 Nunca se recorta:
 
@@ -367,6 +373,7 @@ Nunca se recorta:
 - estado no trivial, finalización y empate en Liga;
 - el perro, como fuente de variabilidad mínima;
 - acción inválida visible, incluida la restricción de equipos repetidos;
+- las imágenes propias de `assets/`, que la rúbrica pide explícitamente;
 - responsabilidades reales de Express;
 - `fetch`, JSON, GET, POST y mismo dominio y puerto;
 - lint de frontend y backend;

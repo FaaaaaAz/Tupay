@@ -79,6 +79,17 @@ Reglas del turno:
 - El tiro de poder aumenta en 50% la fuerza máxima del lanzamiento.
 - Si el choque libera la pelota de un charco (de agua o de nieve), lo hace de una sola vez, sin importar cuántos golpes le falten al charco normalmente.
 
+## Emotes
+
+Los emotes son la forma de festejar, quejarse o burlarse durante el partido, como en cualquier juego por turnos. No afectan la física ni las reglas: son solo expresión.
+
+- El jugador puede lanzar un emote **en cualquier momento**, sea o no su turno.
+- El emote se aplica a **todas sus tapitas en la cancha a la vez**: a las cinco les aparece la misma carita. No se elige una tapita.
+- La carita dura **5 segundos** y después las tapitas vuelven a verse sin cara. Ese es su estado normal.
+- Para no llenar la pantalla, cada jugador puede lanzar **un emote cada 15 segundos**. Mientras espera, el botón se ve deshabilitado con el tiempo restante.
+- Hay siete caritas disponibles: dormido, enojado, enojado serio, feliz, feliz eufórico, llorando y sorprendido.
+- El enfriamiento lo controla el servidor, igual que el resto de las acciones: el cliente pide el emote, el servidor lo acepta o lo rechaza, y React anima los 5 segundos.
+
 ## Física de la cancha
 
 - La pelota y las tapitas rebotan en las paredes de la cancha, excepto en la boca del arco.
@@ -131,6 +142,7 @@ El servidor valida cada acción y rechaza las inválidas con un mensaje que se m
 | Tirar después de agotar el tiempo del turno | "Se acabó tu tiempo: pierdes el turno" |
 | Fuerza o dirección fuera de rango | "Tiro inválido" |
 | Usar el tiro de poder sin tener disponibles | "Ya no te quedan tiros de poder" |
+| Lanzar un emote antes de que pasen 15 segundos del anterior | "Espera unos segundos para volver a usar un emote" |
 | Tirar con la partida terminada | "La partida ya terminó" |
 | `golesParaGanar` fuera de 1 a 5 (Eliminatoria) | "Elige una meta de goles entre 1 y 5" |
 
@@ -141,6 +153,7 @@ El servidor valida cada acción y rechaza las inválidas con un mensaje que se m
 - Minuto de partido (modo Liga) o goles rumbo a la meta (modo Eliminatoria).
 - Marcador del partido.
 - Tiros de poder restantes de cada jugador.
+- Emote activo de cada jugador, con su tiempo restante y su enfriamiento.
 - Apariciones del perro y si está activado.
 - Estado del partido: en juego o finalizado.
 - En una temporada de Liga: calendario, resultados jugados o simulados, y tabla de posiciones.
@@ -154,6 +167,7 @@ Al crear un partido o una temporada se pueden enviar valores opcionales para que
 - `duracionRealSegundos`: duración real total de un partido de Liga (por ejemplo, 5 segundos en vez de varios minutos).
 - `limiteTurnoSegundos`: duración real de cada turno.
 - `perroActivo` y `probabilidadPerro`: para desactivar el perro o forzar su aparición en una prueba puntual.
+- `duracionEmoteSegundos` y `esperaEmoteSegundos`: para acortar los 5 segundos de la carita y los 15 de enfriamiento.
 - `equipos`: lista de equipos participantes de una temporada, para probar con menos de los 10 equipos completos.
 
 ## Evolución de las reglas
@@ -164,3 +178,4 @@ Al crear un partido o una temporada se pueden enviar valores opcionales para que
 4. **De un partido a una temporada:** Liga se amplía de "un partido con reloj" a una temporada de todos contra todos con los equipos reales de la División Profesional, tabla de posiciones y la posibilidad de que el segundo jugador controle al equipo rival en vez de la máquina.
 5. **El perro, versión final:** en vez de pasar el turno siempre al rival después de su aparición, el turno pasa al equipo cuyo arco está más cerca de donde quedó la pelota, para que pueda defenderse si el perro la deja cerca de su propio arco.
 6. **Equipos reales:** se pasó de un puñado de equipos inventados a diez equipos reales de la Liga boliviana, uno o dos por cada plaza futbolística importante del país, con la aclaración de que los escudos son ilustraciones propias y no reproducciones oficiales.
+7. **Emotes:** al dibujar las tapitas aparecieron caritas propias como recurso visual. En vez de dejarlas como decoración fija, se convirtieron en una acción del jugador: una carita que se aplica a todas sus tapitas, dura 5 segundos y tiene 15 segundos de enfriamiento para que nadie pueda llenar la pantalla.
