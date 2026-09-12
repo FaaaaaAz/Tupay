@@ -29,7 +29,10 @@ npm install
 | `npm run build` | Compila el cliente a `dist/cliente` y el servidor a `dist/server`. |
 | `npm start` | Levanta Express sirviendo el cliente ya compilado en `http://localhost:3000`. |
 | `npm run lint` | ESLint sobre cliente y servidor. Falla si hay infracciones. |
-| `npm run typecheck` | TypeScript estricto sobre `compartido/`, `client/` y `server/`. |
+| `npm run typecheck` | TypeScript estricto sobre `compartido/`, `client/`, `server/` y `e2e/`. |
+| `npm run test:e2e` | Pruebas end-to-end sin ventana (lo que corre GitHub Actions). |
+| `npm run test:e2e:visual` | Las mismas pruebas con ventana, en el Google Chrome instalado. |
+| `npm run test:e2e:prod` | Las mismas pruebas contra la aplicación publicada. Necesita `URL_PRODUCCION`. |
 
 En desarrollo son dos procesos: Vite sirve el cliente y reenvía `/api` a Express, de modo que el
 navegador siempre ve una sola dirección. En producción hay un solo proceso: Express sirve el cliente
@@ -70,5 +73,18 @@ El resto de los endpoints del juego se documentan en `docs/api.md` a medida que 
 
 | Variable | Uso |
 |---|---|
-| `PORT` | Puerto donde escucha Express. Por defecto `3000`. |
+| `PORT` | Puerto donde escucha Express. Por defecto `3000`. Render lo asigna solo. |
 | `RENDER_GIT_COMMIT` | La define Render; identifica el commit publicado y se expone en `/api/salud`. |
+| `URL_PRODUCCION` | Dirección pública contra la que corren las pruebas de producción. |
+
+## Despliegue
+
+La aplicación se publica en Render como un único Web Service (frontend y backend bajo la misma
+dirección): <https://tupay.onrender.com>
+
+Los deploys no se disparan con cada push: GitHub Actions ejecuta primero lint y pruebas E2E, y solo
+si ambos pasan le pide a Render que publique, usando un Deploy Hook. El trabajo no se da por bueno
+hasta que `/api/salud` en la URL pública informa exactamente el commit que se acaba de subir.
+
+Los detalles de configuración, las limitaciones del plan gratuito y el motivo para no usar Docker
+están en [`docs/investigacion.md`](docs/investigacion.md).
