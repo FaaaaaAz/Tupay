@@ -95,7 +95,14 @@ Al terminar cada fase:
 tupay/
 ├── AGENTS.md
 ├── README.md
-├── package.json
+├── package.json              scripts unificados y dependencias permitidas
+├── tsconfig.base.json        opciones estrictas compartidas
+├── tsconfig.json             cobertura de compartido/ para el editor
+├── vite.config.ts            raíz en client/, salida a dist/cliente, proxy /api en desarrollo
+├── eslint.config.js          reglas de lint para cliente y servidor
+├── assets/                   recursos visuales originales (tapitas, estadios, pelota, UI)
+├── scripts/dev.mjs           levanta Express y Vite juntos con `npm run dev`
+├── dist/                     salida de compilación (cliente y servidor), no versionada
 ├── compartido/               tipos de entrada y salida de la API (sin lógica)
 ├── client/src/
 │   ├── api/                  llamadas a Express con fetch
@@ -146,6 +153,8 @@ Las dependencias del backend avanzan en un solo sentido: `rutas → servicios �
 | Temporada como capa sobre la partida | El calendario y la tabla son datos y orquestación; el partido en sí sigue siendo el mismo motor de física y reglas. |
 | Partidos sin humanos resueltos por simulación rápida | Evita que jugar una Liga completa signifique jugar decenas de partidos que nadie observaría. |
 | CSS propio, sin React Router ni librerías de estado | Cumple la restricción del examen de no usar frameworks o bibliotecas externas para la interfaz. |
+| Un solo `package.json` en la raíz | Evita workspaces y dependencias duplicadas; `compartido/`, `client/` y `server/` se separan por su `tsconfig`, no por paquetes distintos. |
+| `compartido/` solo con tipos | Al importarse con `import type`, desaparece al compilar: el cliente y el servidor comparten el contrato sin compartir código ejecutable. |
 
 ### Uso moderado de SOLID
 
@@ -161,11 +170,11 @@ Las dependencias del backend avanzan en un solo sentido: `rutas → servicios �
 
 ### Fase 0 — Definición y planificación
 
-- [ ] **0.1 Preparar el repositorio local.** Clonar el repositorio de GitHub, crear `.gitignore` (`node_modules`, `dist`, `playwright-report`, `test-results`, archivos de entorno) y un README mínimo. Confirmar con el docente el tipo de acceso al repositorio. Commit: `chore: preparar repositorio de Tupay`.
-- [ ] **0.2 Cerrar la introducción y el origen de la idea.** Revisar y ajustar `docs/introduccion.md`: nombre, significado, propósito, experiencia de juego y evolución de la idea. Commit: `docs: introducción y evolución de la idea`.
-- [ ] **0.3 Cerrar las reglas del núcleo.** Revisar y ajustar `docs/reglas.md`. Las reglas deben poder explicarse sin consultar el código. Commit: `docs: definir reglas del juego`.
+- [x] **0.1 Preparar el repositorio local.** Clonar el repositorio de GitHub, crear `.gitignore` (`node_modules`, `dist`, `playwright-report`, `test-results`, archivos de entorno) y un README mínimo. Confirmar con el docente el tipo de acceso al repositorio. Commit: `chore: preparar repositorio de Tupay`.
+- [x] **0.2 Cerrar la introducción y el origen de la idea.** Revisar y ajustar `docs/introduccion.md`: nombre, significado, propósito, experiencia de juego y evolución de la idea. Commit: `docs: introducción y evolución de la idea`.
+- [x] **0.3 Cerrar las reglas del núcleo.** Revisar y ajustar `docs/reglas.md`. Las reglas deben poder explicarse sin consultar el código. Commit: `docs: definir reglas del juego`.
 - [ ] **0.4 Registrar planificación y uso de IA.** Añadir este archivo como `docs/plan.md`, crear `AGENTS.md` con las reglas de trabajo del agente (sin librerías prohibidas, sin `commit`/`push` automáticos, explicar antes de modificar) y `docs/uso-ia.md` con la tabla de registro. Commit: `docs: agregar plan y reglas de trabajo con IA`.
-- [ ] **0.5 Revisar equipos y estadios.** Comprobar que la tabla de 10 equipos y sus estadios en `docs/reglas.md` está completa y que cada equipo se puede diferenciar visualmente de los demás. Commit: `docs: revisar equipos y estadios`.
+- [x] **0.5 Revisar equipos y estadios.** Comprobar que la tabla de 10 equipos y sus estadios en `docs/reglas.md` está completa y que cada equipo se puede diferenciar visualmente de los demás. Commit: `docs: revisar equipos y estadios`.
 
 **Criterio de salida:** otra persona puede comprender qué es Tupay, cómo se juega, por qué es original y qué se construirá.
 
@@ -173,11 +182,11 @@ Las dependencias del backend avanzan en un solo sentido: `rutas → servicios �
 
 ### Fase 1 — Esqueleto técnico
 
-- [ ] **1.1 Configurar el proyecto.** `package.json` raíz con módulos ES, Node 22 declarado y scripts unificados. `client/`, `server/` y `compartido/` con TypeScript estricto. Solo React, Express, TypeScript, Vite, tsx, ESLint y Playwright. Commit: `chore: configurar React, Express y TypeScript`.
-- [ ] **1.2 Crear el servidor mínimo.** `server/src/app.ts` arma Express; `server/src/index.ts` escucha `process.env.PORT`. `GET /api/salud` con estado y versión (`RENDER_GIT_COMMIT`); rutas de API inexistentes responden 404 en JSON. Commit: `feat: crear servidor Express y ruta de salud`.
-- [ ] **1.3 Crear el cliente mínimo.** React consulta `/api/salud` con `fetch` y muestra el estado del servidor. Commit: `feat: conectar cliente React con Express`.
-- [ ] **1.4 Unificar dominio y puerto.** Vite compila el cliente y Express lo sirve; en desarrollo, Vite reenvía `/api` al servidor. `npm run build && npm start` debe abrir toda la aplicación desde una sola dirección. Commit: `feat: servir cliente compilado desde Express`.
-- [ ] **1.5 Configurar calidad estática.** ESLint cubre cliente y servidor; scripts `lint`, `lint:client`, `lint:server`, `typecheck`. Comprobar deliberadamente que una infracción hace fallar el comando y luego retirarla. Commit: `chore: configurar lint y typecheck`.
+- [x] **1.1 Configurar el proyecto.** `package.json` raíz con módulos ES, Node 22 o superior declarado en `engines` y scripts unificados. `client/`, `server/` y `compartido/` con TypeScript estricto. Solo React, Express, TypeScript, Vite, tsx, ESLint y Playwright. Commit: `chore: configurar React, Express y TypeScript`.
+- [x] **1.2 Crear el servidor mínimo.** `server/src/app.ts` arma Express; `server/src/index.ts` escucha `process.env.PORT`. `GET /api/salud` con estado y versión (`RENDER_GIT_COMMIT`); rutas de API inexistentes responden 404 en JSON. Commit: `feat: crear servidor Express y ruta de salud`.
+- [x] **1.3 Crear el cliente mínimo.** React consulta `/api/salud` con `fetch` y muestra el estado del servidor. Commit: `feat: conectar cliente React con Express`.
+- [x] **1.4 Unificar dominio y puerto.** Vite compila el cliente y Express lo sirve; en desarrollo, Vite reenvía `/api` al servidor. `npm run build && npm start` debe abrir toda la aplicación desde una sola dirección. Commit: `feat: servir cliente compilado desde Express`.
+- [x] **1.5 Configurar calidad estática.** ESLint cubre cliente y servidor; scripts `lint`, `lint:client`, `lint:server`, `typecheck`. Comprobar deliberadamente que una infracción hace fallar el comando y luego retirarla. Commit: `chore: configurar lint y typecheck`.
 
 **Criterio de salida:** el cliente obtiene información real de Express, toda la aplicación compila y lint cubre ambos lados.
 
@@ -393,7 +402,7 @@ Cada diapositiva responde tres preguntas: **qué decisión se tomó, por qué se
 | Reglas y finalización | Acciones válidas e inválidas, victoria, empate (Liga) y fin de temporada. |
 | Decisión estratégica | Elección de tapita, dirección, fuerza y tiro de poder. |
 | Variabilidad | El perro y, si se llega, estadios y dificultades del rival. |
-| Retroalimentación visual | Turno, marcador, errores, eventos y resultado visibles. |
+| Retroalimentación visual | Turno, marcador, errores, eventos y resultado visibles, con las imágenes propias de `assets/` (tapitas, estadios, pelota y pantallas). |
 | React y TypeScript | Componentes, hooks, estado, eventos y renderizado. |
 | Express y TypeScript | Creación, validación, simulación y, si se llega, orquestación de temporada. |
 | HTTP REST | `fetch`, JSON, GET y POST reales. |
