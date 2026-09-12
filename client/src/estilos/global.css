@@ -1,0 +1,72 @@
+:root {
+  --verde-cancha: #1f6f43;
+  --verde-oscuro: #12492c;
+  --crema: #f4efe4;
+  --dorado: #f2c14e;
+  --rojo: #c0392b;
+
+  color-scheme: dark;
+  font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--crema);
+  background: radial-gradient(circle at 50% 25%, var(--verde-cancha), var(--verde-oscuro) 70%);
+}
+
+.pantalla {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+}
+
+.titulo {
+  margin: 0;
+  font-size: clamp(3rem, 12vw, 7rem);
+  letter-spacing: 0.1em;
+  color: var(--dorado);
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
+}
+
+.subtitulo {
+  margin: 0 0 2rem;
+  font-size: 1.1rem;
+  opacity: 0.85;
+}
+
+.tarjeta {
+  min-width: min(28rem, 100%);
+  padding: 1.25rem 1.5rem;
+  border: 2px solid rgba(244, 239, 228, 0.25);
+  border-radius: 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.tarjeta__titulo {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  opacity: 0.7;
+}
+
+.tarjeta__version {
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+.tarjeta__error {
+  color: var(--rojo);
+}
