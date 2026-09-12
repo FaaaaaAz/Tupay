@@ -42,9 +42,20 @@ compartido/      tipos de entrada y salida de la API (sin lógica)
 client/src/      React: api, componentes, hooks, pantallas, estilos
 server/src/      Express: rutas, servicios, dominio (física y reglas)
 docs/            documentación del proyecto
-assets/          recursos visuales originales (tapitas, estadios, pelota, UI)
+assets/          imágenes originales sin comprimir (fuente de verdad)
 scripts/         utilidades de desarrollo
 ```
+
+Las imágenes que usa el juego viven en `client/src/recursos/` y se generan desde `assets/` con
+un script que se corre a mano, solo cuando cambia algún original:
+
+```bash
+npm install --no-save sharp
+node scripts/optimizar-recursos.mjs
+```
+
+`sharp` no es dependencia del proyecto: hace falta para regenerar las imágenes, no para compilar
+ni para jugar.
 
 ## API
 
