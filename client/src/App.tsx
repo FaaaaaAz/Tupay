@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { RespuestaSalud } from "../../compartido/salud";
+import type { RespuestaSalud } from "../../compartido/salud.js";
 import { obtenerSalud } from "./api/salud";
 
 type EstadoConsulta =

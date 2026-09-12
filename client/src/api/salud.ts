@@ -1,4 +1,4 @@
-import type { RespuestaSalud } from "../../../compartido/salud";
+import type { RespuestaSalud } from "../../../compartido/salud.js";
 
 export async function obtenerSalud(): Promise<RespuestaSalud> {
   const respuesta = await fetch("/api/salud");
