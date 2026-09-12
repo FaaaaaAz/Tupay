@@ -17,8 +17,11 @@
     "start": "node dist/server/src/index.js",
     "lint": "npm run lint:client && npm run lint:server",
     "lint:client": "eslint client compartido vite.config.ts",
-    "lint:server": "eslint server scripts",
-    "typecheck": "tsc -p . && tsc -p client && tsc -p server --noEmit"
+    "lint:server": "eslint server scripts e2e playwright.config.ts playwright.prod.config.ts",
+    "typecheck": "tsc -p . && tsc -p client && tsc -p server --noEmit",
+    "test:e2e": "playwright test --project=chromium",
+    "test:e2e:visual": "playwright test --project=chrome",
+    "test:e2e:prod": "playwright test --config playwright.prod.config.ts --project=chromium"
   },
   "dependencies": {
     "express": "^5.2.1",
@@ -27,6 +30,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
     "@types/express": "^5.0.6",
     "@types/node": "^22.20.2",
     "@types/react": "^19.3.0",
