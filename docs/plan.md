@@ -1,34 +1,41 @@
-# Plan de desarrollo — TUPAY
+# Plan de desarrollo — Tupay
 
 ## 1. Propósito del plan
 
-Este documento organiza el desarrollo de **TUPAY**, videojuego web de fútbol con tapitas inspirado en el fútbol boliviano y desarrollado como proyecto final de Certificación.
+Este documento organiza el desarrollo de **Tupay**, videojuego web de fútbol con tapitas inspirado en la Liga boliviana, desarrollado como proyecto final de Certificación.
 
-El proyecto debe mostrar una evolución comprensible desde la idea inicial hasta la aplicación publicada. Cada fase produce código verificable, documentación, evidencia y commits claros que después podrán utilizarse en una presentación breve.
+El proyecto debe mostrar una evolución comprensible desde la idea inicial hasta la aplicación publicada. Cada fase produce código verificable, documentación, evidencia y commits claros, utilizables después en una presentación breve.
 
-El objetivo no es acumular funcionalidades. La prioridad es construir una partida completa, estable, explicable y alineada con la rúbrica:
+La prioridad no es acumular funciones, sino construir una partida completa, estable y explicable, alineada con la rúbrica del examen: dos jugadores como mínimo, interacción y movimiento, estado y reglas con finalización, React y Express comunicados con `fetch` y JSON, pruebas E2E con integración continua y despliegue, y documentación suficiente para defender el proyecto.
 
-1. dos jugadores como mínimo;
-2. interacción significativa y elementos en movimiento;
-3. estado, reglas, estrategia, variabilidad y finalización;
-4. React y Express comunicados realmente mediante `fetch` y JSON;
-5. pruebas E2E, integración continua y despliegue;
-6. documentación suficiente para explicar y modificar el proyecto durante la defensa.
+- **Último commit permitido:** martes 15 de septiembre, 16:00 (hora de GitHub).
+- **Defensa:** a confirmar con el docente, después del cierre del repositorio.
+- **Introducción y evolución de la idea:** `docs/introduccion.md`.
+- **Reglas completas:** `docs/reglas.md`.
 
-## 2. Alcance del producto
+## 2. Nota de alcance: la Liga completa es la parte más ambiciosa
+
+La visión de Tupay incluye una temporada de Liga con los 10 equipos reales definidos en `docs/reglas.md`, jugados todos contra todos (9 partidos por jugador). Esto es considerablemente más grande que un partido suelto.
+
+Una decisión hace que sea manejable: **los partidos que no involucran a ninguna persona se resuelven con una simulación rápida** (un marcador generado con semilla, sin física completa), no jugándolos uno por uno. Así la tabla avanza para los 10 equipos sin tener que jugar de verdad los partidos entre equipos que no controla nadie.
+
+Este plan sigue esa lógica en todas sus fases: primero el partido individual (Eliminatoria y un partido suelto de Liga), y solo después la temporada completa como una capa por encima. Si en algún punto conviene recortar, la sección 8 (orden de reducción de alcance) dice exactamente qué recortar primero, y la temporada completa está cerca del principio de esa lista.
+
+## 3. Alcance del producto
 
 ### Núcleo obligatorio
 
-La primera versión completa de TUPAY debe incluir:
+La primera versión completa de Tupay debe incluir:
 
-- partida local para dos jugadores en el mismo dispositivo;
-- cancha que utilice la mayor parte de la pantalla;
-- tapitas, pelota, arcos y colisiones;
-- elección de tapita, dirección y fuerza del tiro;
-- turnos y validación de acciones inválidas;
+- partida de 5 contra 5 para uno o dos jugadores, en el mismo dispositivo;
+- cancha que utilice la mayor parte de la pantalla, en navegador de escritorio;
+- tapitas, pelota, arcos y colisiones con física propia;
+- elección de tapita, dirección y fuerza del tiro, con tiempo límite por turno;
+- turnos y validación de acciones inválidas, incluida la restricción de no repetir equipo;
 - marcador, mensajes visibles y estado de la partida;
-- victoria, empate y pantalla de resultado;
-- al menos una fuente de variabilidad controlada por el servidor;
+- modo Eliminatoria (partido único, sin empate, meta de goles configurable);
+- modo Liga como partido suelto (reloj acelerado configurable, empate posible, puntos 3-1-0);
+- el perro como fuente de variabilidad controlada por el servidor;
 - creación, consulta y actualización de partidas mediante una API REST;
 - frontend y backend publicados bajo una sola dirección;
 - pruebas E2E locales, en CI y contra producción.
@@ -37,22 +44,20 @@ La primera versión completa de TUPAY debe incluir:
 
 Estas funciones se desarrollan únicamente cuando el núcleo obligatorio está completo, publicado y probado:
 
-1. evento del perro en la cancha;
-2. tiro de altura;
-3. estadios con efectos propios;
-4. rival controlado por el servidor con lógica aleatoria;
-5. rival controlado por el servidor con distintas dificultades;
-6. avisos de clásicos y presentación especial de equipos;
-7. mejoras visuales, sonoras y de animación.
+1. temporada de Liga completa (calendario todos-contra-todos, tabla de posiciones, control del rival por el segundo jugador, simulación rápida de partidos sin humanos);
+2. rival controlado por el servidor con distintas dificultades (fácil, medio, difícil);
+3. estadios con efectos físicos propios;
+4. tiro de poder;
+5. mejoras visuales, sonoras y de animación.
 
-No se inicia una ampliación si existen fallos en la partida de dos jugadores, la API, las pruebas E2E o el despliegue.
+No se inicia una ampliación si existen fallos en el partido de 1 o 2 jugadores, la API, las pruebas E2E o el despliegue.
 
-## 3. Forma de trabajo con el agente de IA
+## 4. Forma de trabajo con el agente de IA
 
-1. Solicitar una sola tarea por su código, por ejemplo: `Implementa la tarea 4.3 de docs/plan.md`.
-2. Pedir al agente que inspeccione el estado actual antes de modificar archivos.
-3. Indicar expresamente que no debe hacer `commit`, `push`, crear tags ni cambiar servicios externos.
-4. Revisar el cambio y pedir una explicación de cualquier parte que no se comprenda.
+1. Solicitar lo que se necesite en cada momento: una tarea puntual del plan (por ejemplo, `Implementa la tarea 4.3 de docs/plan.md`), varias tareas juntas o un pedido libre que no está numerado en este documento. No es obligatorio avanzar tarea por tarea.
+2. El agente inspecciona el estado actual del proyecto cuando lo necesite; si ya tiene contexto suficiente de la conversación, no hace falta que revise todo de nuevo antes de cada cambio.
+3. El agente puede sugerir un commit y su mensaje, pero no debe ejecutar `commit`, `push`, crear tags ni cambiar servicios externos por su cuenta.
+4. Revisar el cambio y pedir una explicación de cualquier parte que no se comprenda. Todo el código debe poder explicarse y modificarse en la defensa.
 5. Ejecutar las verificaciones correspondientes:
 
    ```bash
@@ -65,121 +70,90 @@ No se inicia una ampliación si existen fallos en la partida de dos jugadores, l
 
 6. Probar manualmente el comportamiento modificado.
 7. Registrar en `docs/uso-ia.md` la solicitud, qué se incorporó y qué se verificó personalmente.
-8. Realizar el commit manualmente con el mensaje sugerido.
-9. Marcar la tarea terminada solo cuando su criterio de aceptación se cumpla.
-
-### Regla de finalización de una tarea
-
-Una tarea está terminada cuando:
-
-- el comportamiento funciona;
-- no rompe funcionalidades anteriores;
-- lint, TypeScript y las pruebas aplicables pasan;
-- el código se puede explicar y modificar;
-- la documentación afectada está actualizada;
-- existe evidencia cuando la tarea la requiere.
+8. Hacer el commit manualmente, usando el mensaje sugerido si aplica.
+9. Si el trabajo corresponde a una tarea numerada del plan, marcarla terminada solo cuando su criterio de aceptación se cumpla.
 
 ### Convención de commits
 
-- `feat:` nueva funcionalidad;
-- `fix:` corrección de un defecto;
-- `docs:` documentación;
-- `test:` pruebas;
-- `ci:` integración continua o despliegue;
-- `refactor:` reorganización sin cambiar el comportamiento;
-- `chore:` configuración y mantenimiento.
+`feat:` funcionalidad nueva · `fix:` corrección · `docs:` documentación · `test:` pruebas · `ci:` integración continua o despliegue · `refactor:` reorganización sin cambiar comportamiento · `chore:` configuración.
 
-Los commits deben representar avances pequeños y comprensibles. No se deben agrupar varias tareas grandes en un solo commit.
+Los commits representan avances pequeños y comprensibles; no se agrupan varias tareas grandes en un solo commit.
 
-## 4. Estrategia de versiones y evidencias
+## 5. Estrategia de versiones y evidencias
 
 Al terminar cada fase:
 
 1. ejecutar todas las verificaciones aplicables;
 2. actualizar `docs/uso-ia.md` y `docs/decisiones.md`;
-3. guardar una captura representativa en `docs/evidencias/`;
+3. guardar una captura representativa en `docs/evidencias/`, con nombre descriptivo (por ejemplo, `fase-2-actions-en-verde.png`);
 4. crear el tag `fase-N` únicamente después de verificar el resultado;
 5. comprobar que la versión publicada corresponde al commit esperado.
 
-Las evidencias deben tener nombres descriptivos, por ejemplo:
-
-- `fase-1-servidor-y-cliente.png`;
-- `fase-2-actions-en-verde.png`;
-- `fase-5-partida-en-produccion.png`;
-- `fase-7-e2e-produccion.png`.
-
-## 5. Arquitectura objetivo
+## 6. Arquitectura objetivo
 
 ```text
 tupay/
 ├── AGENTS.md
 ├── README.md
 ├── package.json
-├── compartido/
-│   └── tipos de entrada y salida de la API
-├── client/
-│   └── src/
-│       ├── api/             llamadas a Express con fetch
-│       ├── componentes/     elementos visuales reutilizables
-│       ├── hooks/           estado y coordinación de la interfaz
-│       ├── pantallas/       Inicio, Partida y Resultado
-│       ├── recursos/        imágenes y sonidos con licencia documentada
-│       └── estilos/         CSS propio
-├── server/
-│   └── src/
-│       ├── rutas/           adaptación HTTP y respuestas JSON
-│       ├── servicios/       casos de uso de la partida
-│       ├── dominio/
-│       │   ├── fisica/      tiros, movimiento, choques y rebotes
-│       │   ├── reglas/      turnos, goles, validaciones y finalización
-│       │   ├── variabilidad/
-│       │   └── rival/       ampliación opcional
-│       ├── repositorios/    almacenamiento de partidas en memoria
-│       ├── utilidades/      vectores y azar con semilla
-│       ├── app.ts
-│       └── index.ts
+├── compartido/               tipos de entrada y salida de la API (sin lógica)
+├── client/src/
+│   ├── api/                  llamadas a Express con fetch
+│   ├── componentes/          elementos visuales reutilizables
+│   ├── hooks/                estado y coordinación de la interfaz
+│   ├── pantallas/             Inicio, Partida, Temporada, Resultado
+│   ├── recursos/             imágenes con autor y licencia documentados
+│   └── estilos/              CSS propio
+├── server/src/
+│   ├── rutas/                adaptación HTTP y respuestas JSON
+│   ├── servicios/            casos de uso: partida individual y temporada
+│   ├── dominio/
+│   │   ├── fisica/           tiros, movimiento, choques y rebotes
+│   │   ├── reglas/           turnos, goles, validaciones y finalización
+│   │   ├── estadios/         configuración de cada estadio
+│   │   ├── eventos/          el perro
+│   │   ├── rival/            estrategias del rival (aleatoria, por muestreo)
+│   │   └── temporada/        calendario todos-contra-todos y tabla de posiciones
+│   ├── repositorios/         partidas y temporadas en memoria
+│   ├── utilidades/           vectores y azar con semilla
+│   ├── app.ts
+│   └── index.ts
 ├── e2e/
 ├── docs/
 │   ├── introduccion.md
 │   ├── reglas.md
+│   ├── plan.md
 │   ├── api.md
 │   ├── boceto.md
 │   ├── decisiones.md
 │   ├── investigacion.md
 │   ├── uso-ia.md
 │   └── evidencias/
-└── .github/
-    └── workflows/
+└── .github/workflows/
 ```
 
-Las dependencias del backend avanzan en un solo sentido:
+Las dependencias del backend avanzan en un solo sentido: `rutas → servicios → dominio`. El dominio no depende de Express, por lo que se puede probar sin levantar el servidor. El módulo `temporada/` reutiliza el mismo motor de partida individual; no duplica la física ni las reglas de un partido.
 
-```text
-rutas -> servicios -> dominio
-```
-
-El dominio no debe depender de Express. React representa y anima el resultado; Express conserva la partida, valida las acciones y calcula sus consecuencias.
-
-## 6. Decisiones de arquitectura
+### Decisiones de arquitectura
 
 | Decisión | Justificación |
-| --- | --- |
-| SVG para la cancha | Permite elementos visibles en el DOM, CSS propio, interacción por puntero y localizadores claros para Playwright. |
+|---|---|
+| SVG para la cancha | Elementos visibles en el DOM, CSS propio, interacción por puntero y localizadores claros para Playwright. |
 | Física en el servidor | Hace que Express participe en una decisión significativa y evita que la lógica crítica exista solo en el navegador. |
 | Animación en React | React reproduce el recorrido calculado por el servidor sin decidir el resultado del tiro. |
-| Azar con semilla | Hace reproducibles los eventos variables y las pruebas. |
-| Repositorio en memoria | Es suficiente para el alcance del examen y evita introducir una base de datos innecesaria. |
-| API con JSON y `fetch` | Cumple el contrato técnico sin Axios ni librerías de estado o comunicación. |
-| Navegación con estado de React | Evita React Router y mantiene únicamente tres pantallas simples. |
-| CSS propio | Cumple la restricción de no utilizar frameworks o bibliotecas de componentes. |
+| Azar con semilla | Hace reproducibles los eventos variables, el rival y las pruebas. |
+| Repositorio en memoria | Suficiente para el alcance del examen; se documenta como limitación. |
+| Temporada como capa sobre la partida | El calendario y la tabla son datos y orquestación; el partido en sí sigue siendo el mismo motor de física y reglas. |
+| Partidos sin humanos resueltos por simulación rápida | Evita que jugar una Liga completa signifique jugar decenas de partidos que nadie observaría. |
+| CSS propio, sin React Router ni librerías de estado | Cumple la restricción del examen de no usar frameworks o bibliotecas externas para la interfaz. |
 
 ### Uso moderado de SOLID
 
 - Las rutas manejan HTTP, los servicios coordinan casos de uso y el dominio aplica reglas.
 - Los componentes dibujan; los hooks coordinan estado, animación y solicitudes.
-- La estrategia de variabilidad y el rival pueden reemplazarse mediante contratos pequeños cuando exista más de una implementación real.
-- El servicio recibe su repositorio y generador aleatorio para facilitar las pruebas.
-- No se crea una interfaz o abstracción sin una necesidad concreta.
+- El rival y la resolución de un partido de temporada son estrategias intercambiables detrás de un contrato pequeño (por ejemplo, "decide un tiro" o "resuelve un resultado"), lo que permite tener una estrategia aleatoria simple y, más adelante, una por muestreo o una simulación rápida sin tocar el resto del sistema.
+- El servicio de partidas recibe su repositorio y su generador aleatorio por parámetro, para que las pruebas puedan usar una semilla fija.
+- No se crea una interfaz o abstracción sin una necesidad concreta: código simple y claro vale más en la defensa que una arquitectura sobrecargada.
 
 ---
 
@@ -187,159 +161,181 @@ El dominio no debe depender de Express. React representa y anima el resultado; E
 
 ### Fase 0 — Definición y planificación
 
-- [ ] **0.1 Preparar el repositorio local.** Clonar `https://github.com/FaaaaaAz/Tupay.git` dentro de la carpeta destinada al proyecto. Crear `.gitignore` para `node_modules`, `dist`, `playwright-report`, `test-results`, archivos de entorno y artefactos temporales. Crear un README mínimo. Commit sugerido: `chore: preparar repositorio de TUPAY`.
-- [ ] **0.2 Documentar el origen de la idea.** Crear `docs/introduccion.md` con el nombre TUPAY, el significado elegido y su fuente, el propósito, la experiencia de juego y la evolución de las ideas anteriores hasta llegar al fútbol con tapitas. Commit sugerido: `docs: explicar origen y propósito de TUPAY`.
-- [ ] **0.3 Cerrar las reglas del núcleo.** Crear `docs/reglas.md` con preparación, turnos, selección de tapita, dirección, fuerza, acciones válidas e inválidas, goles, victoria, empate y finalización. Las reglas deben poder explicarse sin consultar el código. Commit sugerido: `docs: definir reglas del juego`.
-- [ ] **0.4 Registrar planificación y uso de IA.** Añadir `docs/plan.md`, `AGENTS.md` y `docs/uso-ia.md`. La tabla de IA debe incluir tarea, solicitud, respuesta utilizada, modificaciones propias y verificación. Commit sugerido: `docs: agregar plan y reglas de trabajo con IA`.
-- [ ] **0.5 Definir la estrategia de equipos y recursos.** Decidir si se utilizarán nombres y emblemas originales o recursos oficiales; registrar autor, fuente y licencia de cualquier recurso externo. Commit sugerido: `docs: definir estrategia de recursos visuales`.
+- [ ] **0.1 Preparar el repositorio local.** Clonar el repositorio de GitHub, crear `.gitignore` (`node_modules`, `dist`, `playwright-report`, `test-results`, archivos de entorno) y un README mínimo. Confirmar con el docente el tipo de acceso al repositorio. Commit: `chore: preparar repositorio de Tupay`.
+- [ ] **0.2 Cerrar la introducción y el origen de la idea.** Revisar y ajustar `docs/introduccion.md`: nombre, significado, propósito, experiencia de juego y evolución de la idea. Commit: `docs: introducción y evolución de la idea`.
+- [ ] **0.3 Cerrar las reglas del núcleo.** Revisar y ajustar `docs/reglas.md`. Las reglas deben poder explicarse sin consultar el código. Commit: `docs: definir reglas del juego`.
+- [ ] **0.4 Registrar planificación y uso de IA.** Añadir este archivo como `docs/plan.md`, crear `AGENTS.md` con las reglas de trabajo del agente (sin librerías prohibidas, sin `commit`/`push` automáticos, explicar antes de modificar) y `docs/uso-ia.md` con la tabla de registro. Commit: `docs: agregar plan y reglas de trabajo con IA`.
+- [ ] **0.5 Revisar equipos y estadios.** Comprobar que la tabla de 10 equipos y sus estadios en `docs/reglas.md` está completa y que cada equipo se puede diferenciar visualmente de los demás. Commit: `docs: revisar equipos y estadios`.
 
-**Criterio de salida:** otra persona puede comprender qué es TUPAY, cómo se juega, por qué es original y qué se construirá.
+**Criterio de salida:** otra persona puede comprender qué es Tupay, cómo se juega, por qué es original y qué se construirá.
 
-**Evidencia:** carpeta `docs/` visible en GitHub.
+**Evidencia:** carpeta `docs/` visible en GitHub. Tag: `fase-0`.
 
 ### Fase 1 — Esqueleto técnico
 
-- [ ] **1.1 Configurar el proyecto.** Crear un `package.json` raíz con módulos ES, scripts unificados y versión de Node declarada. Preparar `client/`, `server/` y `compartido/` con TypeScript estricto. Usar solo React, Express, TypeScript, Vite, ESLint, Playwright y herramientas mínimas de ejecución y construcción. Commit sugerido: `chore: configurar React Express y TypeScript`.
-- [ ] **1.2 Crear el servidor mínimo.** `server/src/app.ts` arma Express y `server/src/index.ts` escucha `process.env.PORT`. Añadir `GET /api/salud` con estado y versión; las rutas de API inexistentes responden 404 en JSON. Commit sugerido: `feat: crear servidor Express y ruta de salud`.
-- [ ] **1.3 Crear el cliente mínimo.** React consulta `/api/salud` mediante `fetch` y muestra el estado del servidor. Commit sugerido: `feat: conectar cliente React con Express`.
-- [ ] **1.4 Unificar dominio y puerto.** Vite genera el cliente compilado y Express lo sirve. En desarrollo, Vite redirige `/api` al servidor. `npm run build && npm start` debe abrir la aplicación completa desde una sola dirección. Commit sugerido: `feat: servir cliente compilado desde Express`.
-- [ ] **1.5 Configurar calidad estática.** ESLint debe cubrir cliente y servidor. Añadir `lint`, `lint:client`, `lint:server` y `typecheck`. Comprobar deliberadamente que una infracción hace fallar el comando y después retirarla. Commit sugerido: `chore: configurar lint y typecheck`.
+- [ ] **1.1 Configurar el proyecto.** `package.json` raíz con módulos ES, Node 22 declarado y scripts unificados. `client/`, `server/` y `compartido/` con TypeScript estricto. Solo React, Express, TypeScript, Vite, tsx, ESLint y Playwright. Commit: `chore: configurar React, Express y TypeScript`.
+- [ ] **1.2 Crear el servidor mínimo.** `server/src/app.ts` arma Express; `server/src/index.ts` escucha `process.env.PORT`. `GET /api/salud` con estado y versión (`RENDER_GIT_COMMIT`); rutas de API inexistentes responden 404 en JSON. Commit: `feat: crear servidor Express y ruta de salud`.
+- [ ] **1.3 Crear el cliente mínimo.** React consulta `/api/salud` con `fetch` y muestra el estado del servidor. Commit: `feat: conectar cliente React con Express`.
+- [ ] **1.4 Unificar dominio y puerto.** Vite compila el cliente y Express lo sirve; en desarrollo, Vite reenvía `/api` al servidor. `npm run build && npm start` debe abrir toda la aplicación desde una sola dirección. Commit: `feat: servir cliente compilado desde Express`.
+- [ ] **1.5 Configurar calidad estática.** ESLint cubre cliente y servidor; scripts `lint`, `lint:client`, `lint:server`, `typecheck`. Comprobar deliberadamente que una infracción hace fallar el comando y luego retirarla. Commit: `chore: configurar lint y typecheck`.
 
 **Criterio de salida:** el cliente obtiene información real de Express, toda la aplicación compila y lint cubre ambos lados.
 
-**Evidencia:** aplicación abierta desde Express y respuesta JSON de `/api/salud`.
+**Evidencia:** aplicación abierta desde Express y respuesta JSON de `/api/salud`. Tag: `fase-1`.
 
 ### Fase 2 — Integración continua y despliegue temprano
 
-- [ ] **2.1 Configurar Playwright.** Preparar ejecución headless para CI y ejecución visual con Google Chrome para la defensa. Crear una prueba inicial que cargue la página y confirme la respuesta del servidor. Scripts: `test:e2e` y `test:e2e:visual`. Commit sugerido: `test: configurar Playwright`.
-- [ ] **2.2 Crear el pipeline.** Añadir tres trabajos claramente nombrados: `Lint frontend y backend`, `Pruebas E2E headless` y `Deploy aplicación completa`. El despliegue depende de que las verificaciones anteriores terminen correctamente. Guardar el reporte E2E como artefacto. Commit sugerido: `ci: validar probar y desplegar la aplicación`.
-- [ ] **2.3 Configurar el servicio público.** Crear un único servicio web para frontend y backend, configurar construcción, inicio, puerto y variables necesarias. No utilizar Docker salvo que el servicio realmente lo requiera. Guardar secretos únicamente en GitHub o en el proveedor. No escribirlos en el repositorio. 
-- [ ] **2.4 Verificar el despliegue automático.** Confirmar que un cambio en `main` activa el pipeline, publica exactamente el commit aprobado y permite consultar `/api/salud` desde la URL pública. Commit sugerido: `ci: completar despliegue automático`.
-- [ ] **2.5 Preparar pruebas de producción.** Crear una configuración E2E que reciba la URL pública mediante variable de entorno y reutilice pruebas relevantes. Commit sugerido: `test: ejecutar E2E contra producción`.
-- [ ] **2.6 Documentar la investigación.** Iniciar `docs/investigacion.md`: fuentes consultadas, Playwright local y headless, servicio elegido, puerto, variables, despliegue, arranque en frío, limitaciones y motivo para utilizar o descartar Docker. Commit sugerido: `docs: registrar investigación técnica`.
+- [ ] **2.1 Configurar Playwright.** Ejecución headless para CI (`chromium`) y ejecución visual con Google Chrome para la defensa (`chrome`). Prueba inicial: la página carga y confirma la respuesta del servidor. Scripts `test:e2e` y `test:e2e:visual`. Commit: `test: configurar Playwright`.
+- [ ] **2.2 Crear el pipeline.** Tres trabajos claramente nombrados: `Lint (frontend y backend)`, `Pruebas E2E (headless)` y `Deploy a Render`. El despliegue depende de que los dos anteriores terminen bien. Guardar el reporte E2E como artefacto. Commit: `ci: validar, probar y desplegar la aplicación`.
+- [ ] **2.3 Configurar el servicio en Render.** Un único Web Service para frontend y backend (Build `npm ci && npm run build`, Start `npm start`, plan Free). Auto-Deploy en Off. Guardar la Deploy Hook URL como secreto `RENDER_DEPLOY_HOOK_URL` y la URL pública como variable `URL_PRODUCCION` en GitHub. No usar Docker.
+- [ ] **2.4 Verificar el despliegue automático.** Un push a `main` dispara el pipeline, publica exactamente el commit aprobado y `/api/salud` responde con ese commit desde la URL pública. Commit: `ci: completar despliegue automático`.
+- [ ] **2.5 Preparar pruebas de producción.** `playwright.prod.config.ts` recibe la URL pública mediante variable de entorno y reutiliza las pruebas relevantes contra ella, con tiempos de espera largos por el arranque en frío de Render. Script `test:e2e:prod`. Commit: `test: ejecutar E2E contra producción`.
+- [ ] **2.6 Documentar la investigación.** Iniciar `docs/investigacion.md`: fuentes consultadas sobre Playwright y Render, cómo se ejecutan las pruebas local y headless, puerto, variables, arranque en frío, limitaciones del plan gratuito y motivo para no usar Docker. Medir cuánto tarda el pipeline completo. Commit: `docs: registrar investigación técnica`.
 
-**Criterio de salida:** un push válido produce lint, E2E y despliegue verificables, y la aplicación responde desde una URL pública.
+**Criterio de salida:** un push válido produce lint, E2E y despliegue verificables, y la aplicación responde desde una URL pública. **Meta: pipeline completo en menos de 6 minutos.**
 
-**Evidencia:** ejecución con los tres trabajos en verde y aplicación pública.
+**Evidencia:** ejecución con los tres trabajos en verde y aplicación pública. Tag: `fase-2`.
 
 ### Fase 3 — Diseño funcional, visual y de API
 
-- [ ] **3.1 Crear el boceto.** Documentar las pantallas Inicio, Partida y Resultado. En Partida, la cancha debe dominar la pantalla y acompañarse de marcador, turno, controles, recursos y mensajes. Commit sugerido: `docs: crear boceto de pantallas`.
-- [ ] **3.2 Definir la identidad visual.** Establecer paleta, tipografía del sistema, estilo de tapitas, pelota, cancha, fondos e iconografía. Priorizar legibilidad y contraste. Crear recursos propios o registrar licencias. Commit sugerido: `docs: definir identidad visual`.
-- [ ] **3.3 Definir el contrato compartido.** Crear tipos de datos para partida, jugadores, tapitas, pelota, turno, marcador, tiro, recorrido, evento, error y resultado. No incluir lógica de negocio en `compartido/`. Commit sugerido: `feat: definir contrato TypeScript de la API`.
-- [ ] **3.4 Diseñar la API.** Crear `docs/api.md` con método, ruta, entrada, salida, códigos de error y ejemplos JSON para cada endpoint. Commit sugerido: `docs: diseñar API REST`.
+- [ ] **3.1 Crear el boceto.** Pantallas Inicio, Partida, Temporada y Resultado. En Partida, la cancha domina la pantalla, acompañada de marcador, turno, controles, tiros de poder y mensajes. En Temporada, el calendario y la tabla de posiciones. Commit: `docs: crear boceto de pantallas`.
+- [ ] **3.2 Definir la identidad visual.** Paleta, tipografía, estilo de tapitas, pelota, cancha y equipos. Crear los emblemas ilustrados propios de cada club o registrar su origen y licencia. Commit: `docs: definir identidad visual`.
+- [ ] **3.3 Definir el contrato compartido.** Tipos en `compartido/` para partida, equipo, tapita, pelota, turno, marcador, tiro, recorrido, evento, error, resultado, jornada y tabla de posiciones. Sin lógica de negocio en `compartido/`. Commit: `feat: definir contrato TypeScript de la API`.
+- [ ] **3.4 Diseñar la API.** `docs/api.md` con método, ruta, entrada, salida, códigos de error y ejemplos JSON. Commit: `docs: diseñar API REST`.
 
-| Método | Ruta | Responsabilidad |
-| --- | --- | --- |
-| GET | `/api/salud` | Informar estado y versión del servidor. |
-| GET | `/api/equipos` | Entregar equipos disponibles. |
-| GET | `/api/variantes` | Entregar configuraciones disponibles. |
-| POST | `/api/partidas` | Crear una partida y devolver su estado inicial. |
-| GET | `/api/partidas/:id` | Recuperar el estado actual. |
-| POST | `/api/partidas/:id/tiros` | Validar y ejecutar un tiro. |
-| POST | `/api/partidas/:id/turno-rival` | Ejecutar el turno del servidor si se implementa el modo individual. |
+  | Método | Ruta | Responsabilidad |
+  |---|---|---|
+  | GET | `/api/salud` | Estado y versión del servidor. |
+  | GET | `/api/equipos` | Equipos disponibles. |
+  | GET | `/api/estadios` | Estadios disponibles. |
+  | POST | `/api/partidas` | Crear un partido individual (Eliminatoria o Liga suelta). |
+  | GET | `/api/partidas/:id` | Estado actual del partido. |
+  | POST | `/api/partidas/:id/tiros` | Validar y ejecutar un tiro. |
+  | POST | `/api/partidas/:id/turno-rival` | Turno del servidor (modo 1 jugador). |
+  | POST | `/api/temporadas` | Crear una temporada: equipos participantes, equipo(s) humano(s), duración y perro por defecto. Genera el calendario. |
+  | GET | `/api/temporadas/:id` | Calendario, tabla de posiciones y próximo partido pendiente de cada jugador. |
+  | POST | `/api/temporadas/:id/jornadas/:jornadaId/jugar` | Si el partido involucra a una persona, crea el partido individual correspondiente; si no, lo resuelve por simulación rápida y actualiza la tabla. |
 
-- [ ] **3.5 Registrar decisiones y riesgos.** Crear `docs/decisiones.md` con decisiones técnicas, alternativas descartadas, riesgos y mitigaciones. Incluir física, sincronización de animaciones, almacenamiento en memoria, recursos visuales, despliegue y tiempo de CI. Commit sugerido: `docs: registrar decisiones y riesgos`.
+- [ ] **3.5 Registrar decisiones y riesgos.** `docs/decisiones.md` con las decisiones técnicas, alternativas descartadas, riesgos y mitigaciones: física, sincronización de animaciones, almacenamiento en memoria, simulación rápida de partidos sin humanos, recursos visuales, despliegue y tiempo de CI. Commit: `docs: registrar decisiones y riesgos`.
 
-**Criterio de salida:** las pantallas, estados, endpoints y responsabilidades de React y Express están definidos antes de implementar el juego.
+**Criterio de salida:** pantallas, estados, endpoints y responsabilidades de React y Express definidos antes de implementar el juego.
 
-**Evidencia:** boceto e identidad visual inicial.
+**Evidencia:** boceto e identidad visual inicial. Tag: `fase-3`.
 
 ### Fase 4 — Dominio y física en Express
 
-- [ ] **4.1 Crear utilidades matemáticas.** Implementar funciones puras para vectores y un generador aleatorio con semilla. Commit sugerido: `feat: agregar vectores y azar reproducible`.
-- [ ] **4.2 Centralizar la configuración.** Definir dimensiones, radios, fricción, rebote, fuerza máxima, límite de simulación y umbral de detención. Evitar números mágicos. Commit sugerido: `feat: configurar física del juego`.
-- [ ] **4.3 Implementar primero la física mínima.** Simular movimiento, fricción, rebote en límites y detención con pasos fijos. Todavía sin choques múltiples ni efectos especiales. Commit sugerido: `feat: simular movimiento y rebotes`.
-- [ ] **4.4 Añadir colisiones.** Resolver choques entre tapitas, pelota y límites con subpasos suficientes para evitar atravesamientos. Limitar la cantidad de cuadros devueltos a React. Commit sugerido: `feat: resolver colisiones del juego`.
-- [ ] **4.5 Detectar goles.** Considerar gol únicamente cuando la pelota cruza completamente la línea dentro del arco. Las tapitas no pueden convertirse en gol. Commit sugerido: `feat: detectar goles correctamente`.
-- [ ] **4.6 Crear pruebas unitarias.** Usar `node:test` para comprobar rebote, transferencia de movimiento, detención, gol, ausencia de gol y resultado determinista con la misma semilla. Commit sugerido: `test: comprobar física y goles`.
+Esta fase es el mayor riesgo técnico del proyecto. Se construye y se prueba antes que cualquier otra parte del juego.
 
-**Plan de reducción del riesgo:** si la simulación no es estable, reducir la cantidad de tapitas, limitar fuerza y velocidad y aumentar subpasos. No agregar clima, perro, tiro especial o rival hasta estabilizar esta fase.
+- [ ] **4.1 Crear utilidades matemáticas.** Funciones puras para vectores y un generador aleatorio con semilla (por ejemplo, mulberry32). Commit: `feat: agregar vectores y azar reproducible`.
+- [ ] **4.2 Centralizar la configuración.** Dimensiones de cancha, radios de tapita y pelota (5 tapitas por equipo), fricción, rebote, fuerza máxima, límite de simulación y umbral de detención. Sin números mágicos dentro de la física. Commit: `feat: configurar física del juego`.
+- [ ] **4.3 Simular movimiento y rebotes.** Movimiento con fricción, rebote en los límites de la cancha (excepto en la boca del arco) y detención con pasos fijos, con subpasos para evitar que los objetos se atraviesen. Todavía sin choques múltiples ni efectos especiales. Commit: `feat: simular movimiento y rebotes`.
+- [ ] **4.4 Añadir colisiones.** Choques entre tapitas y pelota, con suficientes subpasos para que nada se atraviese. Limitar la cantidad de cuadros del recorrido que se envían a React. Commit: `feat: resolver colisiones del juego`.
+- [ ] **4.5 Detectar goles.** Gol únicamente cuando la pelota cruza completamente la línea dentro del arco; las tapitas rebotan en esa línea y nunca cuentan como gol. Commit: `feat: detectar goles correctamente`.
+- [ ] **4.6 Crear pruebas unitarias.** Con `node:test` (incluido en Node, sin dependencias nuevas). Casos: rebote en una pared, un choque transfiere velocidad, todo termina deteniéndose, un tiro directo es gol, y el mismo tiro con la misma semilla da siempre el mismo resultado. Script `test:unit`. Commit: `test: comprobar física y goles`.
+
+**Punto de control:** si la simulación no es estable (objetos que se atraviesan o nunca se detienen), reducir velocidad máxima y aumentar subpasos antes de continuar. No se agregan estadios, perro, tiro de poder ni rival hasta estabilizar esta fase.
 
 **Criterio de salida:** el servidor calcula recorridos reproducibles y las pruebas cubren los casos esenciales.
 
-**Evidencia:** pruebas unitarias en verde y visualización temporal de un tiro calculado.
+**Evidencia:** pruebas unitarias en verde. Tag: `fase-4`.
 
-### Fase 5 — Reglas y API de la partida
+### Fase 5 — Reglas y API del partido individual
 
-- [ ] **5.1 Guardar partidas en memoria.** Crear `RepositorioPartidas` y `RepositorioEnMemoria` con operaciones pequeñas y comprobables. Commit sugerido: `feat: guardar partidas en memoria`.
-- [ ] **5.2 Crear y consultar partidas.** Implementar servicio y rutas `POST /api/partidas` y `GET /api/partidas/:id`. El servidor define formación, primer turno y variabilidad inicial. Commit sugerido: `feat: crear y consultar partidas`.
-- [ ] **5.3 Validar acciones.** Rechazar partida inexistente, partida terminada, turno incorrecto, tapita rival, fuerza o dirección inválida y tiro enviado mientras otro está en curso. Responder siempre con errores JSON consistentes. Commit sugerido: `feat: validar acciones de la partida`.
-- [ ] **5.4 Ejecutar tiros.** Implementar `POST /api/partidas/:id/tiros`: validar, simular, registrar gol, reiniciar posiciones cuando corresponda, cambiar turno y devolver recorrido más estado final. Commit sugerido: `feat: ejecutar tiros desde la API`.
-- [ ] **5.5 Implementar finalización.** Añadir modalidad por límite de goles y una condición de empate verificable. Si se incluye reloj, el servidor debe ser la fuente de verdad. Commit sugerido: `feat: finalizar partidas con victoria o empate`.
-- [ ] **5.6 Centralizar errores.** Mantener rutas delgadas y convertir errores del dominio en respuestas `{ "error": { "codigo": "...", "mensaje": "..." } }`. Commit sugerido: `refactor: centralizar errores de la API`.
-- [ ] **5.7 Verificar el contrato.** Probar endpoints con `curl` o la pestaña Network y reemplazar los ejemplos teóricos de `docs/api.md` por solicitudes y respuestas reales. Commit sugerido: `docs: documentar ejemplos reales de la API`.
+Esta fase construye el partido completo para Eliminatoria y para un partido suelto de Liga. La temporada completa (Fase 7) se apoya en este motor sin modificarlo.
 
-**Criterio de salida:** una partida completa puede administrarse exclusivamente mediante solicitudes JSON.
+- [ ] **5.1 Guardar partidas en memoria.** `RepositorioPartidas` y `RepositorioEnMemoria` con operaciones pequeñas y comprobables. Commit: `feat: guardar partidas en memoria`.
+- [ ] **5.2 Crear y consultar partidos.** Servicio y rutas `POST /api/partidas` y `GET /api/partidas/:id`. El servidor define la formación de 5 tapitas por equipo, el primer turno y valida que los equipos no se repitan. Commit: `feat: crear y consultar partidos`.
+- [ ] **5.3 Validar acciones.** Cada acción inválida de `docs/reglas.md`: partido inexistente o terminado, turno incorrecto, tapita rival, fuerza o dirección fuera de rango, turno vencido, tiros de poder agotados y equipos repetidos. Errores siempre en JSON. Commit: `feat: validar acciones del partido`.
+- [ ] **5.4 Ejecutar tiros.** `POST /api/partidas/:id/tiros`: validar, simular, registrar gol, reiniciar formación si corresponde, cambiar turno y devolver recorrido más estado final. Commit: `feat: ejecutar tiros desde la API`.
+- [ ] **5.5 Implementar Eliminatoria.** Meta de goles configurable (1 a 5, por defecto 3), sin empate, partido único. Commit: `feat: modo Eliminatoria`.
+- [ ] **5.6 Implementar Liga como partido suelto.** Reloj de 90 minutos de juego con duración real configurable, límite de 15 segundos por turno, empate posible. El servidor es la fuente de verdad del reloj. Commit: `feat: modo Liga con reloj acelerado`.
+- [ ] **5.7 Implementar el perro.** Evento tras cada tiro con probabilidad configurable (activable o no); mueve la pelota, nunca genera gol, y el turno pasa al equipo cuyo arco quede más cerca de la nueva posición de la pelota. Commit: `feat: el perro entra a la cancha`.
+- [ ] **5.8 Centralizar errores.** Rutas delgadas; un único manejador convierte errores del dominio en `{ "error": "mensaje" }` con su código HTTP. Commit: `refactor: centralizar errores de la API`.
+- [ ] **5.9 Verificar el contrato.** Probar cada endpoint con `curl` o la pestaña Network; reemplazar los ejemplos teóricos de `docs/api.md` por solicitudes y respuestas reales. Commit: `docs: documentar ejemplos reales de la API`.
 
-**Evidencia:** creación de partida, tiro válido y tiro inválido observados en Network o mediante `curl`.
+**Criterio de salida:** un partido completo, en cualquiera de los dos modos, se administra exclusivamente mediante solicitudes JSON.
+
+**Evidencia:** creación de partido, tiro válido, tiro inválido y aparición del perro, observados en Network o con `curl`. Tag: `fase-5`.
 
 ### Fase 6 — Frontend jugable
 
-- [ ] **6.1 Crear navegación interna.** `App` controla Inicio, Partida y Resultado mediante estado de React, sin React Router. Commit sugerido: `feat: navegar entre pantallas del juego`.
-- [ ] **6.2 Implementar Inicio.** Permitir elegir dos equipos y configurar la partida. Mostrar reglas resumidas e instrucciones de control antes de jugar. Commit sugerido: `feat: crear pantalla de inicio`.
-- [ ] **6.3 Crear `usePartida`.** Centralizar estado remoto, carga, errores y llamadas `fetch`. Los componentes visuales no deben llamar a la API directamente. Commit sugerido: `feat: coordinar partida con usePartida`.
-- [ ] **6.4 Dibujar la cancha en SVG.** Mostrar cancha, arcos, tapitas y pelota de manera adaptable. Añadir nombres accesibles o `data-testid` estables. Commit sugerido: `feat: dibujar cancha interactiva`.
-- [ ] **6.5 Implementar apuntado.** Arrastrar desde una tapita propia para elegir dirección y fuerza. Mostrar una guía visual y cancelar correctamente gestos inválidos. Commit sugerido: `feat: apuntar y ejecutar tiros`.
-- [ ] **6.6 Reproducir recorridos.** Crear `useAnimacion` con `requestAnimationFrame`. Bloquear nuevos tiros durante la reproducción y aplicar al final el estado confirmado por Express. Commit sugerido: `feat: animar recorridos del servidor`.
-- [ ] **6.7 Mostrar información completa.** Marcador, turno, instrucciones, estado de carga, errores, goles y resultados deben ser visibles sin consola. Commit sugerido: `feat: mostrar estado y retroalimentación`.
-- [ ] **6.8 Crear Resultado.** Mostrar ganador o empate, marcador final y acciones para revancha o regreso. Commit sugerido: `feat: crear pantalla de resultado`.
-- [ ] **6.9 Adaptar a distintos tamaños.** Verificar computadora, tablet y celular en orientación apropiada. Mantener cancha, controles y textos utilizables. Commit sugerido: `feat: adaptar interfaz a diferentes pantallas`.
+- [ ] **6.1 Crear navegación interna.** `App` controla Inicio, Partida y Resultado mediante estado de React, sin React Router. Commit: `feat: navegar entre pantallas del juego`.
+- [ ] **6.2 Implementar Inicio.** Elegir 1 o 2 jugadores, modo (Eliminatoria o Liga), equipos, estadio, perro activado o no y, en Eliminatoria, la meta de goles. Instrucciones visibles antes de jugar. Commit: `feat: crear pantalla de inicio`.
+- [ ] **6.3 Crear `usePartida`.** Centraliza estado remoto, carga, errores y llamadas `fetch`. Los componentes visuales no llaman a la API directamente. Commit: `feat: coordinar partida con usePartida`.
+- [ ] **6.4 Dibujar la cancha en SVG.** Cancha, arcos, 5 tapitas por equipo y pelota, ocupando la mayor parte de la pantalla. Nombres accesibles o `data-testid` estables. Commit: `feat: dibujar cancha interactiva`.
+- [ ] **6.5 Implementar apuntado.** Arrastrar desde una tapita propia para elegir dirección y fuerza, con una guía visual; cancelar correctamente un gesto inválido. Commit: `feat: apuntar y ejecutar tiros`.
+- [ ] **6.6 Reproducir recorridos.** `useAnimacion` con `requestAnimationFrame`. Bloquear nuevos tiros durante la reproducción; al final, aplicar el estado confirmado por Express. Commit: `feat: animar recorridos del servidor`.
+- [ ] **6.7 Mostrar información completa.** Marcador, turno con cuenta regresiva, minuto o goles rumbo a la meta, tiros de poder, errores y eventos (incluido el perro), siempre visibles sin abrir la consola. Commit: `feat: mostrar estado y retroalimentación`.
+- [ ] **6.8 Crear Resultado.** Ganador, empate o derrota, marcador final, revancha o volver al inicio. Commit: `feat: crear pantalla de resultado`.
 
-**Criterio de salida:** dos personas pueden completar una partida desde la URL pública sin abrir herramientas de desarrollo.
+**Punto de control:** un partido completo de Eliminatoria y uno de Liga suelta se pueden jugar de principio a fin en la URL pública, con 1 o 2 jugadores.
 
-**Evidencia:** inicio, partida en curso y resultado en producción.
+**Evidencia:** inicio, partido en curso y resultado en producción. Tag: `fase-6`.
 
-### Fase 7 — Variabilidad e identidad de TUPAY
+### Fase 7 — Temporada de Liga (ampliación condicionada)
 
-Implementar esta fase de forma incremental. Cada función debe poder desactivarse mediante configuración para facilitar pruebas y defensa.
+Esta fase solo se inicia si el núcleo (fases 0 a 6) está completo, publicado y probado. Reutiliza el motor de partido de la Fase 5; no lo modifica.
 
-- [ ] **7.1 Añadir variabilidad mínima.** El servidor elige mediante semilla una variante de cancha o un evento sencillo que modifique una decisión de juego sin volver impredecibles las pruebas. Commit sugerido: `feat: agregar variabilidad reproducible`.
-- [ ] **7.2 Implementar el perro.** Evento ocasional y limitado: el servidor calcula su recorrido y cómo afecta la pelota. Definir claramente si puede anular un gol. Commit sugerido: `feat: agregar evento del perro`.
-- [ ] **7.3 Implementar tiro de altura.** Recurso limitado por jugador con efecto claro y contador visible. Commit sugerido: `feat: agregar tiro de altura`.
-- [ ] **7.4 Incorporar estadios.** Empezar con diferencias visuales. Añadir un solo efecto físico por estadio únicamente si puede probarse y explicarse. Commit sugerido: `feat: diferenciar estadios`.
-- [ ] **7.5 Agregar modo individual.** Crear una estrategia sencilla del servidor y el endpoint de turno rival. La dificultad avanzada por muestreo queda como mejora posterior. Commit sugerido: `feat: agregar rival controlado por el servidor`.
-- [ ] **7.6 Crear recursos finales.** Integrar tapitas, emblemas, pelota, perro, texturas y sonidos optimizados. Documentar herramientas de IA, prompts relevantes, edición propia, autores y licencias. Commit sugerido: `feat: integrar recursos visuales y sonoros`.
-- [ ] **7.7 Añadir presentación temática.** Incorporar mensajes de clásico u otros detalles bolivianos que no alteren la estabilidad. Commit sugerido: `feat: reforzar identidad de TUPAY`.
+- [ ] **7.1 Calendario todos-contra-todos.** Función pura que, dada una lista de equipos, genera un calendario de una vuelta (por ejemplo, con el método del círculo). Con los 10 equipos de `docs/reglas.md`, cada jugador tiene 9 partidos en su calendario. Commit: `feat: generar calendario de la temporada`.
+- [ ] **7.2 Guardar y consultar temporadas.** `RepositorioTemporadas`, `POST /api/temporadas` y `GET /api/temporadas/:id` con calendario y tabla de posiciones inicial (todos en cero). Commit: `feat: crear y consultar temporadas`.
+- [ ] **7.3 Jugar un partido de la jornada.** `POST /api/temporadas/:id/jornadas/:jornadaId/jugar`: si el partido involucra a una persona, crea el partido individual (reutilizando la Fase 5) y lo enlaza a esa jornada; si no involucra a ninguna, resuelve un resultado con la semilla de la temporada, sin física completa. Commit: `feat: jugar y simular jornadas`.
+- [ ] **7.4 Cerrar un partido y actualizar la tabla.** Cuando un partido individual de una jornada termina, su resultado se refleja en la tabla de posiciones (puntos 3-1-0, diferencia de goles). Commit: `feat: actualizar tabla de posiciones`.
+- [ ] **7.5 Control del rival por el segundo jugador.** Antes de un partido que no es el cruce directo entre ambos jugadores, el segundo jugador puede elegir si controla al equipo rival o lo deja en manos del servidor. Commit: `feat: controlar al equipo rival como segundo jugador`.
+- [ ] **7.6 Pantalla de Temporada.** Calendario, próximo partido pendiente y tabla de posiciones, visibles sin abrir la consola. Commit: `feat: pantalla de temporada`.
 
-**Criterio de salida:** cada partida presenta alguna diferencia visible y estratégica, y el juego posee una identidad reconocible sin comprometer el núcleo.
+**Punto de control:** si esta fase no avanza con fluidez, se detiene aquí. Liga sigue existiendo como partido suelto (Fase 5/6) y eso ya cumple el núcleo obligatorio; la temporada completa queda documentada en `docs/decisiones.md` como una mejora no terminada, lo cual es preferible a comprometer las fases 8 y 9.
 
-**Evidencia:** variaciones de partida y al menos un evento especial.
+**Evidencia:** tabla de posiciones actualizada tras jugar y simular varias jornadas. Tag: `fase-7`.
 
-### Fase 8 — Pruebas E2E y robustez
+### Fase 8 — Variabilidad, dificultad y personalización
 
-- [ ] **8.1 Estabilizar localizadores.** Usar roles accesibles y `data-testid` solo cuando no exista un selector semántico estable. Commit sugerido: `test: estabilizar localizadores E2E`.
-- [ ] **8.2 Cubrir el inicio.** Verificar que equipos y variantes provienen del servidor y que se puede crear una partida. Commit sugerido: `test: comprobar inicio de partida`.
-- [ ] **8.3 Cubrir la interacción principal.** Apuntar, tirar y comprobar que cambian posiciones o turno después de una respuesta real de la API. Commit sugerido: `test: comprobar tiro e integración HTTP`.
-- [ ] **8.4 Cubrir una validación.** Forzar una acción inválida y comprobar que la interfaz muestra el mensaje devuelto por Express. Commit sugerido: `test: comprobar acción inválida`.
-- [ ] **8.5 Cubrir la finalización.** Crear una partida determinista y corta, provocar el resultado y verificar la pantalla final. Los valores especiales de prueba solo pueden aceptarse en un entorno controlado. Commit sugerido: `test: comprobar finalización de partida`.
-- [ ] **8.6 Preparar prueba de defensa.** Crear una prueba corta contra la URL pública que demuestre inicio, comunicación real y una interacción relevante en Chrome visual. Commit sugerido: `test: preparar recorrido E2E de defensa`.
-- [ ] **8.7 Comprobar CI y producción.** Ejecutar las mismas capacidades en modo headless dentro de GitHub Actions y contra la versión publicada. Medir y registrar la duración total del pipeline. Commit sugerido: `test: validar E2E en CI y producción`.
+- [ ] **8.1 Estadios con efecto propio.** Añadir, sobre el estadio de referencia de Cochabamba (sin efecto especial), los demás estadios de `docs/reglas.md`, empezando por uno solo y agregando los demás si el tiempo lo permite. Commit: `feat: estadios con efectos propios`.
+- [ ] **8.2 Rival aleatorio.** Estrategia sencilla del servidor para el modo 1 jugador y el endpoint de turno rival. Commit: `feat: rival controlado por el servidor`.
+- [ ] **8.3 Rival por muestreo y dificultades.** Candidatos dirigidos hacia la pelota, función de puntuación, error de puntería y tres dificultades (fácil, medio, difícil) como configuración. Commit: `feat: rival por muestreo con tres dificultades`.
+- [ ] **8.4 Tiro de poder.** Dos por jugador y por partido, con 50% más de fuerza máxima; libera un charco de una sola vez sin importar los golpes que le falten. Commit: `feat: tiro de poder`.
+- [ ] **8.5 Crear recursos visuales finales.** Tapitas, emblemas ilustrados de cada club, pelota y perro. Documentar herramientas usadas, autoría propia y cualquier licencia de terceros en `docs/decisiones.md`. Commit: `feat: integrar recursos visuales`.
+
+**Criterio de salida:** cada partido presenta alguna diferencia visible y estratégica, y el juego tiene una identidad reconocible sin comprometer el núcleo.
+
+**Evidencia:** variaciones de partido y las tres dificultades del rival. Tag: `fase-8`.
+
+### Fase 9 — Pruebas E2E y robustez
+
+- [ ] **9.1 Estabilizar localizadores.** Roles accesibles y `data-testid` donde no exista un selector semántico estable. Commit: `test: estabilizar localizadores E2E`.
+- [ ] **9.2 Cubrir el inicio.** Verificar que equipos y estadios provienen del servidor y que se puede crear un partido en cada modo. Commit: `test: comprobar inicio de partido`.
+- [ ] **9.3 Cubrir la interacción principal.** Apuntar, tirar y comprobar que cambian posiciones o turno tras una respuesta real de la API. Commit: `test: comprobar tiro e integración HTTP`.
+- [ ] **9.4 Cubrir una validación.** Forzar una acción inválida (por ejemplo, equipos repetidos) y comprobar que la interfaz muestra el mensaje devuelto por Express. Commit: `test: comprobar acción inválida`.
+- [ ] **9.5 Cubrir la finalización.** Partido determinista y corto (Eliminatoria con `golesParaGanar: 1`) que termina en la pantalla de resultado. Commit: `test: comprobar finalización de partido`.
+- [ ] **9.6 Preparar la prueba de defensa.** Prueba corta (menos de 30 segundos) contra la URL pública que demuestre inicio, comunicación real y una interacción relevante en Chrome visual. Commit: `test: preparar recorrido E2E de defensa`.
+- [ ] **9.7 Comprobar CI y producción, y medir tiempos.** Ejecutar las mismas capacidades en modo headless en GitHub Actions y contra la versión publicada. Volver a medir la duración total del pipeline y optimizar si pasa de 6 minutos. Commit: `test: validar E2E en CI y producción`.
 
 **Criterio de salida:** las pruebas demuestran inicio, interacción, backend y validación o finalización, tanto localmente como en CI y producción.
 
-**Evidencia:** Chrome visual ejecutando la prueba pública y Actions en verde.
+**Evidencia:** Chrome visual ejecutando la prueba pública y Actions en verde. Tag: `fase-9`.
 
-### Fase 9 — Pulido, documentación y entrega
+### Fase 10 — Documentación final y video
 
-- [ ] **9.1 Revisar experiencia de usuario.** Corregir estados de carga, doble clic, gestos cancelados, desconexión, partida inexistente, pantalla pequeña, contraste, foco y mensajes. Commit sugerido: `fix: mejorar robustez y experiencia de juego`.
-- [ ] **9.2 Completar README.** Incluir requisitos, instalación, comandos, arquitectura, endpoints JSON, variables, pruebas, despliegue y URL pública. Commit sugerido: `docs: completar README`.
-- [ ] **9.3 Completar documentación.** Revisar introducción, reglas, API, boceto, decisiones, investigación, riesgos, cambios importantes y uso de IA. Commit sugerido: `docs: completar documentación técnica`.
-- [ ] **9.4 Reunir evidencias.** Guardar capturas útiles y comprobar que no contienen secretos ni datos irrelevantes. Commit sugerido: `docs: agregar evidencias finales`.
-- [ ] **9.5 Grabar el video.** Preparar un video de entre 3 y 5 minutos que muestre una partida, una solicitud JSON, una prueba E2E visual, GitHub Actions y la aplicación publicada.
-- [ ] **9.6 Ejecutar auditoría final.** Comparar el proyecto con la lista de verificación de este documento, revisar dependencias instaladas y comprobar que no existe ninguna librería prohibida.
+- [ ] **10.1 Revisar experiencia de usuario.** Estados de carga, doble clic, gestos cancelados, partido inexistente, contraste y foco visible. Commit: `fix: mejorar robustez y experiencia de juego`.
+- [ ] **10.2 Completar el README.** Requisitos, instalación, comandos, arquitectura, endpoints JSON, variables de entorno, pruebas, despliegue y URL pública. Commit: `docs: completar README`.
+- [ ] **10.3 Completar la documentación.** Revisar `introduccion.md`, `reglas.md`, `plan.md`, `api.md`, `boceto.md`, `decisiones.md` (riesgos con su mitigación y cambios importantes con su justificación), `investigacion.md` y `uso-ia.md`. Commit: `docs: completar documentación técnica`.
+- [ ] **10.4 Reunir evidencias.** Capturas útiles en `docs/evidencias/`, sin secretos ni datos irrelevantes. Commit: `docs: agregar evidencias finales`.
+- [ ] **10.5 Grabar el video.** Entre 3 y 5 minutos: una partida, una solicitud JSON, una prueba E2E visual, GitHub Actions y la aplicación publicada.
+- [ ] **10.6 Auditoría final.** Comparar el proyecto con la lista de verificación de la sección 10 de este documento y revisar que no haya ninguna librería prohibida instalada.
 
 **Criterio de salida:** repositorio, documentación, video, CI y aplicación pública corresponden a la misma versión estable.
 
-### Fase 10 — Preparación de la defensa
+**Evidencia:** todo lo anterior reunido. Tag: `fase-10`.
 
-- [ ] **10.1 Preparar el recorrido de defensa.** Abrir previamente editor, terminal, repositorio, Actions, servicio de despliegue y aplicación pública.
-- [ ] **10.2 Ensayar con cronómetro.** Ejecutar la E2E visual contra producción, realizar un cambio pequeño, verificarlo, activar CI/CD y mostrarlo publicado dentro del tiempo permitido.
-- [ ] **10.3 Preparar cambios configurables.** Saber modificar rápidamente, sin buscar por todo el proyecto: goles para ganar, fuerza máxima, fricción, probabilidad de evento, texto, color o duración. Cada valor debe estar centralizado y tener pruebas aplicables.
-- [ ] **10.4 Preparar explicación técnica.** Poder explicar un tiro completo: interacción en React, `fetch`, ruta Express, servicio, validación, física, JSON de respuesta, animación y renderizado.
-- [ ] **10.5 Preparar fallos controlados.** Saber demostrar que lint falla, cómo se ve una acción inválida y cómo se diagnostica una prueba E2E.
-- [ ] **10.6 Confirmar el procedimiento de congelamiento.** Obtener una aclaración del docente sobre cómo se realizará el cambio obligatorio de la defensa sin contradecir la prohibición de actualizar el repositorio después del cierre.
-- [ ] **10.7 Preparar el equipo.** Contar con batería, cargador, sesiones iniciadas, credenciales disponibles, Chrome instalado, dependencias listas y una conexión de respaldo.
+### Fase 11 — Preparación de la defensa
+
+- [ ] **11.1 Preparar el recorrido de defensa.** Abrir previamente editor, terminal, repositorio, Actions, Render y la aplicación pública.
+- [ ] **11.2 Ensayar con cronómetro, al menos dos veces.** E2E visual contra producción, un cambio pequeño, verificarlo, activar CI/CD y mostrarlo publicado dentro de los 10 minutos.
+- [ ] **11.3 Preparar cambios configurables.** Saber modificar sin buscar por todo el proyecto: meta de goles, duración real de la Liga, probabilidad del perro, fricción de un estadio, un texto o un color. Cada valor debe estar centralizado.
+- [ ] **11.4 Preparar la explicación técnica.** Poder explicar un tiro completo: interacción en React, `fetch`, ruta Express, servicio, validación, física, JSON de respuesta, animación y renderizado; y, si se llegó a la Fase 7, cómo un resultado de partido se refleja en la tabla de la temporada.
+- [ ] **11.5 Preparar fallos controlados.** Saber demostrar que lint falla, cómo se ve una acción inválida y cómo se diagnostica una prueba E2E.
+- [ ] **11.6 Confirmar el procedimiento de la defensa.** Aclarar con el docente cómo se realiza el cambio obligatorio de la defensa sin contradecir el cierre del repositorio del 15 de septiembre.
+- [ ] **11.7 Congelar el repositorio.** Último commit antes de las 16:00 del martes. Tag `v1.0`.
+- [ ] **11.8 Preparar el equipo.** Batería, cargador, sesiones iniciadas, credenciales disponibles, Chrome instalado, dependencias listas y conexión de respaldo. Despertar el servicio de Render unos minutos antes de la defensa.
 
 **Criterio de salida:** el recorrido completo se ejecuta de forma repetible y existe margen para explicar decisiones.
 
@@ -347,22 +343,21 @@ Implementar esta fase de forma incremental. Cada función debe poder desactivars
 
 Si aparece un bloqueo, se recorta en este orden:
 
-1. presentación especial de clásicos;
-2. sonidos y animaciones decorativas;
-3. dificultad avanzada del rival;
-4. rival controlado por el servidor completo;
-5. efectos físicos diferentes por estadio;
-6. tiro de altura;
-7. evento complejo del perro, conservando una variación más simple si fuera necesario.
+1. temporada de Liga completa (queda Liga como partido suelto, que ya cumple el núcleo);
+2. dificultad avanzada del rival por muestreo (queda la aleatoria);
+3. estadios con efectos físicos (queda el estadio de referencia de Cochabamba);
+4. tiro de poder;
+5. control del equipo rival por el segundo jugador (queda solo contra el servidor);
+6. mejoras visuales y sonoras decorativas.
 
 Nunca se recorta:
 
-- modo local para dos jugadores;
-- movimiento, choques, goles y turnos;
+- modo Eliminatoria y modo Liga como partido suelto, para 1 y 2 jugadores;
+- 5 tapitas por equipo, movimiento, choques, goles y turnos;
 - decisiones de dirección, fuerza y selección de tapita;
-- estado no trivial, finalización y empate;
-- al menos una variación entre partidas;
-- acción inválida visible;
+- estado no trivial, finalización y empate en Liga;
+- el perro, como fuente de variabilidad mínima;
+- acción inválida visible, incluida la restricción de equipos repetidos;
 - responsabilidades reales de Express;
 - `fetch`, JSON, GET, POST y mismo dominio y puerto;
 - lint de frontend y backend;
@@ -370,38 +365,37 @@ Nunca se recorta:
 
 ## 9. Guion de evolución para la presentación
 
-La presentación debe contar una historia, no enumerar archivos.
-
 | Diapositiva | Mensaje principal | Evidencia sugerida |
-| --- | --- | --- |
-| 1. TUPAY | Qué es y qué experiencia propone. | Nombre, identidad y captura final. |
-| 2. Evolución de la idea | Cómo las primeras ideas llevaron al fútbol con tapitas. | Bocetos o comparación breve de conceptos. |
-| 3. Planificación | Cómo se convirtió la idea en reglas, alcance y riesgos. | Fragmentos de `docs/` y plan por fases. |
+|---|---|---|
+| 1. Tupay | Qué es y qué experiencia propone. | Nombre, identidad y captura final. |
+| 2. Evolución de la idea | Cómo las primeras ideas llevaron al fútbol con tapitas y al nombre Tupay. | Comparación breve de conceptos descartados. |
+| 3. Planificación | Cómo se convirtió la idea en reglas, alcance y riesgos, incluida la decisión de acotar la Liga. | Fragmentos de `docs/` y este plan por fases. |
 | 4. Diseño | Cómo se definieron pantallas, interacción e identidad boliviana. | Boceto frente a interfaz final. |
 | 5. Arquitectura | Qué hace React, qué hace Express y cómo se comunican. | Diagrama simple y ejemplo JSON. |
-| 6. Desarrollo | Cómo se construyeron física, reglas y partida jugable. | Evolución mediante tags o commits. |
-| 7. Pruebas | Cómo se comprobaron inicio, tiro, backend, errores y finalización. | Playwright visual y Actions. |
-| 8. Publicación | Cómo el mismo proyecto llegó a una URL pública. | Pipeline y aplicación publicada. |
-| 9. Resultado y aprendizaje | Qué cambió, qué se descartó y qué se aprendió. | Comparación idea inicial contra resultado. |
+| 6. Desarrollo | Cómo se construyeron física, reglas y partido jugable. | Evolución mediante tags o commits. |
+| 7. Liga y temporada | Cómo el mismo motor de partido se convierte en una temporada con tabla. | Calendario y tabla de posiciones. |
+| 8. Pruebas | Cómo se comprobaron inicio, tiro, backend, errores y finalización. | Playwright visual y Actions. |
+| 9. Publicación | Cómo el mismo proyecto llegó a una URL pública. | Pipeline y aplicación publicada. |
+| 10. Resultado y aprendizaje | Qué cambió, qué se recortó y qué se aprendió. | Comparación idea inicial contra resultado. |
 
-Cada diapositiva debe responder tres preguntas: **qué decisión se tomó, por qué se tomó y cómo se verificó**.
+Cada diapositiva responde tres preguntas: **qué decisión se tomó, por qué se tomó y cómo se verificó**.
 
 ## 10. Lista de verificación contra la rúbrica
 
 | Requisito | Evidencia prevista |
-| --- | --- |
+|---|---|
 | Juego original | Concepto, evolución y reglas documentadas. |
-| Al menos dos jugadores | Modo local para dos jugadores. |
+| Al menos dos jugadores | 1 jugador contra el servidor o 2 en el mismo dispositivo. |
 | Uso significativo de pantalla | Cancha dominante, marcador, controles y mensajes. |
-| Movimiento | Tapitas, pelota y evento opcional animados. |
+| Movimiento | Tapitas, pelota y el perro, animados. |
 | Interacción entre jugadores | Choques, bloqueos, turnos y competencia por goles. |
-| Estado no trivial | Posiciones, marcador, turno, estado de animación, variante y resultado. |
-| Reglas y finalización | Acciones válidas e inválidas, victoria y empate. |
-| Decisión estratégica | Elección de tapita, dirección y fuerza. |
-| Variabilidad | Variante o evento del servidor con semilla. |
+| Estado no trivial | Posiciones, marcador, turno, tiros de poder, resultado y, en Liga, tabla de posiciones. |
+| Reglas y finalización | Acciones válidas e inválidas, victoria, empate (Liga) y fin de temporada. |
+| Decisión estratégica | Elección de tapita, dirección, fuerza y tiro de poder. |
+| Variabilidad | El perro y, si se llega, estadios y dificultades del rival. |
 | Retroalimentación visual | Turno, marcador, errores, eventos y resultado visibles. |
 | React y TypeScript | Componentes, hooks, estado, eventos y renderizado. |
-| Express y TypeScript | Creación, almacenamiento, validación y simulación de partidas. |
+| Express y TypeScript | Creación, validación, simulación y, si se llega, orquestación de temporada. |
 | HTTP REST | `fetch`, JSON, GET y POST reales. |
 | Mismo dominio y puerto | Cliente compilado servido por Express. |
 | Sin librerías prohibidas | Dependencias auditadas y CSS propio. |
@@ -414,17 +408,18 @@ Cada diapositiva debe responder tres preguntas: **qué decisión se tomó, por q
 ## 11. Riesgos prioritarios
 
 | Riesgo | Señal temprana | Mitigación |
-| --- | --- | --- |
-| Física inestable | Objetos se atraviesan o nunca se detienen. | Pasos fijos, subpasos, límites de iteración y menos tapitas. |
-| Animación distinta del servidor | React termina en otra posición. | Animar exclusivamente los cuadros devueltos y aplicar el estado final del servidor. |
-| Pruebas frágiles | E2E falla de forma intermitente. | Semilla fija, localizadores estables y espera de respuestas, no de tiempos arbitrarios. |
-| Despliegue lento o fallido | El commit publicado no coincide. | Despliegue temprano, endpoint de versión y medición continua. |
-| Pérdida de partidas | Reinicio del servicio borra memoria. | Aceptarlo y documentarlo; mostrar un mensaje y permitir crear otra partida. |
-| Exceso de alcance | El núcleo sigue incompleto al iniciar extras. | Aplicar estrictamente el orden de reducción. |
-| Código difícil de defender | No se puede explicar una función o modificar una regla. | Tareas pequeñas, revisión personal y configuración centralizada. |
-| Recursos sin permiso | No se conoce origen o licencia. | Preferir recursos propios y registrar toda fuente o herramienta generativa. |
-| Contradicción del cierre | El cambio de defensa exige actualizar el repositorio congelado. | Solicitar una instrucción escrita del docente antes de la entrega. |
+|---|---|---|
+| Física inestable | Objetos se atraviesan o nunca se detienen. | Pasos fijos, subpasos, límites de iteración; reducir velocidad máxima si es necesario. |
+| La Liga completa consume todo el tiempo | Avanza el trabajo y todavía no hay un partido de Liga suelto jugable. | Detenerse en la Fase 7 según su punto de control; Liga como partido suelto ya cumple el núcleo. |
+| Animación distinta del servidor | React termina en otra posición que el servidor. | Animar solo los cuadros devueltos y aplicar el estado final del servidor. |
+| Pruebas frágiles | E2E falla de forma intermitente. | Semilla fija, localizadores estables y espera de respuestas reales, no de tiempos arbitrarios. |
+| Despliegue lento o fallido | El commit publicado no coincide con el esperado. | Despliegue temprano (Fase 2), endpoint de versión y medición continua. |
+| Pérdida de partidas o temporadas | Reinicio del servicio borra la memoria. | Aceptarlo y documentarlo; mostrar un mensaje claro y permitir crear otro partido. |
+| Exceso de alcance | Se empieza una ampliación con el núcleo todavía incompleto. | Aplicar estrictamente el orden de reducción de la sección 8. |
+| Código difícil de defender | No se puede explicar una función o modificar una regla en el momento. | Tareas pequeñas, revisión personal y valores de configuración centralizados. |
+| Identidad de los clubes | Uso de escudos oficiales sin autorización. | Escudos ilustrados propios, no oficiales; registrar el criterio en `docs/decisiones.md`. |
+| Contradicción del cierre | El cambio de la defensa exige actualizar el repositorio ya congelado. | Solicitar una instrucción escrita del docente antes de la entrega (tarea 11.6). |
 
 ## 12. Condición final de éxito
 
-TUPAY está listo cuando una persona puede abrir la URL pública, comprender las instrucciones, completar una partida de dos jugadores, observar una variación, provocar una acción inválida y llegar a un resultado; mientras tanto, las pruebas y GitHub Actions demuestran que React, Express, la API y el despliegue funcionan como una sola aplicación.
+Tupay está listo cuando una persona puede abrir la URL pública, comprender las instrucciones, completar un partido de Eliminatoria o de Liga con 1 o 2 jugadores, observar al perro entrar a la cancha, provocar una acción inválida y llegar a un resultado; mientras tanto, las pruebas y GitHub Actions demuestran que React, Express, la API y el despliegue funcionan como una sola aplicación. La temporada completa de Liga es un logro adicional, no una condición para que el proyecto esté completo.
