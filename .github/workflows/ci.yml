@@ -1,0 +1,85 @@
+name: Validar, probar y publicar Tupay
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint (frontend y backend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Revisar el código con ESLint
+        run: npm run lint
+
+      - name: Comprobar los tipos de TypeScript
+        run: npm run typecheck
+
+  e2e:
+    name: Pruebas E2E (headless)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Instalar el navegador de Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Ejecutar las pruebas E2E
+        run: npm run test:e2e
+
+      - name: Guardar el reporte de Playwright
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-e2e
+          path: playwright-report/
+          retention-days: 7
+
+  deploy:
+    name: Deploy a Render
+    needs: [lint, e2e]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pedir a Render que publique este commit
+        run: curl --fail --silent --show-error "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
+      # Render responde al instante, pero publicar toma un par de minutos. El trabajo
+      # solo se da por bueno cuando la URL pública informa exactamente este commit.
+      - name: Comprobar que la URL pública ya sirve este commit
+        run: |
+          esperado="${{ github.sha }}"
+          url="${{ vars.URL_PRODUCCION }}/api/salud"
+          echo "Esperando a que $url informe $esperado"
+          for intento in $(seq 1 40); do
+            publicado=$(curl --silent --max-time 90 "$url" | sed -n 's/.*"version":"\([^"]*\)".*/\1/p')
+            if [ "$publicado" = "$esperado" ]; then
+              echo "Publicado correctamente tras $intento intentos."
+              exit 0
+            fi
+            echo "intento $intento: la URL informa '$publicado'"
+            sleep 10
+          done
+          echo "La aplicación publicada nunca informó el commit $esperado."
+          exit 1
