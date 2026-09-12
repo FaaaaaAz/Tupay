@@ -107,7 +107,7 @@ Los emotes son la forma de festejar, quejarse o burlarse durante el partido, com
 
 ## Estadios
 
-El partido se juega en el estadio del equipo local (ver la tabla de "Equipos"). Los seis estadios se agrupan en tres climas, dos sedes por clima.
+Por defecto, el partido se juega en el estadio del equipo local (ver la tabla de "Equipos"), pero al crear el partido se puede elegir cualquier otro: así se puede probar un efecto de cancha sin tener que cambiar de equipo. Los seis estadios se agrupan en tres climas, dos sedes por clima.
 
 | Estadio | Ciudad | Efecto |
 |---|---|---|

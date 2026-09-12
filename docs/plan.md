@@ -109,7 +109,7 @@ tupay/
 │   ├── api/                  llamadas a Express con fetch
 │   ├── componentes/          elementos visuales reutilizables
 │   ├── hooks/                estado y coordinación de la interfaz
-│   ├── pantallas/             Inicio, Partida, Temporada, Resultado
+│   ├── pantallas/            Portada, Menú, Configuración, Partida, Temporada, Resultado
 │   ├── recursos/             imágenes listas para la web (equipos, estadios, juego, emotes, pantallas)
 │   └── estilos/              CSS propio
 ├── server/src/
@@ -210,10 +210,10 @@ Las dependencias del backend avanzan en un solo sentido: `rutas → servicios �
 
 ### Fase 3 — Diseño funcional, visual y de API
 
-- [ ] **3.1 Crear el boceto.** Pantallas Inicio, Partida, Temporada y Resultado. En Partida, la cancha domina la pantalla, acompañada de marcador, turno, controles, tiros de poder y mensajes. En Temporada, el calendario y la tabla de posiciones. Commit: `docs: crear boceto de pantallas`.
-- [ ] **3.2 Definir la identidad visual.** Paleta, tipografía y estilo, apoyados en los recursos que ya existen: tapitas de los diez equipos, pelota, perro, arcos, charcos, seis estadios, siete emotes y las dos pantallas de presentación. Registrar su autoría propia y el criterio de no reproducir los escudos oficiales. Commit: `docs: definir identidad visual`.
-- [ ] **3.3 Definir el contrato compartido.** Tipos en `compartido/` para partida, equipo, tapita, pelota, turno, marcador, tiro, recorrido, evento, emote, error, resultado, jornada y tabla de posiciones. Sin lógica de negocio en `compartido/`. Commit: `feat: definir contrato TypeScript de la API`.
-- [ ] **3.4 Diseñar la API.** `docs/api.md` con método, ruta, entrada, salida, códigos de error y ejemplos JSON. Commit: `docs: diseñar API REST`.
+- [x] **3.1 Crear el boceto.** Pantallas Inicio, Partida, Temporada y Resultado. En Partida, la cancha domina la pantalla, acompañada de marcador, turno, controles, tiros de poder y mensajes. En Temporada, el calendario y la tabla de posiciones. Commit: `docs: crear boceto de pantallas`.
+- [x] **3.2 Definir la identidad visual.** Paleta, tipografía y estilo, apoyados en los recursos que ya existen: tapitas de los diez equipos, pelota, perro, arcos, charcos, seis estadios, siete emotes y las dos pantallas de presentación. Registrar su autoría propia y el criterio de no reproducir los escudos oficiales. Commit: `docs: definir identidad visual`.
+- [x] **3.3 Definir el contrato compartido.** Tipos en `compartido/` para partida, equipo, tapita, pelota, turno, marcador, tiro, recorrido, evento, emote, error, resultado, jornada y tabla de posiciones. Sin lógica de negocio en `compartido/`. Commit: `feat: definir contrato TypeScript de la API`.
+- [x] **3.4 Diseñar la API.** `docs/api.md` con método, ruta, entrada, salida, códigos de error y ejemplos JSON. Commit: `docs: diseñar API REST`.
 
   | Método | Ruta | Responsabilidad |
   |---|---|---|
@@ -229,7 +229,7 @@ Las dependencias del backend avanzan en un solo sentido: `rutas → servicios �
   | GET | `/api/temporadas/:id` | Calendario, tabla de posiciones y próximo partido pendiente de cada jugador. |
   | POST | `/api/temporadas/:id/jornadas/:jornadaId/jugar` | Si el partido involucra a una persona, crea el partido individual correspondiente; si no, lo resuelve por simulación rápida y actualiza la tabla. |
 
-- [ ] **3.5 Registrar decisiones y riesgos.** `docs/decisiones.md` con las decisiones técnicas, alternativas descartadas, riesgos y mitigaciones: física, sincronización de animaciones, almacenamiento en memoria, simulación rápida de partidos sin humanos, recursos visuales, despliegue y tiempo de CI. Commit: `docs: registrar decisiones y riesgos`.
+- [x] **3.5 Registrar decisiones y riesgos.** `docs/decisiones.md` con las decisiones técnicas, alternativas descartadas, riesgos y mitigaciones: física, sincronización de animaciones, almacenamiento en memoria, simulación rápida de partidos sin humanos, recursos visuales, despliegue y tiempo de CI. Commit: `docs: registrar decisiones y riesgos`.
 
 **Criterio de salida:** pantallas, estados, endpoints y responsabilidades de React y Express definidos antes de implementar el juego.
 
@@ -272,8 +272,8 @@ Esta fase construye el partido completo para Eliminatoria y para un partido suel
 
 ### Fase 6 — Frontend jugable
 
-- [ ] **6.1 Crear navegación interna.** `App` controla Inicio, Partida y Resultado mediante estado de React, sin React Router. Commit: `feat: navegar entre pantallas del juego`.
-- [ ] **6.2 Implementar Inicio.** Elegir 1 o 2 jugadores, modo (Eliminatoria o Liga), equipos, estadio, perro activado o no y, en Eliminatoria, la meta de goles. Instrucciones visibles antes de jugar. Commit: `feat: crear pantalla de inicio`.
+- [ ] **6.1 Crear navegación interna.** `App` controla Portada, Menú, Configuración, Partida, Resultado y Temporada mediante estado de React, sin React Router. Commit: `feat: navegar entre pantallas del juego`.
+- [ ] **6.2 Implementar Portada, Menú y Configuración.** Portada con el botón de iniciar sobre la imagen de presentación; menú con las tarjetas de Eliminatoria, Liga e instrucciones; pantalla de configuración para elegir 1 o 2 jugadores, dificultad, equipos, estadio, perro activado o no y, en Eliminatoria, la meta de goles. Los equipos y estadios se piden al servidor, no se escriben en el cliente. Commit: `feat: crear pantallas de inicio y configuración`.
 - [ ] **6.3 Crear `usePartida`.** Centraliza estado remoto, carga, errores y llamadas `fetch`. Los componentes visuales no llaman a la API directamente. Commit: `feat: coordinar partida con usePartida`.
 - [ ] **6.4 Dibujar la cancha en SVG.** Cancha, arcos, 5 tapitas por equipo y pelota, ocupando la mayor parte de la pantalla. Nombres accesibles o `data-testid` estables. Orden de capas, de atrás hacia adelante: fondo del estadio, charcos, pelota y tapitas, caritas de emote sobre cada tapita, y los arcos **por encima de todo**, para que la pelota se vea entrando al arco. El arco es un solo archivo: para el lado contrario se voltea en espejo horizontal, no se rota. Commit: `feat: dibujar cancha interactiva`.
 - [ ] **6.5 Implementar apuntado.** Arrastrar desde una tapita propia para elegir dirección y fuerza, con una guía visual; cancelar correctamente un gesto inválido. Commit: `feat: apuntar y ejecutar tiros`.
