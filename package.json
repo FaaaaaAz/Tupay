@@ -18,8 +18,9 @@
     "lint": "npm run lint:client && npm run lint:server",
     "lint:client": "eslint client compartido vite.config.ts",
     "lint:server": "eslint server scripts e2e playwright.config.ts playwright.prod.config.ts",
-    "typecheck": "tsc -p . && tsc -p client && tsc -p server --noEmit",
-    "test:e2e": "playwright test --project=chromium",
+    "typecheck": "tsc -p . && tsc -p client && tsc -p server/tsconfig.test.json",
+    "test:unit": "tsx --test \"server/src/**/*.test.ts\"",
+    "test:e2e":"playwright test --project=chromium",
     "test:e2e:visual": "playwright test --project=chrome",
     "test:e2e:prod": "playwright test --config playwright.prod.config.ts --project=chromium"
   },

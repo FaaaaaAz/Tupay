@@ -29,7 +29,7 @@ jobs:
         run: npm run typecheck
 
   e2e:
-    name: Pruebas E2E (headless)
+    name: Pruebas unitarias y E2E (headless)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +41,9 @@ jobs:
 
       - name: Instalar dependencias
         run: npm ci
+
+      - name: Ejecutar las pruebas unitarias de la física
+        run: npm run test:unit
 
       - name: Instalar el navegador de Playwright
         run: npx playwright install --with-deps chromium

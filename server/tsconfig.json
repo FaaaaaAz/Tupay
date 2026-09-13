@@ -8,5 +8,6 @@
     "rootDir": "..",
     "outDir": "../dist"
   },
-  "include": ["src", "../compartido"]
+  "include": ["src", "../compartido"],
+  "exclude": ["src/**/*.test.ts"]
 }
