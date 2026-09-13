@@ -7,6 +7,7 @@ import type {
   Lado,
   Marcador,
   Modo,
+  OpcionesDePrueba,
   PeticionCrearPartida,
   Resultado,
   Tapita,
@@ -121,7 +122,12 @@ function validarConfiguracion(peticion: PeticionCrearPartida): void {
     throw new ErrorDeJuego(MENSAJES.metaDeGolesInvalida);
   }
 
-  const { duracionRealSegundos, limiteTurnoSegundos, probabilidadPerro } = peticion;
+  validarOpcionesDePrueba(peticion);
+}
+
+/** Las opciones de prueba pueden faltar, pero si vienen: duraciones positivas y probabilidad entre 0 y 1. */
+export function validarOpcionesDePrueba(opciones: OpcionesDePrueba): void {
+  const { duracionRealSegundos, limiteTurnoSegundos, probabilidadPerro } = opciones;
   const esPositivoUOmitido = (valor: number | undefined) => valor === undefined || valor > 0;
   const probabilidadValida =
     probabilidadPerro === undefined || (probabilidadPerro >= 0 && probabilidadPerro <= 1);

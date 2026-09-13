@@ -25,3 +25,10 @@ export const RIVAL = {
   /** Variación al azar de la fuerza, para que no tire siempre igual. */
   variacionDeFuerza: 0.1,
 } as const;
+
+export const TEMPORADA = {
+  puntosPorVictoria: 3,
+  puntosPorEmpate: 1,
+  /** Probabilidad de que un equipo haga 0, 1, 2, 3 o 4 goles en un partido simulado. */
+  probabilidadDeGoles: [0.28, 0.34, 0.22, 0.11, 0.05],
+} as const;

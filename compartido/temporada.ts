@@ -1,22 +1,23 @@
 import type { IdEquipo } from "./catalogo.js";
-import type { Marcador, Modo, OpcionesDePrueba } from "./partida.js";
+import type { Dificultad, Marcador, OpcionesDePrueba, Partida } from "./partida.js";
 
-export type EstadoJornada = "pendiente" | "enJuego" | "jugada" | "simulada";
+export type EstadoPartidoDeTemporada = "pendiente" | "enJuego" | "jugado" | "simulado";
 export type EstadoTemporada = "enCurso" | "finalizada";
+export type ControlDelRival = "servidor" | "humano";
 
 /**
- * Un partido del calendario. `jugada` significa que lo jugó una persona con la
- * física completa; `simulada`, que se resolvió con la semilla porque no
- * participaba ningún humano.
+ * Un partido del calendario. En cada jornada todos los equipos juegan una vez. `jugado`
+ * significa que lo jugó una persona con la física completa; `simulado`, que se resolvió con
+ * la semilla porque no participaba ninguna.
  */
-export interface Jornada {
+export interface PartidoDeTemporada {
   id: string;
-  numero: number;
+  jornada: number;
   local: IdEquipo;
   visitante: IdEquipo;
-  estado: EstadoJornada;
+  estado: EstadoPartidoDeTemporada;
   marcador: Marcador | null;
-  /** Id de la partida creada, cuando la juega una persona. */
+  /** Id de la partida creada para jugarlo, cuando participa una persona. */
   partida: string | null;
 }
 
@@ -37,9 +38,14 @@ export interface Temporada {
   equipos: IdEquipo[];
   /** Equipos controlados por personas: uno o dos. */
   humanos: IdEquipo[];
-  jornadas: Jornada[];
+  partidos: PartidoDeTemporada[];
   /** Ordenada por puntos, diferencia de goles y goles a favor. */
   tabla: FilaTabla[];
+  /** `null` cuando ya se jugaron todas. */
+  jornadaActual: number | null;
+  totalDeJornadas: number;
+  /** Ids de los partidos que las personas pueden jugar ahora. */
+  proximosPartidos: string[];
   estado: EstadoTemporada;
   campeon: IdEquipo | null;
 }
@@ -48,20 +54,19 @@ export interface PeticionCrearTemporada extends OpcionesDePrueba {
   /** Por defecto, los diez equipos del catálogo. */
   equipos?: IdEquipo[];
   humanos: IdEquipo[];
+  /** Dificultad de los rivales que maneja el servidor. Por defecto, medio. */
+  dificultad?: Dificultad;
+  /** Por defecto `true`. */
   perroActivo?: boolean;
 }
 
-/**
- * Antes de una jornada donde solo hay un equipo humano, el segundo jugador puede
- * tomar el control del rival en vez de dejarlo en manos del servidor.
- */
-export interface PeticionJugarJornada {
-  rivalControladoPor?: "servidor" | "humano";
+/** Con dos personas, antes de enfrentar a un equipo de nadie, el segundo jugador puede tomarlo. */
+export interface PeticionJugarPartidoDeTemporada {
+  rivalControladoPor?: ControlDelRival;
 }
 
-export interface RespuestaJugarJornada {
-  jornada: Jornada;
+export interface RespuestaJugarPartidoDeTemporada {
   temporada: Temporada;
-  /** Modo con el que se creó la partida, cuando la juega una persona. */
-  modo: Modo | null;
+  /** La partida recién creada, lista para abrir la cancha. */
+  partida: Partida;
 }
