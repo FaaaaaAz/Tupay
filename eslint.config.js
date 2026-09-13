@@ -9,6 +9,12 @@ export default tseslint.config(
   js.configs.recommended,
   tseslint.configs.recommended,
   {
+    rules: {
+      // Express reconoce un manejador de errores por sus cuatro parámetros, aunque no use todos.
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    },
+  },
+  {
     files: ["client/**/*.{ts,tsx}"],
     languageOptions: { globals: globals.browser },
   },
