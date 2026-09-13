@@ -139,6 +139,8 @@ export interface PeticionCrearPartida extends OpcionesDePrueba {
 }
 
 export interface PeticionTiro {
+  /** Quién tira. Permite distinguir "no es tu turno" de "ese jugador no es tuyo". */
+  lado: Lado;
   /** Id de una tapita propia. */
   tapita: string;
   /** El servidor solo usa su dirección; no hace falta que venga normalizada. */
