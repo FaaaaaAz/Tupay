@@ -40,6 +40,11 @@ export function Instrucciones({ alVolver }: { alVolver: () => void }) {
             <strong>Liga:</strong> 90 minutos a reloj acelerado. Gana quien tenga más goles al final,
             y puede terminar empatado.
           </li>
+          <li>
+            <strong>Temporada:</strong> los 10 equipos juegan todos contra todos. Juegas un partido de
+            Liga por jornada; los que no juega nadie los resuelve el servidor. Victoria suma 3 puntos,
+            empate 1, y al final el primero de la tabla es campeón.
+          </li>
         </ul>
 
         <h2>El perro</h2>

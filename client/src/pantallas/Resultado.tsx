@@ -6,19 +6,21 @@ import { IMAGEN_DE_EQUIPO } from "../recursos/indice";
 
 interface Props {
   partida: Partida;
-  peticion: PeticionCrearPartida;
   equipos: Equipo[];
+  /** Configuración para jugar la revancha. Un partido de temporada no tiene revancha. */
+  revancha: PeticionCrearPartida | null;
   alJugarDeNuevo: (partida: Partida) => void;
-  alIrAlMenu: () => void;
+  textoParaSalir: string;
+  alSalir: () => void;
 }
 
-export function Resultado({ partida, peticion, equipos, alJugarDeNuevo, alIrAlMenu }: Props) {
+export function Resultado({ partida, equipos, revancha, alJugarDeNuevo, textoParaSalir, alSalir }: Props) {
   const { crear, enviando, error } = useCrearPartida();
   const marcador = partida.resultado?.marcador ?? partida.marcador;
   const ganador = partida.resultado?.ganador ?? null;
   const equipoDe = (lado: Lado) => equipoPorId(equipos, partida[lado].equipo);
 
-  async function revancha() {
+  async function jugarRevancha(peticion: PeticionCrearPartida) {
     const nueva = await crear(peticion);
     if (nueva) alJugarDeNuevo(nueva);
   }
@@ -43,11 +45,22 @@ export function Resultado({ partida, peticion, equipos, alJugarDeNuevo, alIrAlMe
         )}
 
         <div className="resultado__acciones">
-          <button type="button" className="boton boton--principal" disabled={enviando} onClick={() => void revancha()}>
-            {enviando ? "Preparando…" : "Revancha"}
-          </button>
-          <button type="button" className="boton boton--secundario" onClick={alIrAlMenu}>
-            Volver al menú
+          {revancha && (
+            <button
+              type="button"
+              className="boton boton--principal"
+              disabled={enviando}
+              onClick={() => void jugarRevancha(revancha)}
+            >
+              {enviando ? "Preparando…" : "Revancha"}
+            </button>
+          )}
+          <button
+            type="button"
+            className={revancha ? "boton boton--secundario" : "boton boton--principal"}
+            onClick={alSalir}
+          >
+            {textoParaSalir}
           </button>
         </div>
       </section>

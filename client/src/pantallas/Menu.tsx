@@ -3,11 +3,12 @@ import { IMAGENES } from "../recursos/indice";
 
 interface Props {
   alElegirModo: (modo: Modo) => void;
+  alVerTemporada: () => void;
   alVerInstrucciones: () => void;
   alVolver: () => void;
 }
 
-export function Menu({ alElegirModo, alVerInstrucciones, alVolver }: Props) {
+export function Menu({ alElegirModo, alVerTemporada, alVerInstrucciones, alVolver }: Props) {
   return (
     <main className="menu" style={{ backgroundImage: `url(${IMAGENES.menu})` }}>
       <h1 className="menu__titulo">Tupay</h1>
@@ -23,7 +24,14 @@ export function Menu({ alElegirModo, alVerInstrucciones, alVolver }: Props) {
         <button type="button" className="tarjeta-menu" onClick={() => alElegirModo("liga")}>
           <span className="tarjeta-menu__nombre">Liga</span>
           <span className="tarjeta-menu__detalle">
-            90 minutos a reloj acelerado. Gana quien tenga más goles, y puede terminar empatado.
+            Un partido de 90 minutos a reloj acelerado. Gana quien tenga más goles, y puede terminar empatado.
+          </span>
+        </button>
+
+        <button type="button" className="tarjeta-menu" onClick={alVerTemporada}>
+          <span className="tarjeta-menu__nombre">Temporada</span>
+          <span className="tarjeta-menu__detalle">
+            Los 10 equipos, todos contra todos, con tabla de posiciones y campeón.
           </span>
         </button>
 
