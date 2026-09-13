@@ -1,6 +1,6 @@
 import type { Vector } from "../../../../compartido/geometria.js";
 import type { Cuadro } from "../../../../compartido/partida.js";
-import { escalar, normalizar } from "../../utilidades/vector.js";
+import { escalar, normalizar, redondear } from "../../utilidades/vector.js";
 import { resolverColisiones } from "./colisiones.js";
 import { FISICA } from "./configuracionFisica.js";
 import { crearPelota, crearPostes, crearTapita, enReposo, type Cuerpo } from "./cuerpo.js";
@@ -11,7 +11,7 @@ export interface Tiro {
   /** Índice de la tapita dentro de `EntradaSimulacion.tapitas`. */
   tapita: number;
   direccion: Vector;
-  /** Proporción de la velocidad máxima, de 0 a 1. */
+  /** Proporción de la velocidad máxima. Llega a 1, o más con un tiro de poder. */
   fuerza: number;
 }
 
@@ -93,9 +93,4 @@ function fotografiar(tapitas: Cuerpo[], pelota: Cuerpo): Cuadro {
     pelota: redondear(pelota.posicion),
     perro: null,
   };
-}
-
-/** Un decimal alcanza para dibujar y achica bastante el JSON del recorrido. */
-function redondear({ x, y }: Vector): Vector {
-  return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
 }

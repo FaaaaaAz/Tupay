@@ -38,3 +38,6 @@ export const FISICA = {
   /** Tope de seguridad: ninguna simulación sigue más allá de este tiempo de juego. */
   segundosMaximosDeSimulacion: 20,
 } as const;
+
+/** Cuadros de animación por cada segundo de juego simulado. */
+export const CUADROS_POR_SEGUNDO = FISICA.pasosPorSegundo / FISICA.pasosPorCuadro;
