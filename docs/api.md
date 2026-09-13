@@ -4,8 +4,10 @@ Toda la comunicación es JSON, de entrada y de salida. Los tipos de cada cuerpo 
 `compartido/` y los comparten el cliente y el servidor, así que un cambio en el contrato rompe la
 compilación de ambos lados en vez de fallar recién en tiempo de ejecución.
 
-> Los ejemplos de este documento son el diseño previo a la implementación. La tarea 5.9 del plan los
-> reemplaza por solicitudes y respuestas reales capturadas del servidor.
+Los ejemplos de las secciones **Catálogo** y **Partida** son solicitudes y respuestas reales,
+capturadas contra el servidor local el 13 de septiembre de 2026 (tarea 5.9 del plan). Solo se
+compactó el formato de algunos arreglos para que entren en pantalla; los valores no se tocaron.
+Las secciones marcadas como *diseño* todavía no están implementadas.
 
 ## Convenciones
 
@@ -15,18 +17,19 @@ compilación de ambos lados en vez de fallar recién en tiempo de ejecución.
 - Los campos que no aplican viajan como `null`, nunca ausentes. `JSON.stringify` descarta
   `undefined`, así que un campo opcional desaparecería del JSON y el cliente no podría distinguir
   "no aplica" de "me olvidé de mandarlo".
-- Las posiciones están en unidades de cancha, no en píxeles. Cada partida informa sus medidas en
-  `cancha`, y el cliente escala el SVG a la pantalla.
+- Las posiciones están en unidades de cancha, no en píxeles, redondeadas a un decimal. Cada partida
+  informa sus medidas en `cancha`, y el cliente escala el SVG a la pantalla.
 
 ## Códigos de estado
 
 | Código | Cuándo |
 |---|---|
 | `200` | Consulta o acción correcta. |
-| `201` | Partida o temporada creada. |
-| `400` | Acción inválida: turno ajeno, fuerza fuera de rango, equipos repetidos, emote en enfriamiento. |
-| `404` | No existe la partida, la temporada o la ruta. |
+| `201` | Partida creada. |
+| `400` | Acción inválida o cuerpo con forma incorrecta. |
+| `404` | No existe la partida o la ruta. |
 | `409` | La partida ya terminó. |
+| `500` | Error inesperado del servidor. El detalle queda en el log, nunca en la respuesta. |
 
 ## Catálogo
 
@@ -35,12 +38,13 @@ compilación de ambos lados en vez de fallar recién en tiempo de ejecución.
 Estado y versión del servidor. Es lo que usa el pipeline para confirmar qué commit está publicado.
 
 ```json
-{ "estado": "ok", "juego": "Tupay", "version": "ec51f6b62479f41df4d919ad8f88e8c14c3d0338" }
+{ "estado": "ok", "juego": "Tupay", "version": "3caf60a1a52e3604cc839f193b86f489cb29505d" }
 ```
 
 ### `GET /api/equipos`
 
-Los diez equipos. El cliente nunca tiene la lista escrita: la pide al servidor.
+Los diez equipos. El cliente nunca tiene la lista escrita: la pide al servidor. Respuesta `200`
+(primeros dos de diez):
 
 ```json
 [
@@ -49,28 +53,30 @@ Los diez equipos. El cliente nunca tiene la lista escrita: la pide al servidor.
     "nombre": "Bolívar",
     "departamento": "La Paz",
     "estadio": "hernandoSiles",
-    "colorPrincipal": "#1e9ade",
+    "colorPrincipal": "#18a8f0",
     "colorSecundario": "#ffffff"
+  },
+  {
+    "id": "theStrongest",
+    "nombre": "The Strongest",
+    "departamento": "La Paz",
+    "estadio": "hernandoSiles",
+    "colorPrincipal": "#ffd800",
+    "colorSecundario": "#181818"
   }
 ]
 ```
 
+Los colores son los dos tonos que más superficie ocupan en la tapita de cada club.
+
 ### `GET /api/estadios`
+
+Respuesta `200` (primeros dos de seis):
 
 ```json
 [
-  {
-    "id": "hernandoSiles",
-    "nombre": "Hernando Siles",
-    "ciudad": "La Paz",
-    "efecto": "charcosDeAgua"
-  },
-  {
-    "id": "ramonAguilera",
-    "nombre": "Ramón Aguilera Costas",
-    "ciudad": "Santa Cruz",
-    "efecto": "ninguno"
-  }
+  { "id": "hernandoSiles", "nombre": "Hernando Siles", "ciudad": "La Paz", "efecto": "charcosDeAgua" },
+  { "id": "villaIngenio", "nombre": "El Titán de Villa Ingenio", "ciudad": "El Alto", "efecto": "charcosDeNieve" }
 ]
 ```
 
@@ -81,29 +87,27 @@ Los diez equipos. El cliente nunca tiene la lista escrita: la pide al servidor.
 Crea un partido, de Eliminatoria o de Liga suelta. El servidor arma la formación de cinco tapitas
 por equipo, sortea el saque y devuelve el estado inicial completo.
 
-Entrada mínima:
+| Campo | Obligatorio | Por defecto |
+|---|---|---|
+| `modo` | sí | — `"eliminatoria"` o `"liga"` |
+| `local`, `visitante` | sí | — `{ equipo, tipo, dificultad? }` |
+| `estadio` | no | el del equipo local |
+| `perroActivo` | no | `true` |
+| `golesParaGanar` | no | `3` (solo Eliminatoria, de 1 a 5) |
+| `semilla` | no | una al azar |
+| `duracionRealSegundos` | no | `300` (solo Liga) |
+| `limiteTurnoSegundos` | no | `15` |
+| `probabilidadPerro` | no | `0.12` |
+
+Solicitud:
 
 ```json
 {
   "modo": "eliminatoria",
   "local": { "equipo": "bolivar", "tipo": "humano" },
-  "visitante": { "equipo": "theStrongest", "tipo": "servidor", "dificultad": "medio" }
-}
-```
-
-Entrada completa, con las opciones que hacen repetibles las pruebas:
-
-```json
-{
-  "modo": "liga",
-  "local": { "equipo": "wilstermann", "tipo": "humano" },
-  "visitante": { "equipo": "aurora", "tipo": "humano" },
-  "estadio": "felixCapriles",
+  "visitante": { "equipo": "theStrongest", "tipo": "humano" },
   "perroActivo": false,
-  "golesParaGanar": 1,
-  "semilla": 12345,
-  "duracionRealSegundos": 10,
-  "limiteTurnoSegundos": 5
+  "semilla": 12345
 }
 ```
 
@@ -111,17 +115,11 @@ Respuesta `201`:
 
 ```json
 {
-  "id": "p_8fa31c",
+  "id": "p_7b989188",
   "modo": "eliminatoria",
   "estado": "enJuego",
   "estadio": "hernandoSiles",
-  "cancha": {
-    "ancho": 1200,
-    "alto": 700,
-    "altoDelArco": 180,
-    "radioTapita": 28,
-    "radioPelota": 18
-  },
+  "cancha": { "ancho": 1200, "alto": 700, "altoDelArco": 180, "radioTapita": 28, "radioPelota": 18 },
   "local": {
     "lado": "local",
     "equipo": "bolivar",
@@ -134,195 +132,202 @@ Respuesta `201`:
   "visitante": {
     "lado": "visitante",
     "equipo": "theStrongest",
-    "tipo": "servidor",
-    "dificultad": "medio",
+    "tipo": "humano",
+    "dificultad": null,
     "tirosDePoder": 2,
     "emote": null,
     "esperaEmote": 0
   },
   "tapitas": [
     { "id": "local-1", "lado": "local", "posicion": { "x": 120, "y": 350 } },
-    { "id": "local-2", "lado": "local", "posicion": { "x": 330, "y": 180 } }
+    { "id": "local-2", "lado": "local", "posicion": { "x": 300, "y": 203 } },
+    { "id": "local-3", "lado": "local", "posicion": { "x": 300, "y": 497 } },
+    { "id": "local-4", "lado": "local", "posicion": { "x": 480, "y": 280 } },
+    { "id": "local-5", "lado": "local", "posicion": { "x": 480, "y": 420 } },
+    { "id": "visitante-1", "lado": "visitante", "posicion": { "x": 1080, "y": 350 } },
+    { "id": "visitante-2", "lado": "visitante", "posicion": { "x": 900, "y": 203 } },
+    { "id": "visitante-3", "lado": "visitante", "posicion": { "x": 900, "y": 497 } },
+    { "id": "visitante-4", "lado": "visitante", "posicion": { "x": 720, "y": 280 } },
+    { "id": "visitante-5", "lado": "visitante", "posicion": { "x": 720, "y": 420 } }
   ],
   "pelota": { "posicion": { "x": 600, "y": 350 }, "atrapadaEn": null, "golpesParaLiberar": 0 },
   "charcos": [],
-  "turno": { "lado": "local", "segundosRestantes": 15 },
+  "turno": { "lado": "visitante", "segundosRestantes": 15 },
   "marcador": { "local": 0, "visitante": 0 },
-  "perro": { "activo": true, "apariciones": 0 },
+  "perro": { "activo": false, "apariciones": 0 },
   "golesParaGanar": 3,
   "reloj": null,
   "resultado": null
 }
 ```
 
-Errores:
+El local defiende el arco izquierdo y forma en la mitad izquierda; el visitante, en espejo. Con la
+semilla `12345` el saque le toca siempre al visitante: esa es la razón de que exista la semilla.
+
+En Liga cambian dos campos. Solicitud con `"modo": "liga"`, Wilstermann contra Aurora y
+`"duracionRealSegundos": 1`:
+
+```json
+{ "estadio": "felixCapriles", "golesParaGanar": null, "reloj": { "minutoDeJuego": 0, "segundosRealesRestantes": 1 } }
+```
+
+Errores reales:
 
 | Situación | Código | Respuesta |
 |---|---|---|
 | Ambos equipos iguales | `400` | `{ "error": "Elijan equipos distintos: todavía no hay camisetas alternativas" }` |
-| `golesParaGanar` fuera de 1 a 5 | `400` | `{ "error": "Elige una meta de goles entre 1 y 5" }` |
+| `golesParaGanar: 6` | `400` | `{ "error": "Elige una meta de goles entre 1 y 5" }` |
+| Falta un campo o tiene otro tipo | `400` | `{ "error": "La configuración de la partida no es válida" }` |
+| El cuerpo no es JSON | `400` | `{ "error": "El cuerpo de la solicitud no es JSON válido" }` |
 
 ### `GET /api/partidas/:id`
 
-Devuelve el mismo objeto `Partida` de arriba, con el estado actual. Si no existe, `404` con
-`{ "error": "Esa partida no existe" }`.
-
-### `POST /api/partidas/:id/tiros`
-
-El corazón del juego: valida el tiro, lo simula hasta que todo se detiene, decide si hubo gol,
-cambia el turno y devuelve el recorrido para que React lo anime.
-
-Entrada:
+Devuelve el mismo objeto `Partida`, con el estado actual. El servidor no usa temporizadores: al
+consultar calcula cuánto tiempo pasó y aplica los turnos vencidos o el final de la Liga. Por ejemplo,
+la partida de Liga de arriba, consultada 1,1 segundos después:
 
 ```json
 {
-  "tapita": "local-3",
-  "direccion": { "x": 0.94, "y": -0.34 },
-  "fuerza": 0.8,
-  "tiroDePoder": false
+  "estado": "finalizada",
+  "reloj": { "minutoDeJuego": 90, "segundosRealesRestantes": 0 },
+  "resultado": { "ganador": null, "marcador": { "local": 0, "visitante": 0 } }
 }
 ```
 
-Respuesta `200`. El recorrido va recortado en el ejemplo; en la práctica son decenas de cuadros:
+`ganador: null` es empate, posible solo en Liga.
+
+| Situación | Código | Respuesta |
+|---|---|---|
+| La partida no existe | `404` | `{ "error": "Esa partida no existe" }` |
+
+### `POST /api/partidas/:id/tiros`
+
+El corazón del juego: valida el tiro, lo simula hasta que todo se detiene, decide si hubo gol o si
+entra el perro, cambia el turno y devuelve el recorrido para que React lo anime.
+
+| Campo | Qué es |
+|---|---|
+| `lado` | Quién tira. Permite distinguir "No es tu turno" de "Ese jugador no es tuyo". |
+| `tapita` | Id de una tapita propia, por ejemplo `"visitante-4"`. |
+| `direccion` | Vector hacia donde sale la tapita. No hace falta normalizarlo. |
+| `fuerza` | Proporción de la fuerza máxima, mayor que 0 y hasta 1. |
+| `tiroDePoder` | Opcional. Multiplica la fuerza por 1,5 y gasta uno de los dos disponibles. |
+
+Solicitud, sobre la partida `p_7b989188` de arriba:
+
+```json
+{ "lado": "visitante", "tapita": "visitante-4", "direccion": { "x": -1, "y": 0.3 }, "fuerza": 0.7 }
+```
+
+Respuesta `200`. Este tiro produjo 103 cuadros y la respuesta completa pesa 27 kB; aquí van los
+dos primeros:
 
 ```json
 {
   "recorrido": [
     {
-      "tapitas": [{ "x": 120, "y": 350 }, { "x": 330, "y": 180 }],
+      "tapitas": [
+        { "x": 120, "y": 350 }, { "x": 300, "y": 203 }, { "x": 300, "y": 497 }, { "x": 480, "y": 280 }, { "x": 480, "y": 420 },
+        { "x": 1080, "y": 350 }, { "x": 900, "y": 203 }, { "x": 900, "y": 497 }, { "x": 720, "y": 280 }, { "x": 720, "y": 420 }
+      ],
       "pelota": { "x": 600, "y": 350 },
       "perro": null
     },
     {
-      "tapitas": [{ "x": 120, "y": 350 }, { "x": 352, "y": 172 }],
+      "tapitas": [
+        { "x": 120, "y": 350 }, { "x": 300, "y": 203 }, { "x": 300, "y": 497 }, { "x": 480, "y": 280 }, { "x": 480, "y": 420 },
+        { "x": 1080, "y": 350 }, { "x": 900, "y": 203 }, { "x": 900, "y": 497 }, { "x": 687.2, "y": 289.8 }, { "x": 720, "y": 420 }
+      ],
       "pelota": { "x": 600, "y": 350 },
       "perro": null
     }
   ],
-  "eventos": [{ "tipo": "gol", "lado": "local" }],
-  "partida": { "...": "el estado completo, ya con el marcador y el turno actualizados" }
+  "eventos": [],
+  "partida": {
+    "turno": { "lado": "local", "segundosRestantes": 15 },
+    "marcador": { "local": 0, "visitante": 0 }
+  }
 }
 ```
 
-Las posiciones de `tapitas` en cada cuadro van **en el mismo orden** que `partida.tapitas`. Repetir
-los identificadores en cada cuadro multiplicaría el tamaño de la respuesta sin agregar información.
+En el segundo cuadro ya se ve a `visitante-4` salir de (720, 280) hacia la izquierda. Las posiciones
+de `tapitas` van **en el mismo orden** que `partida.tapitas`: repetir los identificadores en cada
+cuadro multiplicaría el tamaño de la respuesta sin agregar información.
 
-Errores:
+El turno vuelve a mostrar 15 segundos porque el reloj del turno siguiente arranca cuando termina la
+animación, no cuando responde el servidor.
+
+**Cuando entra el perro**, el recorrido sigue con sus cuadros y aparece un evento. Solicitud con
+`"probabilidadPerro": 1` y `"semilla": 7`; tiró el local:
+
+```json
+{
+  "eventos": [{ "tipo": "perro", "posicionPelota": { "x": 743.1, "y": 478.2 }, "turnoPara": "visitante" }]
+}
+```
+
+Ese tiro tuvo 164 cuadros, 84 de ellos con el perro. Uno mientras lleva la pelota, con los dos en el
+mismo punto:
+
+```json
+{ "pelota": { "x": 647.7, "y": 392.7 }, "perro": { "x": 647.7, "y": 392.7 } }
+```
+
+El turno pasó al visitante aunque tiró el local: el perro dejó la pelota en la mitad derecha, cerca
+del arco del visitante, y el reglamento le da el turno a quien tiene que defender.
+
+Los otros eventos posibles son `{ "tipo": "gol", "lado": "local" }` y
+`{ "tipo": "finDelPartido", "resultado": { ... } }`.
+
+Errores reales:
 
 | Situación | Código | Respuesta |
 |---|---|---|
-| No es su turno | `400` | `{ "error": "No es tu turno" }` |
+| Tira quien no tiene el turno | `400` | `{ "error": "No es tu turno" }` |
 | Tapita del rival | `400` | `{ "error": "Ese jugador no es tuyo" }` |
-| Fuerza o dirección fuera de rango | `400` | `{ "error": "Tiro inválido" }` |
-| Se acabó el tiempo del turno | `400` | `{ "error": "Se acabó tu tiempo: pierdes el turno" }` |
+| `fuerza: 1.5`, dirección nula o campos incorrectos | `400` | `{ "error": "Tiro inválido" }` |
+| Tira después de que se le venció el turno | `400` | `{ "error": "Se acabó tu tiempo: pierdes el turno" }` |
 | Sin tiros de poder | `400` | `{ "error": "Ya no te quedan tiros de poder" }` |
 | Partida terminada | `409` | `{ "error": "La partida ya terminó" }` |
+| La partida no existe | `404` | `{ "error": "Esa partida no existe" }` |
 
-### `POST /api/partidas/:id/turno-rival`
+El aviso de tiempo se obtuvo con `"limiteTurnoSegundos": 1`, esperando 1,2 segundos antes de tirar:
+el servidor responde el error y el turno ya es del rival.
+
+### Rutas inexistentes
+
+Cualquier ruta bajo `/api` que no exista responde `404` con
+`{ "error": "Ruta de API no encontrada" }`, nunca con la página HTML del juego.
+
+## Pendiente de implementar (diseño)
+
+### `POST /api/partidas/:id/turno-rival` — tarea 8.2
 
 Pide al servidor que juegue su turno en el modo de 1 jugador. No lleva cuerpo y responde igual que
 `/tiros`: recorrido, eventos y estado.
 
-### `POST /api/partidas/:id/emotes`
-
-Lanza una carita sobre las cinco tapitas del jugador. No afecta la física ni el turno.
+### `POST /api/partidas/:id/emotes` — tarea 8.6
 
 ```json
 { "lado": "local", "emote": "felizEuforico" }
 ```
 
-Respuesta `200`: el objeto `Partida`, con el emote activo y su enfriamiento.
-
-```json
-{
-  "local": {
-    "emote": { "id": "felizEuforico", "segundosRestantes": 5 },
-    "esperaEmote": 15
-  }
-}
-```
-
-Si todavía está en enfriamiento, `400` con
+Responde el objeto `Partida` con `emote: { "id": "felizEuforico", "segundosRestantes": 5 }` y
+`esperaEmote: 15` en el jugador. En enfriamiento: `400` con
 `{ "error": "Espera unos segundos para volver a usar un emote" }`.
 
-## Temporada
+### Temporada — Fase 7
 
-### `POST /api/temporadas`
+| Método | Ruta | Qué hace |
+|---|---|---|
+| POST | `/api/temporadas` | Crea la temporada y genera el calendario de todos contra todos. |
+| GET | `/api/temporadas/:id` | Calendario, tabla de posiciones y estado de cada jornada. |
+| POST | `/api/temporadas/:id/jornadas/:jornadaId/jugar` | Crea la partida si juega una persona; si no, la resuelve con la semilla. |
 
-Crea una temporada y genera el calendario de todos contra todos, a una vuelta.
-
-```json
-{
-  "equipos": ["bolivar", "theStrongest", "aurora", "wilstermann"],
-  "humanos": ["bolivar"],
-  "perroActivo": true,
-  "semilla": 777
-}
-```
-
-Respuesta `201`: el objeto `Temporada` con las jornadas en `pendiente` y la tabla en cero.
-
-### `GET /api/temporadas/:id`
-
-Calendario, tabla de posiciones y estado de cada jornada.
+Solicitud de creación:
 
 ```json
-{
-  "id": "t_4b19e0",
-  "equipos": ["bolivar", "theStrongest", "aurora", "wilstermann"],
-  "humanos": ["bolivar"],
-  "jornadas": [
-    {
-      "id": "j1",
-      "numero": 1,
-      "local": "bolivar",
-      "visitante": "aurora",
-      "estado": "pendiente",
-      "marcador": null,
-      "partida": null
-    }
-  ],
-  "tabla": [
-    {
-      "equipo": "bolivar",
-      "jugados": 0,
-      "ganados": 0,
-      "empatados": 0,
-      "perdidos": 0,
-      "golesAFavor": 0,
-      "golesEnContra": 0,
-      "diferencia": 0,
-      "puntos": 0
-    }
-  ],
-  "estado": "enCurso",
-  "campeon": null
-}
+{ "equipos": ["bolivar", "theStrongest", "aurora", "wilstermann"], "humanos": ["bolivar"], "semilla": 777 }
 ```
 
-### `POST /api/temporadas/:id/jornadas/:jornadaId/jugar`
-
-Si la jornada involucra a una persona, crea el partido individual y lo enlaza. Si no involucra a
-nadie, la resuelve con la semilla de la temporada, sin física completa, y actualiza la tabla.
-
-```json
-{ "rivalControladoPor": "humano" }
-```
-
-Respuesta `200`:
-
-```json
-{
-  "jornada": {
-    "id": "j1",
-    "numero": 1,
-    "local": "bolivar",
-    "visitante": "aurora",
-    "estado": "enJuego",
-    "marcador": null,
-    "partida": "p_8fa31c"
-  },
-  "temporada": { "...": "la temporada con su tabla actualizada" },
-  "modo": "liga"
-}
-```
+Los tipos completos (`Temporada`, `Jornada`, `FilaTabla`) están en `compartido/temporada.ts`.

@@ -63,12 +63,17 @@ ni para jugar.
 
 ## API
 
-| Método | Ruta | Respuesta |
+| Método | Ruta | Qué hace |
 |---|---|---|
-| GET | `/api/salud` | `{ "estado": "ok", "juego": "Tupay", "version": "<commit>" }` |
+| GET | `/api/salud` | Estado del servidor y commit publicado. |
+| GET | `/api/equipos` | Los diez equipos, con su estadio y sus colores. |
+| GET | `/api/estadios` | Los seis estadios y su efecto. |
+| POST | `/api/partidas` | Crea un partido de Eliminatoria o de Liga. |
+| GET | `/api/partidas/:id` | Estado actual del partido. |
+| POST | `/api/partidas/:id/tiros` | Valida y simula un tiro; devuelve el recorrido y el estado nuevo. |
 
-Cualquier ruta bajo `/api` que no exista responde `404` con `{ "error": "Ruta de API no encontrada" }`.
-El resto de los endpoints del juego se documentan en `docs/api.md` a medida que se implementan.
+Todos los errores responden `{ "error": "mensaje" }`, con el mismo texto que se muestra en pantalla.
+Entradas, salidas y ejemplos reales de cada endpoint: [`docs/api.md`](docs/api.md).
 
 ## Variables de entorno
 

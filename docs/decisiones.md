@@ -225,6 +225,100 @@ de imports que el servidor en desarrollo. Las 20 pruebas tardan 0,2 segundos.
 la línea de gol y que el gol exigiera cruzar la línea por completo— y en cada caso falló exactamente
 la prueba que cubre esa regla. Una prueba que nunca falla no demuestra nada.
 
+## Decisiones de las reglas del partido
+
+Los números de las reglas viven en `server/src/dominio/reglas/configuracionReglas.ts` y todos los
+textos de error en `server/src/dominio/mensajes.ts`. Cambiar la meta de goles, la duración de la
+Liga o un mensaje en la defensa es tocar una línea.
+
+### El reloj se calcula, no se programa
+
+**Decisión.** El servidor no usa `setTimeout` ni `setInterval`. Guarda instantes —cuándo empezó el
+turno, cuándo empezó el partido de Liga— y cada vez que alguien consulta o tira calcula cuánto tiempo
+pasó y aplica lo que debería haber ocurrido: turnos vencidos o el final por tiempo.
+
+**Por qué.** Con temporizadores, cada partida abandonada dejaría uno vivo en el servidor para
+siempre, y las pruebas tendrían que esperar segundos reales. Así, una prueba comprueba "pasaron 16
+segundos" pasando un número, y la de un partido de Liga completo tarda milisegundos.
+
+**Costo aceptado.** El estado cambia recién cuando alguien lo consulta. No importa: nadie puede ver
+un turno vencido sin consultar la partida, y en ese momento el cálculo ya está hecho.
+
+### El turno siguiente arranca cuando termina la animación
+
+**Decisión.** Al responder un tiro, el turno del rival empieza a correr después de la duración del
+recorrido (cantidad de cuadros dividida por 30), no en el instante de la respuesta.
+
+**Por qué.** Un tiro dura entre 3 y 5 segundos de animación. Sin esta regla, el siguiente jugador
+perdía hasta un tercio de sus 15 segundos mirando cómo se mueven las tapitas. El servidor sabe
+exactamente cuánto dura la animación porque él mismo generó los cuadros.
+
+### El pedido de tiro dice quién tira
+
+**Decisión.** `PeticionTiro` incluye `lado`, además de la tapita.
+
+**Por qué.** Sin saber quién tira no hay forma de distinguir las dos acciones inválidas del
+reglamento: "No es tu turno" (tirar cuando le toca al otro, lo normal al jugar contra el servidor) y
+"Ese jugador no es tuyo" (tirar en tu turno con una tapita rival). También permite el aviso "Se acabó
+tu tiempo": el servidor recuerda quién dejó vencer su turno y se lo dice si intenta tirar tarde.
+
+### Las rutas revisan la forma; el dominio, las reglas
+
+**Decisión.** `rutas/lecturaPeticiones.ts` convierte el JSON recibido en el tipo del contrato:
+comprueba tipos, valores permitidos e identificadores del catálogo. Todo lo demás —equipos distintos,
+meta de 1 a 5, fuerza en rango, turno, tiros de poder— lo decide `dominio/reglas`, que no sabe nada
+de HTTP.
+
+**Por qué.** Las reglas se prueban con `node:test` sin levantar Express, y la validación se escribió a
+mano en unas pocas funciones, sin agregar librerías de validación.
+
+### Lo que guarda el servidor no es lo que ve el cliente
+
+**Decisión.** El servidor guarda un `RegistroPartida` —instantes en milisegundos, el generador de azar
+de la partida, quién dejó vencer su turno, posiciones con precisión completa— y el cliente recibe la
+`Partida` pública que arma `aPartidaPublica`, con segundos restantes y posiciones redondeadas.
+
+**Por qué.** El contrato no expone detalles internos y puede quedar estable aunque cambie la forma de
+guardar las partidas.
+
+### Un solo manejador de errores
+
+**Decisión.** El dominio lanza `ErrorDeJuego` con su mensaje y su código HTTP, y
+`rutas/manejadorDeErrores.ts` es el único lugar que lo convierte en `{ "error": "..." }`. Un cuerpo
+que no es JSON responde 400; cualquier otra excepción, 500 con un mensaje genérico, dejando el detalle
+solo en el log.
+
+**Por qué.** Las rutas quedan en tres líneas cada una y ningún error puede responder HTML en lugar de
+JSON. Y un error inesperado no le muestra al jugador detalles internos del servidor.
+
+### El perro deja la pelota en espejo y en un lugar libre
+
+**Decisión.** El perro lleva la pelota al punto en espejo respecto del centro de la cancha, con un
+desvío horizontal de hasta 150 unidades y una altura al azar, siempre dentro del campo y sin encimar
+ninguna tapita. Prueba hasta 20 lugares; si no encuentra uno libre, esa vez no aparece.
+
+**Por qué.** El espejo es lo que "da vuelta la tortilla". Y como el destino queda siempre dentro del
+campo, la regla "el perro nunca genera gol" se cumple por construcción, en vez de tener que anular
+goles después. Se probó con 200 semillas distintas, incluso con la pelota pegada a cada arco.
+
+### El tiro de poder se adelantó a la Fase 5
+
+**Decisión.** La fuerza multiplicada por 1,5, el límite de dos por partido y su validación se
+implementaron ahora, aunque el plan los ubicaba en la tarea 8.4.
+
+**Por qué.** La tarea 5.3 exige validar "tiros de poder agotados", y validar algo que no existe no
+tenía sentido. Solo quedó pendiente que libere charcos, que recién existen con la tarea 8.1.
+
+### Se comprobó que las pruebas de reglas pueden fallar
+
+Se rompieron a propósito tres reglas y en cada caso falló la prueba que la cubre:
+
+| Regla rota | Prueba que falló |
+|---|---|
+| El gol en el arco derecho se lo anota el visitante | "un gol suma al marcador…" y "en Eliminatoria el partido termina al llegar a la meta" |
+| Quien tira tarde recibe "No es tu turno" en vez del aviso de tiempo | "si se vence el turno, pasa al rival y quien tardó recibe el aviso de tiempo" |
+| El reloj del turno corre durante la animación | "el reloj del turno no corre mientras se anima el tiro anterior" |
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano
@@ -271,6 +365,7 @@ necesitara servicios adicionales.
 | Arranque en frío durante la defensa | La primera visita tarda casi un minuto | Tiempos de espera largos en las pruebas de producción y despertar el servicio unos minutos antes. |
 | Partidas perdidas por reinicio | Una partida abierta deja de existir | Limitación aceptada del repositorio en memoria: mensaje claro y opción de crear otra partida. |
 | Reclamo por la identidad de los clubes | Uso de escudos oficiales | Ilustraciones propias, sin escudos oficiales, con el criterio documentado y sin fines comerciales. |
+| Dos tapitas casi iguales | Always Ready y Nacional Potosí son blancas con una franja roja diagonal; solo cambia el color del borde, y a 50 píxeles en la cancha cuesta distinguirlas | Pendiente de decidir: redibujar una de las dos tapitas, o impedir que se enfrenten, igual que dos veces el mismo equipo. |
 | Código que no se puede explicar | No poder modificar una regla en el momento | Tareas pequeñas, revisión personal de cada cambio y valores de configuración centralizados en un solo archivo. |
 | Contradicción con el cierre del repositorio | El cambio de la defensa exige tocar un repositorio ya congelado | Pedir instrucción escrita al docente antes de la entrega (tarea 11.6). |
 
@@ -282,3 +377,6 @@ necesitara servicios adicionales.
 | El perro dejó de pasar el turno siempre al rival | Ahora el turno pasa al equipo cuyo arco quedó más cerca de la pelota, para que pueda defenderse si el perro se la dejó encima. |
 | Las caritas pasaron de decoración a mecánica | Existían como recurso visual. Convertirlas en una acción con duración y enfriamiento agrega expresión sin tocar la física. |
 | De un partido suelto a dos modos y una temporada | Eliminatoria y Liga resuelven el problema del empate de dos formas distintas, y la temporada convierte el mismo motor en una experiencia más larga. |
+| El estadio se puede elegir | Por defecto se juega en el estadio del local, pero elegirlo permite probar un efecto de cancha sin tener que cambiar de equipo. |
+| El pedido de tiro incluye quién tira | Sin ese dato no se podían distinguir las acciones inválidas "No es tu turno" y "Ese jugador no es tuyo". |
+| El turno empieza después de la animación | Al medir la física se vio que un tiro dura de 3 a 5 segundos: era un tercio del turno perdido mirando. |

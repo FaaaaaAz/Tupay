@@ -256,15 +256,15 @@ Esta fase es el mayor riesgo técnico del proyecto. Se construye y se prueba ant
 
 Esta fase construye el partido completo para Eliminatoria y para un partido suelto de Liga. La temporada completa (Fase 7) se apoya en este motor sin modificarlo.
 
-- [ ] **5.1 Guardar partidas en memoria.** `RepositorioPartidas` y `RepositorioEnMemoria` con operaciones pequeñas y comprobables. Commit: `feat: guardar partidas en memoria`.
-- [ ] **5.2 Crear y consultar partidos.** Servicio y rutas `POST /api/partidas` y `GET /api/partidas/:id`. El servidor define la formación de 5 tapitas por equipo, el primer turno y valida que los equipos no se repitan. Commit: `feat: crear y consultar partidos`.
-- [ ] **5.3 Validar acciones.** Cada acción inválida de `docs/reglas.md`: partido inexistente o terminado, turno incorrecto, tapita rival, fuerza o dirección fuera de rango, turno vencido, tiros de poder agotados y equipos repetidos. Errores siempre en JSON. Commit: `feat: validar acciones del partido`.
-- [ ] **5.4 Ejecutar tiros.** `POST /api/partidas/:id/tiros`: validar, simular, registrar gol, reiniciar formación si corresponde, cambiar turno y devolver recorrido más estado final. Commit: `feat: ejecutar tiros desde la API`.
-- [ ] **5.5 Implementar Eliminatoria.** Meta de goles configurable (1 a 5, por defecto 3), sin empate, partido único. Commit: `feat: modo Eliminatoria`.
-- [ ] **5.6 Implementar Liga como partido suelto.** Reloj de 90 minutos de juego con duración real configurable, límite de 15 segundos por turno, empate posible. El servidor es la fuente de verdad del reloj. Commit: `feat: modo Liga con reloj acelerado`.
-- [ ] **5.7 Implementar el perro.** Evento tras cada tiro con probabilidad configurable (activable o no); mueve la pelota, nunca genera gol, y el turno pasa al equipo cuyo arco quede más cerca de la nueva posición de la pelota. Commit: `feat: el perro entra a la cancha`.
-- [ ] **5.8 Centralizar errores.** Rutas delgadas; un único manejador convierte errores del dominio en `{ "error": "mensaje" }` con su código HTTP. Commit: `refactor: centralizar errores de la API`.
-- [ ] **5.9 Verificar el contrato.** Probar cada endpoint con `curl` o la pestaña Network; reemplazar los ejemplos teóricos de `docs/api.md` por solicitudes y respuestas reales. Commit: `docs: documentar ejemplos reales de la API`.
+- [x] **5.1 Guardar partidas en memoria.** `RepositorioPartidas` y `RepositorioPartidasEnMemoria` con operaciones pequeñas y comprobables. Commit: `feat: guardar partidas en memoria`.
+- [x] **5.2 Crear y consultar partidos.** Servicio y rutas `POST /api/partidas` y `GET /api/partidas/:id`. El servidor define la formación de 5 tapitas por equipo, el primer turno y valida que los equipos no se repitan. Commit: `feat: crear y consultar partidos`.
+- [x] **5.3 Validar acciones.** Cada acción inválida de `docs/reglas.md`: partido inexistente o terminado, turno incorrecto, tapita rival, fuerza o dirección fuera de rango, turno vencido, tiros de poder agotados y equipos repetidos. Errores siempre en JSON. Commit: `feat: validar acciones del partido`.
+- [x] **5.4 Ejecutar tiros.** `POST /api/partidas/:id/tiros`: validar, simular, registrar gol, reiniciar formación si corresponde, cambiar turno y devolver recorrido más estado final. Commit: `feat: ejecutar tiros desde la API`.
+- [x] **5.5 Implementar Eliminatoria.** Meta de goles configurable (1 a 5, por defecto 3), sin empate, partido único. Commit: `feat: modo Eliminatoria`.
+- [x] **5.6 Implementar Liga como partido suelto.** Reloj de 90 minutos de juego con duración real configurable, límite de 15 segundos por turno, empate posible. El servidor es la fuente de verdad del reloj. Commit: `feat: modo Liga con reloj acelerado`.
+- [x] **5.7 Implementar el perro.** Evento tras cada tiro con probabilidad configurable (activable o no); mueve la pelota, nunca genera gol, y el turno pasa al equipo cuyo arco quede más cerca de la nueva posición de la pelota. Commit: `feat: el perro entra a la cancha`.
+- [x] **5.8 Centralizar errores.** Rutas delgadas; un único manejador convierte errores del dominio en `{ "error": "mensaje" }` con su código HTTP. Commit: `refactor: centralizar errores de la API`.
+- [x] **5.9 Verificar el contrato.** Probar cada endpoint con `curl` o la pestaña Network; reemplazar los ejemplos teóricos de `docs/api.md` por solicitudes y respuestas reales. Commit: `docs: documentar ejemplos reales de la API`.
 
 **Criterio de salida:** un partido completo, en cualquiera de los dos modos, se administra exclusivamente mediante solicitudes JSON.
 
@@ -305,7 +305,7 @@ Esta fase solo se inicia si el núcleo (fases 0 a 6) está completo, publicado y
 - [ ] **8.1 Estadios con efecto propio.** Añadir, sobre el estadio de referencia de Cochabamba (sin efecto especial), los demás estadios de `docs/reglas.md`, empezando por uno solo y agregando los demás si el tiempo lo permite. Commit: `feat: estadios con efectos propios`.
 - [ ] **8.2 Rival aleatorio.** Estrategia sencilla del servidor para el modo 1 jugador y el endpoint de turno rival. Commit: `feat: rival controlado por el servidor`.
 - [ ] **8.3 Rival por muestreo y dificultades.** Candidatos dirigidos hacia la pelota, función de puntuación, error de puntería y tres dificultades (fácil, medio, difícil) como configuración. Commit: `feat: rival por muestreo con tres dificultades`.
-- [ ] **8.4 Tiro de poder.** Dos por jugador y por partido, con 50% más de fuerza máxima; libera un charco de una sola vez sin importar los golpes que le falten. Commit: `feat: tiro de poder`.
+- [ ] **8.4 Tiro de poder.** Dos por jugador y por partido, con 50% más de fuerza máxima; libera un charco de una sola vez sin importar los golpes que le falten. *La fuerza extra, el límite de dos y su validación ya quedaron en la Fase 5, porque la tarea 5.3 los necesitaba; falta liberar charcos, que recién existen con la tarea 8.1.* Commit: `feat: tiro de poder`.
 - [ ] **8.5 Integrar los recursos visuales.** Las imágenes ya existen: los originales están en `assets/` y las versiones web en `client/src/recursos/` (equipos, estadios, juego, emotes y pantallas). Falta conectarlas a las pantallas y documentar en `docs/decisiones.md` las herramientas usadas, la autoría propia y el criterio de no reproducir escudos oficiales. Commit: `feat: integrar recursos visuales`.
 - [ ] **8.6 Emotes.** `POST /api/partidas/:id/emotes`: el servidor valida el enfriamiento de 15 segundos y registra la carita elegida; React la dibuja sobre las cinco tapitas del jugador durante 5 segundos y luego la retira. Botón deshabilitado con el tiempo restante mientras dura el enfriamiento. Commit: `feat: emotes sobre las tapitas`.
 
