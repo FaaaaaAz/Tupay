@@ -72,6 +72,9 @@ ni para jugar.
 | GET | `/api/partidas/:id` | Estado actual del partido. |
 | POST | `/api/partidas/:id/tiros` | Valida y simula un tiro; devuelve el recorrido y el estado nuevo. |
 | POST | `/api/partidas/:id/turno-rival` | En 1 jugador, el servidor decide y ejecuta el tiro de su equipo. |
+| POST | `/api/temporadas` | Crea una temporada y genera el calendario de todos contra todos. |
+| GET | `/api/temporadas/:id` | Calendario, tabla de posiciones y próximos partidos. |
+| POST | `/api/temporadas/:id/partidos/:partidoId/jugar` | Crea la partida de Liga de un partido de la temporada. |
 
 Todos los errores responden `{ "error": "mensaje" }`, con el mismo texto que se muestra en pantalla.
 Entradas, salidas y ejemplos reales de cada endpoint: [`docs/api.md`](docs/api.md).

@@ -417,6 +417,81 @@ pedido de creación y se le agregaron parámetros de prueba.
 **Por qué.** Las pruebas comprueban que el juego funciona, no que se vea bien. Así se encontró, por
 ejemplo, que el perro tapaba la pelota mientras la llevaba, y se corrigió dibujando la pelota encima.
 
+## Decisiones de la temporada
+
+Los puntos por victoria y empate, y las probabilidades de goles de los partidos simulados, viven en
+`server/src/dominio/reglas/configuracionReglas.ts`, junto con el resto de las reglas.
+
+### La jornada es la fecha; cada cruce es un partido de temporada
+
+**Decisión.** El contrato de la Fase 3 llamaba `Jornada` a cada partido del calendario. Se renombró a
+`PartidoDeTemporada`, con un campo `jornada` que dice a qué fecha pertenece, y la ruta pasó a ser
+`/api/temporadas/:id/partidos/:partidoId/jugar`.
+
+**Por qué.** En fútbol la jornada es la fecha completa, con todos sus partidos. El nombre anterior
+mezclaba los dos conceptos y era difícil de explicar.
+
+### La temporada es una capa: crea partidas comunes
+
+**Decisión.** `ServicioTemporadas` recibe el servicio de partidas y crea partidas de Liga normales.
+No tiene física, reglas de turno ni rival propios.
+
+**Por qué.** El plan pedía reutilizar el motor del partido sin modificarlo, y así fue: no se tocó
+ningún archivo de la física ni de las reglas del partido. Cualquier arreglo al partido llega solo a la
+temporada.
+
+### La temporada se sincroniza al consultarla
+
+**Decisión.** Nadie avisa a la temporada cuando termina una partida. Cada vez que se consulta o se
+juega, revisa sus partidas en juego: anota las que terminaron, vuelve a dejar pendientes las que ya
+no existen y cierra las jornadas que se pueden cerrar.
+
+**Por qué.** Es el mismo criterio que el reloj de las partidas. Además, el motor de partidas no sabe
+que existe la temporada: la dependencia va en un solo sentido.
+
+### Los partidos sin personas se simulan al cerrar la jornada
+
+**Decisión.** Un partido donde no juega ninguna persona no se puede jugar a mano: la API lo rechaza.
+Cuando las personas terminan sus partidos de la jornada, el servidor simula los demás con la semilla,
+sorteando los goles de cada equipo con probabilidades del 28, 34, 22, 11 y 5 % para 0, 1, 2, 3 y 4
+goles.
+
+**Por qué.** La persona nunca tiene que resolver partidos ajenos, y la tabla nunca muestra una jornada
+a medias.
+
+**Alternativa descartada.** Un botón para simular cada partido ajeno: cuatro clics por jornada sin
+ninguna decisión detrás.
+
+### El calendario usa el método del círculo, mezclado con la semilla
+
+**Decisión.** Los equipos se mezclan con Fisher-Yates y la semilla de la temporada, y después se arma
+el calendario con el método del círculo: un equipo queda fijo y los demás rotan una posición por
+jornada. Con una cantidad impar se agrega un lugar vacío, y quien lo enfrenta descansa.
+
+**Por qué.** El método garantiza que cada par se cruce exactamente una vez y que nadie juegue dos veces
+en la misma jornada, y las pruebas lo comprueban. La mezcla hace que cada temporada tenga un orden
+distinto, pero repetible con la misma semilla.
+
+### La tabla no se guarda, se calcula
+
+**Decisión.** La tabla de posiciones se calcula a partir de los resultados en cada respuesta.
+
+**Por qué.** Así no puede quedar desincronizada con los partidos. Con 45 partidos el cálculo es
+instantáneo.
+
+**Desempate final.** Si dos equipos quedan iguales en puntos, diferencia de gol y goles a favor, decide
+el sorteo que se hace con la semilla al crear la temporada. Al principio el último desempate era el
+orden de la lista de equipos, y las capturas lo delataron: en una temporada corta que terminó 0 a 0,
+Bolívar salía campeón solo por ser el primero del catálogo, que además es el equipo elegido por defecto.
+
+### Se comprobó que las pruebas de la temporada pueden fallar
+
+| Regla rota | Prueba que falló |
+|---|---|
+| Una victoria suma lo mismo que un empate | "suma 3 por victoria y 1 por empate…" |
+| La temporada nunca anota el resultado de una partida terminada | "cuando termina la partida de la persona, se anota el resultado y avanza la jornada" |
+| El calendario no rota a los equipos entre jornadas | "cada par se cruza una sola vez" y "cada uno descansa una jornada" |
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano
@@ -457,7 +532,7 @@ necesitara servicios adicionales.
 | Física inestable | Objetos que se atraviesan o que nunca se detienen | Pasos fijos con subpasos, límite de iteraciones y umbral de detención. Si persiste, bajar la velocidad máxima antes de seguir. **Superado en la Fase 4:** ninguna tapita queda encimada y todos los tiros probados terminan en reposo. |
 | La animación termina en otra posición que el servidor | La tapita queda en un lugar y al recargar aparece en otro | Animar solo los cuadros recibidos y aplicar el estado final de Express al terminar. |
 | Respuestas de tiro demasiado grandes | El JSON de un tiro pesa cientos de kilobytes | Recortar la cantidad de cuadros y enviar las posiciones en el mismo orden que `partida.tapitas`, sin repetir identificadores. **Medido en la Fase 4:** 29 kB para un tiro que mueve las diez tapitas. |
-| La Liga completa consume todo el tiempo | Avanza el calendario y todavía no hay un partido de Liga suelto jugable | Detenerse en el punto de control de la Fase 7. Liga como partido suelto ya cumple el núcleo obligatorio. |
+| La Liga completa consume todo el tiempo | Avanza el calendario y todavía no hay un partido de Liga suelto jugable | Detenerse en el punto de control de la Fase 7. Liga como partido suelto ya cumple el núcleo obligatorio. **Superado:** la temporada se empezó recién con el núcleo terminado y publicado, reutilizando el motor de partidas sin modificarlo. |
 | Pruebas E2E intermitentes | Una prueba falla una de cada tres veces sin cambios de código | Semilla fija, esperar respuestas reales en vez de tiempos arbitrarios, localizadores por rol accesible. |
 | Pipeline lento | Supera los 6 minutos | Un solo navegador en CI, caché de npm, lint y E2E en paralelo. Volver a medir en la tarea 9.7. |
 | Arranque en frío durante la defensa | La primera visita tarda casi un minuto | Tiempos de espera largos en las pruebas de producción y despertar el servicio unos minutos antes. |
@@ -481,3 +556,6 @@ necesitara servicios adicionales.
 | El rival simple se adelantó a la Fase 6 | La configuración ofrece 1 jugador; sin rival, el turno del servidor se vencía cada 15 segundos. |
 | Always Ready y Nacional Potosí se mantienen como están | Se prefirió no redibujarlas: el borde las distingue y el turno se marca con un brillo sobre las tapitas. |
 | La pelota se dibuja encima del perro | En las capturas se vio que el perro la tapaba mientras la llevaba. |
+| `Jornada` pasó a llamarse `PartidoDeTemporada` | En fútbol la jornada es la fecha completa; el nombre anterior confundía un partido con una jornada. |
+| Los partidos sin personas se simulan solos | Simularlos a mano obligaba a hacer clics sin ninguna decisión en cada jornada. |
+| El empate total en la tabla lo decide un sorteo | Con el orden de la lista, Bolívar, el primero del catálogo, ganaba todos los empates totales. |

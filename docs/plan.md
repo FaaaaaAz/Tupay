@@ -227,7 +227,7 @@ Las dependencias del backend avanzan en un solo sentido: `rutas → servicios �
   | POST | `/api/partidas/:id/emotes` | Lanzar una carita sobre las cinco tapitas del jugador; valida el enfriamiento de 15 segundos. |
   | POST | `/api/temporadas` | Crear una temporada: equipos participantes, equipo(s) humano(s), duración y perro por defecto. Genera el calendario. |
   | GET | `/api/temporadas/:id` | Calendario, tabla de posiciones y próximo partido pendiente de cada jugador. |
-  | POST | `/api/temporadas/:id/jornadas/:jornadaId/jugar` | Si el partido involucra a una persona, crea el partido individual correspondiente; si no, lo resuelve por simulación rápida y actualiza la tabla. |
+  | POST | `/api/temporadas/:id/partidos/:partidoId/jugar` | Crea la partida de Liga de un partido donde juega una persona. Los partidos sin personas los simula el servidor al cerrar cada jornada. |
 
 - [x] **3.5 Registrar decisiones y riesgos.** `docs/decisiones.md` con las decisiones técnicas, alternativas descartadas, riesgos y mitigaciones: física, sincronización de animaciones, almacenamiento en memoria, simulación rápida de partidos sin humanos, recursos visuales, despliegue y tiempo de CI. Commit: `docs: registrar decisiones y riesgos`.
 
@@ -289,12 +289,12 @@ Esta fase construye el partido completo para Eliminatoria y para un partido suel
 
 Esta fase solo se inicia si el núcleo (fases 0 a 6) está completo, publicado y probado. Reutiliza el motor de partido de la Fase 5; no lo modifica.
 
-- [ ] **7.1 Calendario todos-contra-todos.** Función pura que, dada una lista de equipos, genera un calendario de una vuelta (por ejemplo, con el método del círculo). Con los 10 equipos de `docs/reglas.md`, cada jugador tiene 9 partidos en su calendario. Commit: `feat: generar calendario de la temporada`.
-- [ ] **7.2 Guardar y consultar temporadas.** `RepositorioTemporadas`, `POST /api/temporadas` y `GET /api/temporadas/:id` con calendario y tabla de posiciones inicial (todos en cero). Commit: `feat: crear y consultar temporadas`.
-- [ ] **7.3 Jugar un partido de la jornada.** `POST /api/temporadas/:id/jornadas/:jornadaId/jugar`: si el partido involucra a una persona, crea el partido individual (reutilizando la Fase 5) y lo enlaza a esa jornada; si no involucra a ninguna, resuelve un resultado con la semilla de la temporada, sin física completa. Commit: `feat: jugar y simular jornadas`.
-- [ ] **7.4 Cerrar un partido y actualizar la tabla.** Cuando un partido individual de una jornada termina, su resultado se refleja en la tabla de posiciones (puntos 3-1-0, diferencia de goles). Commit: `feat: actualizar tabla de posiciones`.
-- [ ] **7.5 Control del rival por el segundo jugador.** Antes de un partido que no es el cruce directo entre ambos jugadores, el segundo jugador puede elegir si controla al equipo rival o lo deja en manos del servidor. Commit: `feat: controlar al equipo rival como segundo jugador`.
-- [ ] **7.6 Pantalla de Temporada.** Calendario, próximo partido pendiente y tabla de posiciones, visibles sin abrir la consola. Commit: `feat: pantalla de temporada`.
+- [x] **7.1 Calendario todos-contra-todos.** Función pura que, dada una lista de equipos, genera un calendario de una vuelta (por ejemplo, con el método del círculo). Con los 10 equipos de `docs/reglas.md`, cada jugador tiene 9 partidos en su calendario. Commit: `feat: generar calendario de la temporada`.
+- [x] **7.2 Guardar y consultar temporadas.** `RepositorioTemporadas`, `POST /api/temporadas` y `GET /api/temporadas/:id` con calendario y tabla de posiciones inicial (todos en cero). Commit: `feat: crear y consultar temporadas`.
+- [x] **7.3 Jugar un partido de la jornada.** `POST /api/temporadas/:id/partidos/:partidoId/jugar`: si el partido involucra a una persona, crea la partida individual (reutilizando la Fase 5) y la enlaza a ese partido. Los partidos sin personas no se juegan a mano: cuando las personas terminan los suyos, el servidor simula el resto de la jornada con la semilla de la temporada, sin física completa. Commit: `feat: jugar y simular jornadas`.
+- [x] **7.4 Cerrar un partido y actualizar la tabla.** Cuando un partido individual de una jornada termina, su resultado se refleja en la tabla de posiciones (puntos 3-1-0, diferencia de goles). Commit: `feat: actualizar tabla de posiciones`.
+- [x] **7.5 Control del rival por el segundo jugador.** Antes de un partido que no es el cruce directo entre ambos jugadores, el segundo jugador puede elegir si controla al equipo rival o lo deja en manos del servidor. Commit: `feat: controlar al equipo rival como segundo jugador`.
+- [x] **7.6 Pantalla de Temporada.** Calendario, próximo partido pendiente y tabla de posiciones, visibles sin abrir la consola. Commit: `feat: pantalla de temporada`.
 
 **Punto de control:** si esta fase no avanza con fluidez, se detiene aquí. Liga sigue existiendo como partido suelto (Fase 5/6) y eso ya cumple el núcleo obligatorio; la temporada completa queda documentada en `docs/decisiones.md` como una mejora no terminada, lo cual es preferible a comprometer las fases 8 y 9.
 

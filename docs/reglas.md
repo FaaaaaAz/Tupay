@@ -41,12 +41,14 @@ Notas:
 - Formato: todos los equipos participantes juegan entre sí **una vez** (una vuelta). Con los 10 equipos de Tupay, cada equipo juega 9 partidos.
 - El jugador elige un equipo al crear la temporada y juega, uno a la vez, los partidos de su propio calendario contra cada rival.
 - **En 2 jugadores:** cada persona elige su equipo. Cuando el calendario llega al partido entre ambos equipos, juegan ese partido entre sí en el mismo dispositivo. En los demás partidos de cada jugador (contra equipos que no controla la otra persona), antes de empezar se puede elegir si ese partido lo juega el servidor como rival, o si el segundo jugador prefiere controlar él mismo a ese equipo por esa vez, igual que cuando en el FIFA una persona toma el control del equipo que normalmente maneja la máquina.
-- **Partidos que no involucran a ningún equipo humano:** para no obligar a jugar los demás partidos de cada jornada, esos resultados se resuelven con una simulación rápida (un marcador generado con la semilla de la temporada), sin reproducir la física completa. Así la tabla avanza igual para todos los equipos, pero solo se juegan de verdad los partidos que involucran a una persona. *Esta es una decisión propuesta para que la Liga completa sea manejable; puede ajustarse si se prefiere otro criterio.*
+- **Partidos que no involucran a ningún equipo humano:** para no obligar a jugar los demás partidos de cada jornada, se resuelven solos con una simulación rápida (un marcador generado con la semilla de la temporada), sin reproducir la física completa. Ocurre en cuanto las personas terminan sus partidos de esa jornada. Así la tabla avanza igual para todos los equipos, pero solo se juegan de verdad los partidos que involucran a una persona.
+- **Orden:** los partidos se juegan jornada por jornada. No se puede adelantar un partido de una jornada posterior.
+- **Partidos a medias:** si alguien sale de la cancha antes del final, o el servidor se reinicia, el partido no cuenta y se vuelve a empezar desde cero.
 - **Duración de cada partido:** 90 minutos de juego que transcurren en un tiempo real configurable al crear la temporada. Por ejemplo, 5 minutos reales por lado equivalen a 10 minutos reales en total; 2,5 minutos por lado equivalen a 5 minutos en total. Si no se configura, el partido dura 5 minutos reales. El servidor controla ese reloj.
 - **Tiempo por turno:** cada jugador tiene 15 segundos reales para patear. Si se agota, pierde el turno. Esta regla aplica en cualquier modo, no solo en Liga. El reloj del turno empieza cuando termina la animación del tiro anterior, para que nadie pierda segundos mirando cómo se mueven las tapitas.
 - Un partido de Liga puede terminar en victoria o en **empate**.
 - **Puntos:** victoria 3, empate 1, derrota 0.
-- **Tabla de posiciones:** se ordena por puntos; en caso de igualdad, por diferencia de goles y luego por goles anotados.
+- **Tabla de posiciones:** se ordena por puntos; en caso de igualdad, por diferencia de goles y luego por goles anotados. Si el empate sigue, lo decide un sorteo hecho con la semilla al crear la temporada.
 - **Fin de la temporada:** cuando todos los partidos del calendario tienen resultado (jugado o resuelto por simulación), la temporada termina. El campeón es el equipo que encabeza la tabla.
 - **Alcance de la temporada:** con los 10 equipos, cada jugador tiene 9 partidos en su calendario. Como los partidos sin humanos se resuelven por simulación rápida (ver arriba), jugar la temporada completa no significa jugar 9 partidos completos de física, solo los que de verdad involucran a una persona. Si en algún momento conviene acortarla, reducir la cantidad de equipos participantes es una opción válida: los equipos son datos, no lógica, así que no exige cambios de código, solo de configuración.
 
@@ -147,6 +149,10 @@ El servidor valida cada acción y rechaza las inválidas con un mensaje que se m
 | Fuerza o dirección fuera de rango | "Tiro inválido" |
 | Usar el tiro de poder sin tener disponibles | "Ya no te quedan tiros de poder" |
 | Lanzar un emote antes de que pasen 15 segundos del anterior | "Espera unos segundos para volver a usar un emote" |
+| Crear una temporada con cero o más de dos equipos humanos | "Elige uno o dos equipos para jugar la temporada" |
+| Jugar un partido de temporada de una jornada posterior | "Primero hay que terminar la jornada N" |
+| Tomar el control del rival en una temporada de un solo jugador | "Solo un segundo jugador puede tomar el control del rival" |
+| Volver a jugar un partido de temporada que ya tiene resultado | "Ese partido ya se jugó" |
 | Tirar con la partida terminada | "La partida ya terminó" |
 | `golesParaGanar` fuera de 1 a 5 (Eliminatoria) | "Elige una meta de goles entre 1 y 5" |
 

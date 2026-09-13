@@ -4,7 +4,7 @@ Toda la comunicación es JSON, de entrada y de salida. Los tipos de cada cuerpo 
 `compartido/` y los comparten el cliente y el servidor, así que un cambio en el contrato rompe la
 compilación de ambos lados en vez de fallar recién en tiempo de ejecución.
 
-Los ejemplos de las secciones **Catálogo** y **Partida** son solicitudes y respuestas reales,
+Los ejemplos de las secciones **Catálogo**, **Partida** y **Temporada** son solicitudes y respuestas reales,
 capturadas contra el servidor local el 13 de septiembre de 2026 (tarea 5.9 del plan). Solo se
 compactó el formato de algunos arreglos para que entren en pantalla; los valores no se tocaron.
 Las secciones marcadas como *diseño* todavía no están implementadas.
@@ -335,6 +335,138 @@ Errores reales:
 Cualquier ruta bajo `/api` que no exista responde `404` con
 `{ "error": "Ruta de API no encontrada" }`, nunca con la página HTML del juego.
 
+## Temporada
+
+Una temporada es una capa sobre las partidas: arma el calendario, lleva la tabla y crea partidas de
+Liga comunes para los partidos donde juega una persona. Los partidos sin personas los simula el
+servidor cuando las personas terminan los suyos de esa jornada.
+
+### `POST /api/temporadas`
+
+| Campo | Obligatorio | Por defecto |
+|---|---|---|
+| `humanos` | sí | — uno o dos equipos, distintos |
+| `equipos` | no | los diez del catálogo |
+| `dificultad` | no | `"medio"`, para los rivales del servidor |
+| `perroActivo` | no | `true` |
+| `duracionRealSegundos` | no | `300` por partido |
+| `semilla`, `limiteTurnoSegundos`, `probabilidadPerro` | no | igual que en `/partidas` |
+
+Solicitud, con cuatro equipos para que el ejemplo sea corto:
+
+```json
+{
+  "equipos": ["bolivar", "theStrongest", "aurora", "wilstermann"],
+  "humanos": ["bolivar"],
+  "duracionRealSegundos": 1,
+  "perroActivo": false,
+  "semilla": 5
+}
+```
+
+Respuesta `201`. Con cuatro equipos hay 3 jornadas de 2 partidos; con los diez del catálogo, 9 jornadas
+de 5:
+
+```json
+{
+  "id": "t_8e4e3b2f",
+  "equipos": ["bolivar", "theStrongest", "aurora", "wilstermann"],
+  "humanos": ["bolivar"],
+  "partidos": [
+    { "id": "partido-1", "jornada": 1, "local": "theStrongest", "visitante": "aurora", "estado": "pendiente", "marcador": null, "partida": null },
+    { "id": "partido-2", "jornada": 1, "local": "wilstermann", "visitante": "bolivar", "estado": "pendiente", "marcador": null, "partida": null },
+    { "id": "partido-3", "jornada": 2, "local": "wilstermann", "visitante": "theStrongest", "estado": "pendiente", "marcador": null, "partida": null },
+    { "id": "partido-4", "jornada": 2, "local": "aurora", "visitante": "bolivar", "estado": "pendiente", "marcador": null, "partida": null },
+    { "id": "partido-5", "jornada": 3, "local": "theStrongest", "visitante": "bolivar", "estado": "pendiente", "marcador": null, "partida": null },
+    { "id": "partido-6", "jornada": 3, "local": "aurora", "visitante": "wilstermann", "estado": "pendiente", "marcador": null, "partida": null }
+  ],
+  "tabla": [
+    { "equipo": "theStrongest", "jugados": 0, "ganados": 0, "empatados": 0, "perdidos": 0, "golesAFavor": 0, "golesEnContra": 0, "diferencia": 0, "puntos": 0 }
+  ],
+  "jornadaActual": 1,
+  "totalDeJornadas": 3,
+  "proximosPartidos": ["partido-2"],
+  "estado": "enCurso",
+  "campeon": null
+}
+```
+
+La tabla va recortada a su primera fila en el ejemplo; trae una por equipo. Mientras todos están
+empatados, el orden es el del sorteo que se hizo con la semilla al crear la temporada, que también
+es el último desempate.
+
+### `POST /api/temporadas/:id/partidos/:partidoId/jugar`
+
+Crea la partida de Liga de un partido donde juega una persona. El cuerpo es opcional:
+
+```json
+{ "rivalControladoPor": "humano" }
+```
+
+Solo sirve con dos personas: el rival que no es de ninguna de las dos lo toma el segundo jugador en vez
+del servidor.
+
+Solicitud con `{}` sobre `partido-2` de la temporada de arriba. Respuesta `200`, con la partida lista
+para abrir la cancha (recortada) y la temporada actualizada:
+
+```json
+{
+  "partida": {
+    "id": "p_927fc592",
+    "modo": "liga",
+    "local": { "lado": "local", "equipo": "wilstermann", "tipo": "servidor", "dificultad": "medio", "tirosDePoder": 2, "emote": null, "esperaEmote": 0 },
+    "visitante": { "lado": "visitante", "equipo": "bolivar", "tipo": "humano", "dificultad": null, "tirosDePoder": 2, "emote": null, "esperaEmote": 0 },
+    "reloj": { "minutoDeJuego": 0, "segundosRealesRestantes": 1, "duracionRealSegundos": 1 }
+  },
+  "temporada": {
+    "partidos": [
+      { "id": "partido-2", "jornada": 1, "local": "wilstermann", "visitante": "bolivar", "estado": "enJuego", "marcador": null, "partida": "p_927fc592" }
+    ]
+  }
+}
+```
+
+### `GET /api/temporadas/:id`
+
+Devuelve la temporada completa. Al consultarla, el servidor revisa las partidas en juego, anota las que
+terminaron y cierra las jornadas que ya se pueden cerrar. La misma temporada, 1,2 segundos después de
+empezar el partido:
+
+```json
+{
+  "jornadaActual": 2,
+  "proximosPartidos": ["partido-4"],
+  "partidos": [
+    { "id": "partido-1", "jornada": 1, "local": "theStrongest", "visitante": "aurora", "estado": "simulado", "marcador": { "local": 0, "visitante": 1 }, "partida": null },
+    { "id": "partido-2", "jornada": 1, "local": "wilstermann", "visitante": "bolivar", "estado": "jugado", "marcador": { "local": 0, "visitante": 0 }, "partida": "p_927fc592" }
+  ],
+  "tabla": [
+    { "equipo": "aurora", "jugados": 1, "puntos": 3, "diferencia": 1 },
+    { "equipo": "bolivar", "jugados": 1, "puntos": 1, "diferencia": 0 },
+    { "equipo": "wilstermann", "jugados": 1, "puntos": 1, "diferencia": 0 },
+    { "equipo": "theStrongest", "jugados": 1, "puntos": 0, "diferencia": -1 }
+  ]
+}
+```
+
+El partido de Bolívar terminó 0 a 0 porque duró un segundo: quedó `jugado`. Como ya no quedaba ninguna
+persona por jugar en la jornada 1, el otro partido se simuló (Aurora ganó 1 a 0) y la temporada pasó a
+la jornada 2. Las filas de la tabla van recortadas a los campos que cambian.
+
+Cuando se juega el último partido, `estado` pasa a `"finalizada"`, `jornadaActual` a `null` y `campeon`
+al primero de la tabla.
+
+Errores reales:
+
+| Situación | Código | Respuesta |
+|---|---|---|
+| Adelantar un partido de otra jornada | `400` | `{ "error": "Primero hay que terminar la jornada 2" }` |
+| Jugar un partido donde no hay personas | `400` | `{ "error": "En ese partido no juega nadie: lo resuelve el servidor" }` |
+| Volver a jugar un partido con resultado | `409` | `{ "error": "Ese partido ya se jugó" }` |
+| Tomar el rival con una sola persona | `400` | `{ "error": "Solo un segundo jugador puede tomar el control del rival" }` |
+| Crear con `"humanos": []` | `400` | `{ "error": "Elige uno o dos equipos para jugar la temporada" }` |
+| La temporada no existe | `404` | `{ "error": "Esa temporada no existe" }` |
+
 ## Pendiente de implementar (diseño)
 
 ### `POST /api/partidas/:id/emotes` — tarea 8.6
@@ -347,18 +479,3 @@ Responde el objeto `Partida` con `emote: { "id": "felizEuforico", "segundosResta
 `esperaEmote: 15` en el jugador. En enfriamiento: `400` con
 `{ "error": "Espera unos segundos para volver a usar un emote" }`.
 
-### Temporada — Fase 7
-
-| Método | Ruta | Qué hace |
-|---|---|---|
-| POST | `/api/temporadas` | Crea la temporada y genera el calendario de todos contra todos. |
-| GET | `/api/temporadas/:id` | Calendario, tabla de posiciones y estado de cada jornada. |
-| POST | `/api/temporadas/:id/jornadas/:jornadaId/jugar` | Crea la partida si juega una persona; si no, la resuelve con la semilla. |
-
-Solicitud de creación:
-
-```json
-{ "equipos": ["bolivar", "theStrongest", "aurora", "wilstermann"], "humanos": ["bolivar"], "semilla": 777 }
-```
-
-Los tipos completos (`Temporada`, `Jornada`, `FilaTabla`) están en `compartido/temporada.ts`.

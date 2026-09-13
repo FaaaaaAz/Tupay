@@ -107,8 +107,8 @@ proyecto necesitara servicios adicionales (una base de datos, un worker), la dec
 
 | Medición | Resultado |
 |---|---|
-| Pruebas unitarias de física, reglas y rival (49 pruebas) | 0,4 s |
-| Pruebas E2E locales (13 pruebas, headless, 3 de ellas jugando en el navegador) | 7,9 s más el tiempo de compilar |
+| Pruebas unitarias de física, reglas, rival y temporada (67 pruebas) | 0,4 s |
+| Pruebas E2E locales (16 pruebas, headless, 4 de ellas jugando en el navegador) | 8,3 s más el tiempo de compilar |
 | Pruebas E2E contra producción (servicio despierto) | 5,9 s |
 | Deploy completo en Render (primer deploy) | 45,1 s |
 | Pipeline completo en GitHub Actions | *pendiente: medir tras la primera ejecución* |
