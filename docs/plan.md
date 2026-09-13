@@ -239,12 +239,12 @@ Las dependencias del backend avanzan en un solo sentido: `rutas → servicios �
 
 Esta fase es el mayor riesgo técnico del proyecto. Se construye y se prueba antes que cualquier otra parte del juego.
 
-- [ ] **4.1 Crear utilidades matemáticas.** Funciones puras para vectores y un generador aleatorio con semilla (por ejemplo, mulberry32). Commit: `feat: agregar vectores y azar reproducible`.
-- [ ] **4.2 Centralizar la configuración.** Dimensiones de cancha, radios de tapita y pelota (5 tapitas por equipo), fricción, rebote, fuerza máxima, límite de simulación y umbral de detención. Sin números mágicos dentro de la física. Commit: `feat: configurar física del juego`.
-- [ ] **4.3 Simular movimiento y rebotes.** Movimiento con fricción, rebote en los límites de la cancha (excepto en la boca del arco) y detención con pasos fijos, con subpasos para evitar que los objetos se atraviesen. Todavía sin choques múltiples ni efectos especiales. Commit: `feat: simular movimiento y rebotes`.
-- [ ] **4.4 Añadir colisiones.** Choques entre tapitas y pelota, con suficientes subpasos para que nada se atraviese. Limitar la cantidad de cuadros del recorrido que se envían a React. Commit: `feat: resolver colisiones del juego`.
-- [ ] **4.5 Detectar goles.** Gol únicamente cuando la pelota cruza completamente la línea dentro del arco; las tapitas rebotan en esa línea y nunca cuentan como gol. Commit: `feat: detectar goles correctamente`.
-- [ ] **4.6 Crear pruebas unitarias.** Con `node:test` (incluido en Node, sin dependencias nuevas). Casos: rebote en una pared, un choque transfiere velocidad, todo termina deteniéndose, un tiro directo es gol, y el mismo tiro con la misma semilla da siempre el mismo resultado. Script `test:unit`. Commit: `test: comprobar física y goles`.
+- [x] **4.1 Crear utilidades matemáticas.** Funciones puras para vectores y un generador aleatorio con semilla (por ejemplo, mulberry32). Commit: `feat: agregar vectores y azar reproducible`.
+- [x] **4.2 Centralizar la configuración.** Dimensiones de cancha, radios de tapita y pelota (5 tapitas por equipo), fricción, rebote, fuerza máxima, límite de simulación y umbral de detención. Sin números mágicos dentro de la física. Commit: `feat: configurar física del juego`.
+- [x] **4.3 Simular movimiento y rebotes.** Movimiento con fricción, rebote en los límites de la cancha (excepto en la boca del arco) y detención con pasos fijos, con subpasos para evitar que los objetos se atraviesen. Todavía sin choques múltiples ni efectos especiales. Commit: `feat: simular movimiento y rebotes`.
+- [x] **4.4 Añadir colisiones.** Choques entre tapitas y pelota, con suficientes subpasos para que nada se atraviese. Limitar la cantidad de cuadros del recorrido que se envían a React. Commit: `feat: resolver colisiones del juego`.
+- [x] **4.5 Detectar goles.** Gol únicamente cuando la pelota cruza completamente la línea dentro del arco; las tapitas rebotan en esa línea y nunca cuentan como gol. Commit: `feat: detectar goles correctamente`.
+- [x] **4.6 Crear pruebas unitarias.** Con `node:test` (incluido en Node, sin dependencias nuevas), ejecutadas con `tsx --test` para leer TypeScript directamente y corridas en el trabajo de pruebas de GitHub Actions antes de las E2E. Casos: rebote en una pared, un choque transfiere velocidad, todo termina deteniéndose, un tiro directo es gol, y el mismo tiro con la misma semilla da siempre el mismo resultado. Script `test:unit`. Commit: `test: comprobar física y goles`.
 
 **Punto de control:** si la simulación no es estable (objetos que se atraviesan o nunca se detienen), reducir velocidad máxima y aumentar subpasos antes de continuar. No se agregan estadios, perro, tiro de poder ni rival hasta estabilizar esta fase.
 

@@ -30,6 +30,7 @@ npm install
 | `npm start` | Levanta Express sirviendo el cliente ya compilado en `http://localhost:3000`. |
 | `npm run lint` | ESLint sobre cliente y servidor. Falla si hay infracciones. |
 | `npm run typecheck` | TypeScript estricto sobre `compartido/`, `client/`, `server/` y `e2e/`. |
+| `npm run test:unit` | Pruebas unitarias de la física y las utilidades del servidor, con `node:test`. |
 | `npm run test:e2e` | Pruebas end-to-end sin ventana (lo que corre GitHub Actions). |
 | `npm run test:e2e:visual` | Las mismas pruebas con ventana, en el Google Chrome instalado. |
 | `npm run test:e2e:prod` | Las mismas pruebas contra la aplicación publicada. Necesita `URL_PRODUCCION`. |

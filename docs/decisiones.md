@@ -153,6 +153,78 @@ misma física del juego y ejecuta el de mejor puntuación, con un error de punte
 tapita, cualquier ángulo, cualquier fuerza— y el resultado depende de la física, así que no hay árbol
 que recorrer. El muestreo reutiliza el motor que ya existe.
 
+## Decisiones de la física
+
+Todos los números de esta sección viven en `server/src/dominio/fisica/configuracionFisica.ts`. Para
+cambiar cómo se siente el juego no hace falta tocar ningún otro archivo.
+
+### Pasos fijos con subpasos
+
+**Decisión.** La simulación avanza en pasos fijos de 1/60 de segundo, y cada paso se divide en 8
+subpasos.
+
+**Por qué.** Con un paso variable, el mismo tiro daría resultados distintos según la velocidad de la
+máquina, y no se podrían escribir pruebas repetibles. Los subpasos evitan el *efecto túnel*: a
+velocidad máxima un cuerpo avanza unas 4 unidades por subpaso, muy por debajo del radio de la pelota
+(18), así que dos cuerpos nunca llegan a atravesarse entre un cálculo y el siguiente.
+
+**Alternativa descartada.** Detección continua de colisiones, que calcula el instante exacto de cada
+choque. Es más precisa, pero bastante más difícil de explicar y de probar, y con estas velocidades no
+hace falta.
+
+### La fricción es una retención por segundo
+
+**Decisión.** Cada cuerpo conserva una fracción fija de su velocidad por cada segundo que rueda: 25 %
+las tapitas y 35 % la pelota. Por debajo de 8 unidades por segundo se da por detenido.
+
+**Por qué.** Es un solo número por cuerpo, fácil de ajustar en la defensa, y no depende del tamaño del
+paso porque se aplica como `retencion ** dt`. La pelota conserva más velocidad que las tapitas para
+que ruede más lejos, como una pelota real frente a una chapa. El umbral de detención existe porque
+una retención nunca llega a cero exacto: sin él, la simulación no terminaría.
+
+### Los choques se resuelven por impulso
+
+**Decisión.** Cuando dos círculos se enciman, primero se separan en proporción a su masa y después
+intercambian impulso sobre la línea que une sus centros, con un rebote de 0,9. La pelota pesa 0,6 y
+las tapitas 1.
+
+**Por qué.** Es el modelo físico más simple que produce choques creíbles. Como la pelota es más
+liviana, sale despedida más rápido que la tapita que la golpea, que es lo que se espera en el juego.
+
+**Los postes son cuerpos fijos.** Cada poste es un círculo con masa infinita (`masaInversa: 0`) que
+pasa por la misma función de choques. Así un tiro puede pegar en el palo sin escribir un caso
+especial.
+
+### La física no sabe de equipos
+
+**Decisión.** La simulación informa en qué arco entró la pelota (`"izquierdo"` o `"derecho"`), no qué
+equipo anotó.
+
+**Por qué.** Qué arco defiende cada equipo es una regla del partido, que se decide en la Fase 5. Así
+la física se puede probar sin crear partidas, y las dependencias van en un solo sentido: las reglas
+usan la física, nunca al revés.
+
+### Los cuadros del recorrido se redondean
+
+**Decisión.** Se guarda un cuadro cada 2 pasos (30 cuadros por segundo) y sus posiciones se redondean
+a un decimal. El estado final conserva la precisión completa.
+
+**Por qué.** Un decimal alcanza para dibujar, y el ahorro es considerable. Medido: un tiro con una
+tapita pesa entre 7 y 11 kB, y un tiro que mueve las diez tapitas, 29 kB con 114 cuadros y 3,8
+segundos de animación. Redondear solo los cuadros, y no el estado, evita que el error se acumule
+turno tras turno.
+
+### Pruebas unitarias con `node:test`
+
+**Decisión.** Las pruebas de la física usan el ejecutor que trae Node y se corren con `tsx --test`.
+
+**Por qué.** No suma ninguna dependencia, y `tsx` lee TypeScript directamente con la misma resolución
+de imports que el servidor en desarrollo. Las 20 pruebas tardan 0,2 segundos.
+
+**Se comprobó que pueden fallar.** Se rompieron a propósito dos reglas —que las tapitas rebotaran en
+la línea de gol y que el gol exigiera cruzar la línea por completo— y en cada caso falló exactamente
+la prueba que cubre esa regla. Una prueba que nunca falla no demuestra nada.
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano
@@ -190,9 +262,9 @@ necesitara servicios adicionales.
 
 | Riesgo | Señal temprana | Mitigación |
 |---|---|---|
-| Física inestable | Objetos que se atraviesan o que nunca se detienen | Pasos fijos con subpasos, límite de iteraciones y umbral de detención. Si persiste, bajar la velocidad máxima antes de seguir. Punto de control al final de la Fase 4. |
+| Física inestable | Objetos que se atraviesan o que nunca se detienen | Pasos fijos con subpasos, límite de iteraciones y umbral de detención. Si persiste, bajar la velocidad máxima antes de seguir. **Superado en la Fase 4:** ninguna tapita queda encimada y todos los tiros probados terminan en reposo. |
 | La animación termina en otra posición que el servidor | La tapita queda en un lugar y al recargar aparece en otro | Animar solo los cuadros recibidos y aplicar el estado final de Express al terminar. |
-| Respuestas de tiro demasiado grandes | El JSON de un tiro pesa cientos de kilobytes | Recortar la cantidad de cuadros y enviar las posiciones en el mismo orden que `partida.tapitas`, sin repetir identificadores. |
+| Respuestas de tiro demasiado grandes | El JSON de un tiro pesa cientos de kilobytes | Recortar la cantidad de cuadros y enviar las posiciones en el mismo orden que `partida.tapitas`, sin repetir identificadores. **Medido en la Fase 4:** 29 kB para un tiro que mueve las diez tapitas. |
 | La Liga completa consume todo el tiempo | Avanza el calendario y todavía no hay un partido de Liga suelto jugable | Detenerse en el punto de control de la Fase 7. Liga como partido suelto ya cumple el núcleo obligatorio. |
 | Pruebas E2E intermitentes | Una prueba falla una de cada tres veces sin cambios de código | Semilla fija, esperar respuestas reales en vez de tiempos arbitrarios, localizadores por rol accesible. |
 | Pipeline lento | Supera los 6 minutos | Un solo navegador en CI, caché de npm, lint y E2E en paralelo. Volver a medir en la tarea 9.7. |

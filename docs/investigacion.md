@@ -107,6 +107,7 @@ proyecto necesitara servicios adicionales (una base de datos, un worker), la dec
 
 | Medición | Resultado |
 |---|---|
+| Pruebas unitarias de la física (20 pruebas) | 0,2 s |
 | Pruebas E2E locales (3 pruebas, headless) | 8,0 s más el tiempo de compilar |
 | Pruebas E2E contra producción (servicio despierto) | 5,9 s |
 | Deploy completo en Render (primer deploy) | 45,1 s |
