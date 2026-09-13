@@ -71,6 +71,22 @@ test("tirar con una tapita del rival se rechaza", async ({ request }) => {
   expect(await respuesta.json()).toEqual({ error: "Ese jugador no es tuyo" });
 });
 
+test("en el modo de un jugador, el servidor juega su turno", async ({ request }) => {
+  // Con la semilla 12345 el saque es del visitante, que aquí controla el servidor.
+  const creada = await request.post("/api/partidas", {
+    data: { ...PARTIDA_BASE, visitante: { equipo: "theStrongest", tipo: "servidor" }, semilla: 12345 },
+  });
+  const partida: Partida = await creada.json();
+  expect(partida.turno.lado).toBe("visitante");
+
+  const respuesta = await request.post(`/api/partidas/${partida.id}/turno-rival`);
+  expect(respuesta.ok()).toBeTruthy();
+
+  const { recorrido, partida: despues }: RespuestaTiro = await respuesta.json();
+  expect(recorrido.length).toBeGreaterThan(1);
+  expect(despues.turno.lado).toBe("local");
+});
+
 test("una partida que no existe responde 404", async ({ request }) => {
   const respuesta = await request.get("/api/partidas/p_noexiste");
 
