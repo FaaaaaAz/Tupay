@@ -1,23 +1,12 @@
 import { useState, type FormEvent } from "react";
 import type { Equipo, Estadio, IdEquipo, IdEstadio } from "../../../compartido/catalogo.js";
 import type { Dificultad, Modo, Partida, PeticionCrearPartida } from "../../../compartido/partida.js";
+import { DIFICULTADES, DURACIONES_DE_LIGA } from "../componentes/opcionesDeJuego";
+import { SelectorDeEquipo } from "../componentes/SelectorDeEquipo";
 import { equipoPorId } from "../hooks/useCatalogo";
 import { useCrearPartida } from "../hooks/useCrearPartida";
-import { IMAGEN_DE_EQUIPO } from "../recursos/indice";
 
 const METAS_DE_GOLES = [1, 2, 3, 4, 5];
-
-const DURACIONES_DE_LIGA = [
-  { segundos: 150, texto: "2 min 30 s" },
-  { segundos: 300, texto: "5 minutos" },
-  { segundos: 600, texto: "10 minutos" },
-];
-
-const DIFICULTADES: { valor: Dificultad; texto: string }[] = [
-  { valor: "facil", texto: "Fácil" },
-  { valor: "medio", texto: "Medio" },
-  { valor: "dificil", texto: "Difícil" },
-];
 
 interface Props {
   modo: Modo;
@@ -171,28 +160,5 @@ export function Configuracion({ modo, equipos, estadios, alJugar, alVolver }: Pr
         </button>
       </form>
     </main>
-  );
-}
-
-interface PropsSelector {
-  etiqueta: string;
-  valor: IdEquipo;
-  equipos: Equipo[];
-  alCambiar: (equipo: IdEquipo) => void;
-}
-
-function SelectorDeEquipo({ etiqueta, valor, equipos, alCambiar }: PropsSelector) {
-  return (
-    <label className="selector-equipo">
-      <span className="campo__etiqueta">{etiqueta}</span>
-      <img className="selector-equipo__tapita" src={IMAGEN_DE_EQUIPO[valor]} alt="" />
-      <select value={valor} onChange={(evento) => alCambiar(evento.target.value as IdEquipo)}>
-        {equipos.map((equipo) => (
-          <option key={equipo.id} value={equipo.id}>
-            {equipo.nombre}
-          </option>
-        ))}
-      </select>
-    </label>
   );
 }
