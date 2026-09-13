@@ -1,13 +1,20 @@
+import type { IdEquipo } from "../../../compartido/catalogo.js";
 import type { Vector } from "../../../compartido/geometria.js";
 import type {
   ConfiguracionJugador,
   Dificultad,
   Lado,
   Modo,
+  OpcionesDePrueba,
   PeticionCrearPartida,
   PeticionTiro,
   TipoJugador,
 } from "../../../compartido/partida.js";
+import type {
+  ControlDelRival,
+  PeticionCrearTemporada,
+  PeticionJugarPartidoDeTemporada,
+} from "../../../compartido/temporada.js";
 import { esIdEquipo, esIdEstadio } from "../dominio/catalogo.js";
 import { ErrorDeJuego } from "../dominio/errores.js";
 import { MENSAJES } from "../dominio/mensajes.js";
@@ -30,6 +37,9 @@ const esTexto = (valor: unknown): valor is string => typeof valor === "string";
 const esVector = (valor: unknown): valor is Vector =>
   esObjeto(valor) && esNumero(valor.x) && esNumero(valor.y);
 
+const esListaDeEquipos = (valor: unknown): valor is IdEquipo[] =>
+  Array.isArray(valor) && valor.every(esIdEquipo);
+
 function esUnoDe<T extends string>(opciones: readonly T[]): Guardia<T> {
   return (valor): valor is T =>
     typeof valor === "string" && (opciones as readonly string[]).includes(valor);
@@ -39,12 +49,22 @@ const esModo = esUnoDe<Modo>(["eliminatoria", "liga"]);
 const esTipoJugador = esUnoDe<TipoJugador>(["humano", "servidor"]);
 const esDificultad = esUnoDe<Dificultad>(["facil", "medio", "dificil"]);
 const esLado = esUnoDe<Lado>(["local", "visitante"]);
+const esControlDelRival = esUnoDe<ControlDelRival>(["servidor", "humano"]);
 
 /** Un campo que puede faltar, pero que si viene debe tener el tipo correcto. */
 function opcional<T>(valor: unknown, esValido: Guardia<T>, mensaje: string): T | undefined {
   if (valor === undefined) return undefined;
   if (!esValido(valor)) throw new ErrorDeJuego(mensaje);
   return valor;
+}
+
+function leerOpcionesDePrueba(cuerpo: Record<string, unknown>, mensaje: string): OpcionesDePrueba {
+  return {
+    semilla: opcional(cuerpo.semilla, esNumero, mensaje),
+    duracionRealSegundos: opcional(cuerpo.duracionRealSegundos, esNumero, mensaje),
+    limiteTurnoSegundos: opcional(cuerpo.limiteTurnoSegundos, esNumero, mensaje),
+    probabilidadPerro: opcional(cuerpo.probabilidadPerro, esNumero, mensaje),
+  };
 }
 
 export function leerPeticionCrearPartida(cuerpo: unknown): PeticionCrearPartida {
@@ -61,10 +81,7 @@ export function leerPeticionCrearPartida(cuerpo: unknown): PeticionCrearPartida 
     estadio: opcional(cuerpo.estadio, esIdEstadio, mensaje),
     perroActivo: opcional(cuerpo.perroActivo, esBooleano, mensaje),
     golesParaGanar: opcional(cuerpo.golesParaGanar, esNumero, mensaje),
-    semilla: opcional(cuerpo.semilla, esNumero, mensaje),
-    duracionRealSegundos: opcional(cuerpo.duracionRealSegundos, esNumero, mensaje),
-    limiteTurnoSegundos: opcional(cuerpo.limiteTurnoSegundos, esNumero, mensaje),
-    probabilidadPerro: opcional(cuerpo.probabilidadPerro, esNumero, mensaje),
+    ...leerOpcionesDePrueba(cuerpo, mensaje),
   };
 }
 
@@ -84,6 +101,30 @@ export function leerPeticionTiro(cuerpo: unknown): PeticionTiro {
     fuerza,
     tiroDePoder: opcional(tiroDePoder, esBooleano, mensaje),
   };
+}
+
+export function leerPeticionCrearTemporada(cuerpo: unknown): PeticionCrearTemporada {
+  const mensaje = MENSAJES.configuracionInvalida;
+  if (!esObjeto(cuerpo)) throw new ErrorDeJuego(mensaje);
+
+  const { humanos } = cuerpo;
+  if (!esListaDeEquipos(humanos)) throw new ErrorDeJuego(mensaje);
+
+  return {
+    humanos,
+    equipos: opcional(cuerpo.equipos, esListaDeEquipos, mensaje),
+    dificultad: opcional(cuerpo.dificultad, esDificultad, mensaje),
+    perroActivo: opcional(cuerpo.perroActivo, esBooleano, mensaje),
+    ...leerOpcionesDePrueba(cuerpo, mensaje),
+  };
+}
+
+export function leerPeticionJugarPartido(cuerpo: unknown): PeticionJugarPartidoDeTemporada {
+  const mensaje = MENSAJES.configuracionInvalida;
+  const datos = cuerpo ?? {};
+  if (!esObjeto(datos)) throw new ErrorDeJuego(mensaje);
+
+  return { rivalControladoPor: opcional(datos.rivalControladoPor, esControlDelRival, mensaje) };
 }
 
 function leerJugador(valor: unknown): ConfiguracionJugador {
