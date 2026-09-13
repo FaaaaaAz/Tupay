@@ -319,6 +319,104 @@ Se rompieron a propósito tres reglas y en cada caso falló la prueba que la cub
 | Quien tira tarde recibe "No es tu turno" en vez del aviso de tiempo | "si se vence el turno, pasa al rival y quien tardó recibe el aviso de tiempo" |
 | El reloj del turno corre durante la animación | "el reloj del turno no corre mientras se anima el tiro anterior" |
 
+## Decisiones del frontend
+
+### La navegación es un estado, no un router
+
+**Decisión.** `App` guarda la pantalla actual como un tipo con una variante por pantalla, y cada
+variante lleva los datos que esa pantalla necesita: la partida en curso, o la configuración para
+jugar la revancha.
+
+**Por qué.** El examen no permite React Router. Y así TypeScript impide abrir la pantalla de
+resultado sin una partida, o la de partida sin saber cómo se creó.
+
+### Un hook coordina la partida; los componentes solo dibujan
+
+**Decisión.** `usePartida` concentra el estado que confirmó Express, la jugada que se está animando,
+los errores, el reloj del turno y el turno del servidor. `Cancha` recibe datos y avisa cuando el
+jugador suelta un tiro, pero no conoce la API.
+
+**Por qué.** Es el mismo reparto que en el servidor —rutas, servicios, dominio— y deja un solo lugar
+donde mirar cuando algo no llega o no se actualiza.
+
+### La física se superpone a la imagen con una sola calibración
+
+**Decisión.** Se midieron con un script las líneas dibujadas en los seis estadios: coinciden con
+diferencias de un píxel. Las líneas de gol de la física se alinean exactamente con las dibujadas y
+la escala es la misma en los dos ejes. Los números viven en `client/src/componentes/calibracionCancha.ts`.
+
+**Por qué.** La cancha dibujada es un poco más apaisada que la de la física (1,85 contra 1,71). Con
+la misma escala en los dos ejes, las paredes de arriba y abajo quedan unos 20 píxeles por fuera de
+las bandas, todavía sobre el césped, y ninguna tapita se deforma.
+
+**Alternativas descartadas.** Estirar la imagen en vertical, que deformaba las tapitas en óvalos, y
+cambiar la física a 1200 × 647, que obligaba a rehacer pruebas y la documentación de la API por un
+detalle visual.
+
+### Las imágenes se ajustan a su dibujo, no a su archivo
+
+**Decisión.** Cada imagen se agranda según qué parte del archivo ocupa el dibujo: la tapita llena el
+93,5 % de su imagen y la pelota el 85,6 %.
+
+**Por qué.** Si se dibujaran del tamaño del archivo, los choques parecerían ocurrir antes de que las
+tapitas se toquen.
+
+### Apuntar como una honda
+
+**Decisión.** Se presiona una tapita propia y se arrastra hacia atrás; la tapita sale hacia el lado
+contrario. La fuerza crece con la distancia hasta llegar al máximo a 240 unidades, y un arrastre de
+menos de 25 cancela el tiro. El puntero se convierte a unidades de la física con la matriz de
+transformación del propio SVG.
+
+**Por qué.** Es el gesto que ya conoce cualquiera que jugó a las tapitas o al billar. Y como la
+conversión usa la matriz real del SVG, funciona igual en cualquier tamaño de ventana.
+
+### La animación interpola entre cuadros
+
+**Decisión.** El servidor manda 30 cuadros por segundo y el cliente dibuja con `requestAnimationFrame`
+calculando posiciones intermedias.
+
+**Por qué.** Se ve fluido en pantallas de 60 Hz o más sin mandar el doble de datos. Al terminar, el
+cliente descarta sus posiciones y aplica el estado que confirmó Express.
+
+### Dos relojes en el cliente
+
+**Decisión.** La cuenta regresiva del turno empieza cuando termina la animación, igual que en el
+servidor. El reloj de la Liga, en cambio, cuenta desde que llegó la respuesta.
+
+**Por qué.** El turno no corre mientras las tapitas se mueven, pero el partido de Liga sí. Si los dos
+relojes arrancaran al final de la animación, el minuto de la Liga retrocedería unos segundos después
+de cada tiro.
+
+### El rival simple se adelantó a la Fase 6
+
+**Decisión.** La tarea 8.2 se hizo junto con el frontend. El rival apunta como en el billar al punto
+de la pelota opuesto al arco que ataca, y calcula la fuerza con la misma física del juego: con
+fricción exponencial, la velocidad al llegar es la inicial menos una cantidad proporcional a la
+distancia.
+
+**Por qué.** La configuración ofrece 1 jugador, y sin rival el turno del servidor se vencía cada 15
+segundos. La otra opción, ocultar el modo, dejaba la fase a medias. En difícil, la prueba exige que al
+menos 24 de 30 tiros manden la pelota hacia su arco.
+
+### El turno se marca en la cancha, no solo en el marcador
+
+**Decisión.** Las tapitas del equipo que tiene el turno titilan con un borde brillante, y su recuadro
+del marcador se enmarca con el color del club. Con la preferencia del sistema de reducir movimiento,
+el brillo queda fijo.
+
+**Por qué.** Mirar la cancha tiene que alcanzar para saber qué tapitas se pueden mover. Además
+resuelve el caso de Always Ready y Nacional Potosí, cuyas tapitas son casi iguales.
+
+### Se verificó en un Chrome real
+
+**Decisión.** Además de las pruebas, se recorrió el juego completo con Playwright a 1366 × 768 y a
+1920 × 1080, y se revisaron las capturas. Para forzar al perro y acortar la Liga se interceptó el
+pedido de creación y se le agregaron parámetros de prueba.
+
+**Por qué.** Las pruebas comprueban que el juego funciona, no que se vea bien. Así se encontró, por
+ejemplo, que el perro tapaba la pelota mientras la llevaba, y se corrigió dibujando la pelota encima.
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano
@@ -365,7 +463,7 @@ necesitara servicios adicionales.
 | Arranque en frío durante la defensa | La primera visita tarda casi un minuto | Tiempos de espera largos en las pruebas de producción y despertar el servicio unos minutos antes. |
 | Partidas perdidas por reinicio | Una partida abierta deja de existir | Limitación aceptada del repositorio en memoria: mensaje claro y opción de crear otra partida. |
 | Reclamo por la identidad de los clubes | Uso de escudos oficiales | Ilustraciones propias, sin escudos oficiales, con el criterio documentado y sin fines comerciales. |
-| Dos tapitas casi iguales | Always Ready y Nacional Potosí son blancas con una franja roja diagonal; solo cambia el color del borde, y a 50 píxeles en la cancha cuesta distinguirlas | Pendiente de decidir: redibujar una de las dos tapitas, o impedir que se enfrenten, igual que dos veces el mismo equipo. |
+| Dos tapitas casi iguales | Always Ready y Nacional Potosí son blancas con una franja roja diagonal; solo cambia el color del borde, y a 50 píxeles en la cancha cuesta distinguirlas | **Resuelto:** se mantienen las dos, porque en una Liga tienen que enfrentarse. El borde de cada tapita es distinto, y las del equipo con el turno titilan con un borde brillante, así nunca hay duda de cuáles se pueden mover. |
 | Código que no se puede explicar | No poder modificar una regla en el momento | Tareas pequeñas, revisión personal de cada cambio y valores de configuración centralizados en un solo archivo. |
 | Contradicción con el cierre del repositorio | El cambio de la defensa exige tocar un repositorio ya congelado | Pedir instrucción escrita al docente antes de la entrega (tarea 11.6). |
 
@@ -380,3 +478,6 @@ necesitara servicios adicionales.
 | El estadio se puede elegir | Por defecto se juega en el estadio del local, pero elegirlo permite probar un efecto de cancha sin tener que cambiar de equipo. |
 | El pedido de tiro incluye quién tira | Sin ese dato no se podían distinguir las acciones inválidas "No es tu turno" y "Ese jugador no es tuyo". |
 | El turno empieza después de la animación | Al medir la física se vio que un tiro dura de 3 a 5 segundos: era un tercio del turno perdido mirando. |
+| El rival simple se adelantó a la Fase 6 | La configuración ofrece 1 jugador; sin rival, el turno del servidor se vencía cada 15 segundos. |
+| Always Ready y Nacional Potosí se mantienen como están | Se prefirió no redibujarlas: el borde las distingue y el turno se marca con un brillo sobre las tapitas. |
+| La pelota se dibuja encima del perro | En las capturas se vio que el perro la tapaba mientras la llevaba. |

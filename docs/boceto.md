@@ -119,6 +119,10 @@ caritas de emote sobre cada tapita → **arcos por encima de todo**. Los arcos v
 pelota se vea entrando dentro del arco y no por delante de la red. El arco es un único archivo: para
 el lado derecho se voltea en espejo horizontal, nunca se rota.
 
+**Turno**: las tapitas del equipo que tiene el turno titilan con un borde brillante, y su recuadro en
+el marcador se enmarca con el color del club. Así se sabe qué tapitas se pueden mover sin leer nada,
+y no se confunden equipos con tapitas parecidas, como Always Ready y Nacional Potosí.
+
 **Apuntar**: se arrastra hacia atrás desde una tapita propia, como en el billar. Mientras se arrastra
 aparece una flecha que muestra dirección y fuerza; al soltar, el tiro se envía a Express. Si el
 gesto empieza sobre una tapita rival o el arrastre es demasiado corto, se cancela sin enviar nada.

@@ -168,7 +168,11 @@ En Liga cambian dos campos. Solicitud con `"modo": "liga"`, Wilstermann contra A
 `"duracionRealSegundos": 1`:
 
 ```json
-{ "estadio": "felixCapriles", "golesParaGanar": null, "reloj": { "minutoDeJuego": 0, "segundosRealesRestantes": 1 } }
+{
+  "estadio": "felixCapriles",
+  "golesParaGanar": null,
+  "reloj": { "minutoDeJuego": 0, "segundosRealesRestantes": 1, "duracionRealSegundos": 1 }
+}
 ```
 
 Errores reales:
@@ -189,12 +193,13 @@ la partida de Liga de arriba, consultada 1,1 segundos después:
 ```json
 {
   "estado": "finalizada",
-  "reloj": { "minutoDeJuego": 90, "segundosRealesRestantes": 0 },
+  "reloj": { "minutoDeJuego": 90, "segundosRealesRestantes": 0, "duracionRealSegundos": 1 },
   "resultado": { "ganador": null, "marcador": { "local": 0, "visitante": 0 } }
 }
 ```
 
-`ganador: null` es empate, posible solo en Liga.
+`ganador: null` es empate, posible solo en Liga. Con `duracionRealSegundos` el cliente avanza el
+minuto de juego entre una respuesta y la siguiente, sin tener que consultar al servidor cada segundo.
 
 | Situación | Código | Respuesta |
 |---|---|---|
@@ -243,6 +248,7 @@ dos primeros:
     }
   ],
   "eventos": [],
+  "cuadrosPorSegundo": 30,
   "partida": {
     "turno": { "lado": "local", "segundosRestantes": 15 },
     "marcador": { "local": 0, "visitante": 0 }
@@ -250,7 +256,8 @@ dos primeros:
 }
 ```
 
-En el segundo cuadro ya se ve a `visitante-4` salir de (720, 280) hacia la izquierda. Las posiciones
+`cuadrosPorSegundo` le dice al cliente a qué velocidad reproducir el recorrido para que dure lo
+mismo que en el servidor. En el segundo cuadro ya se ve a `visitante-4` salir de (720, 280) hacia la izquierda. Las posiciones
 de `tapitas` van **en el mismo orden** que `partida.tapitas`: repetir los identificadores en cada
 cuadro multiplicaría el tamaño de la respuesta sin agregar información.
 
@@ -294,17 +301,41 @@ Errores reales:
 El aviso de tiempo se obtuvo con `"limiteTurnoSegundos": 1`, esperando 1,2 segundos antes de tirar:
 el servidor responde el error y el turno ya es del rival.
 
+### `POST /api/partidas/:id/turno-rival`
+
+En el modo de 1 jugador, el cliente lo llama cuando le toca al equipo que controla el servidor. No
+lleva cuerpo: el servidor decide el tiro, lo ejecuta con las mismas reglas que una persona y
+responde igual que `/tiros`.
+
+Partida de Bolívar contra The Strongest manejado por el servidor en difícil, con `"semilla": 12345`
+para que saque el visitante. Respuesta `200`, con 126 cuadros y 32 kB en total:
+
+```json
+{
+  "recorrido": ["… 126 cuadros …"],
+  "eventos": [],
+  "cuadrosPorSegundo": 30,
+  "partida": {
+    "turno": { "lado": "local", "segundosRestantes": 15 },
+    "marcador": { "local": 0, "visitante": 0 }
+  }
+}
+```
+
+Errores reales:
+
+| Situación | Código | Respuesta |
+|---|---|---|
+| Le toca a una persona | `400` | `{ "error": "Todavía no le toca al rival" }` |
+| Una persona intenta mover al equipo del servidor por `/tiros` | `400` | `{ "error": "No es tu turno" }` |
+| Partida terminada | `409` | `{ "error": "La partida ya terminó" }` |
+
 ### Rutas inexistentes
 
 Cualquier ruta bajo `/api` que no exista responde `404` con
 `{ "error": "Ruta de API no encontrada" }`, nunca con la página HTML del juego.
 
 ## Pendiente de implementar (diseño)
-
-### `POST /api/partidas/:id/turno-rival` — tarea 8.2
-
-Pide al servidor que juegue su turno en el modo de 1 jugador. No lleva cuerpo y responde igual que
-`/tiros`: recorrido, eventos y estado.
 
 ### `POST /api/partidas/:id/emotes` — tarea 8.6
 

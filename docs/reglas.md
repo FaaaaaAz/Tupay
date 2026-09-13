@@ -99,6 +99,10 @@ Los emotes son la forma de festejar, quejarse o burlarse durante el partido, com
 
 ## Rival controlado por el servidor (1 jugador)
 
+**Versión actual: rival simple.** Juega como en el billar. Entre sus tapitas elige la más cercana que esté detrás de la pelota respecto del arco que ataca, y apunta al punto de la pelota opuesto a ese arco, para mandarla hacia allá. Calcula la fuerza necesaria para llegar con impulso y le agrega un error de puntería según la dificultad: fácil, medio o difícil. Todo sale de la semilla del partido, así que es repetible. Antes de tirar espera un instante, para que se note de quién es el turno.
+
+**Versión por muestreo: mejora planificada (tarea 8.3).**
+
 - No se usa minimax: en este juego las jugadas posibles son continuas (cualquier tapita, cualquier ángulo, cualquier fuerza) y el resultado depende de la física, así que no hay un árbol de jugadas que recorrer por completo.
 - En su turno, el servidor genera varios tiros candidatos dirigidos hacia la pelota (algunos apuntando, como en el billar, al punto de la pelota opuesto al arco rival), los simula con la misma física del juego y ejecuta el que obtiene mejor puntuación.
 - La puntuación premia el gol y acercar la pelota al arco rival, y castiga el autogol y dejar la pelota cerca del arco propio. Después de elegir el mejor tiro, se le agrega un pequeño error de puntería para que el rival no sea perfecto.
