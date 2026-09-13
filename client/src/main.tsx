@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import "./estilos/global.css";
+import "./estilos/partida.css";
 
 const raiz = document.getElementById("raiz");
 if (!raiz) {

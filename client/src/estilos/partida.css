@@ -1,0 +1,205 @@
+.partida {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background: #06120b;
+}
+
+/* Marcador */
+
+.marcador {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1.2rem;
+  background: linear-gradient(#0b1f33, #081626);
+  border-bottom: 1px solid var(--borde);
+}
+
+.marcador__equipo {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  justify-self: start;
+  padding: 0.3rem 0.9rem;
+  border: 2px solid transparent;
+  border-radius: 0.8rem;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.marcador__equipo--visitante {
+  flex-direction: row-reverse;
+  justify-self: end;
+  text-align: right;
+}
+
+.marcador__equipo--activo {
+  border-color: var(--color-equipo);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--color-equipo) 55%, transparent);
+}
+
+.marcador__tapita {
+  width: 2.6rem;
+  height: 2.6rem;
+}
+
+.marcador__nombre {
+  display: block;
+  font-weight: 800;
+}
+
+.marcador__rol {
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
+.marcador__centro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.marcador__goles {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+.marcador__detalle {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* Cancha */
+
+.partida__cancha {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cancha {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Deja ver las tribunas fuera de la cancha cuando la ventana es más ancha que la imagen. */
+  overflow: visible;
+  touch-action: none;
+  user-select: none;
+}
+
+.tapita__brillo {
+  fill: none;
+  stroke: #fff3a0;
+  stroke-width: 6;
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 0 6px #ffd84d);
+}
+
+.tapita--activa .tapita__brillo {
+  animation: titilar 0.9s ease-in-out infinite;
+}
+
+.tapita--apuntable {
+  cursor: grab;
+}
+
+.cancha--apuntando,
+.cancha--apuntando .tapita--apuntable {
+  cursor: grabbing;
+}
+
+@keyframes titilar {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tapita--activa .tapita__brillo {
+    animation: none;
+    opacity: 0.85;
+  }
+}
+
+.apuntado {
+  pointer-events: none;
+}
+
+.apuntado__guia {
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 3;
+  stroke-dasharray: 10 8;
+}
+
+.apuntado__flecha {
+  stroke: #fff;
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.apuntado__punta {
+  fill: #fff;
+}
+
+.apuntado--poder .apuntado__flecha {
+  stroke: #ff8a2a;
+}
+
+.apuntado--poder .apuntado__punta {
+  fill: #ff8a2a;
+}
+
+/* Pie: turno, tiro de poder y mensajes */
+
+.partida__pie {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 0.55rem 1.2rem;
+  background: linear-gradient(#081626, #0b1f33);
+  border-top: 1px solid var(--borde);
+}
+
+.turno {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.turno__segundos {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.turno__segundos--urgente {
+  color: var(--rojo);
+}
+
+.partida__pie .mensaje {
+  min-height: 1.3em;
+}
+
+.boton--poder[aria-pressed="true"] {
+  color: #fff;
+  background: linear-gradient(#ff9a3c, #d9480f);
+  box-shadow: 0 0 16px rgba(255, 120, 30, 0.7);
+}
+
+.aviso-perdida {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.65);
+}

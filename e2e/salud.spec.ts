@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-test("la aplicación carga y muestra la respuesta de Express", async ({ page }) => {
+test("la aplicación carga y muestra que Express respondió", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { name: "Tupay" })).toBeVisible();
-  await expect(page.getByTestId("estado-servidor")).toContainText("Express responde");
+  await expect(page.getByRole("button", { name: "Iniciar" })).toBeVisible();
+  await expect(page.getByTestId("estado-servidor")).toContainText("Servidor en línea");
 });
 
 test("la API de salud responde JSON", async ({ request }) => {

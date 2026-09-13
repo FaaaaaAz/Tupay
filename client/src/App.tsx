@@ -1,48 +1,91 @@
-import { useEffect, useState } from "react";
-import type { RespuestaSalud } from "../../compartido/salud.js";
-import { obtenerSalud } from "./api/salud";
+import { useState } from "react";
+import type { Modo, Partida as DatosPartida, PeticionCrearPartida } from "../../compartido/partida.js";
+import { useCatalogo } from "./hooks/useCatalogo";
+import { Configuracion } from "./pantallas/Configuracion";
+import { Instrucciones } from "./pantallas/Instrucciones";
+import { Menu } from "./pantallas/Menu";
+import { Partida } from "./pantallas/Partida";
+import { Portada } from "./pantallas/Portada";
+import { Resultado } from "./pantallas/Resultado";
 
-type EstadoConsulta =
-  | { situacion: "cargando" }
-  | { situacion: "listo"; salud: RespuestaSalud }
-  | { situacion: "error"; mensaje: string };
+type Pantalla =
+  | { tipo: "portada" }
+  | { tipo: "menu" }
+  | { tipo: "instrucciones" }
+  | { tipo: "configuracion"; modo: Modo }
+  | { tipo: "partida"; partida: DatosPartida; peticion: PeticionCrearPartida }
+  | { tipo: "resultado"; partida: DatosPartida; peticion: PeticionCrearPartida };
 
+/** Sin React Router: la pantalla actual es un estado más, y navegar es cambiar ese estado. */
 export function App() {
-  const [consulta, setConsulta] = useState<EstadoConsulta>({ situacion: "cargando" });
+  const [pantalla, setPantalla] = useState<Pantalla>({ tipo: "portada" });
+  const { catalogo, error } = useCatalogo();
+  const irAlMenu = () => setPantalla({ tipo: "menu" });
 
-  useEffect(() => {
-    obtenerSalud()
-      .then((salud) => setConsulta({ situacion: "listo", salud }))
-      .catch((error: unknown) => {
-        const mensaje = error instanceof Error ? error.message : "Error desconocido";
-        setConsulta({ situacion: "error", mensaje });
-      });
-  }, []);
+  switch (pantalla.tipo) {
+    case "portada":
+      return <Portada alIniciar={irAlMenu} />;
+    case "menu":
+      return (
+        <Menu
+          alElegirModo={(modo) => setPantalla({ tipo: "configuracion", modo })}
+          alVerInstrucciones={() => setPantalla({ tipo: "instrucciones" })}
+          alVolver={() => setPantalla({ tipo: "portada" })}
+        />
+      );
+    case "instrucciones":
+      return <Instrucciones alVolver={irAlMenu} />;
+  }
 
-  return (
-    <main className="pantalla">
-      <h1 className="titulo">Tupay</h1>
-      <p className="subtitulo">Fútbol de tapitas de la Liga boliviana</p>
-
-      <section className="tarjeta" aria-live="polite">
-        <h2 className="tarjeta__titulo">Estado del servidor</h2>
-        {consulta.situacion === "cargando" && <p data-testid="estado-servidor">Consultando…</p>}
-        {consulta.situacion === "error" && (
-          <p className="tarjeta__error" data-testid="estado-servidor">
-            Sin conexión con Express: {consulta.mensaje}
+  // Las pantallas siguientes necesitan los equipos y estadios que manda Express.
+  if (!catalogo) {
+    return (
+      <main className="fondo-panel">
+        <div className="panel">
+          <p className={error ? "mensaje mensaje--error" : "mensaje"} role={error ? "alert" : "status"}>
+            {error ?? "Cargando equipos y estadios…"}
           </p>
-        )}
-        {consulta.situacion === "listo" && (
-          <>
-            <p data-testid="estado-servidor">
-              Express responde: <strong>{consulta.salud.estado}</strong>
-            </p>
-            <p className="tarjeta__version">
-              Versión publicada: <code>{consulta.salud.version}</code>
-            </p>
-          </>
-        )}
-      </section>
-    </main>
-  );
+          {error && (
+            <button type="button" className="boton boton--secundario" onClick={irAlMenu}>
+              Volver al menú
+            </button>
+          )}
+        </div>
+      </main>
+    );
+  }
+
+  switch (pantalla.tipo) {
+    case "configuracion":
+      return (
+        <Configuracion
+          key={pantalla.modo}
+          modo={pantalla.modo}
+          equipos={catalogo.equipos}
+          estadios={catalogo.estadios}
+          alJugar={(partida, peticion) => setPantalla({ tipo: "partida", partida, peticion })}
+          alVolver={irAlMenu}
+        />
+      );
+    case "partida":
+      return (
+        <Partida
+          key={pantalla.partida.id}
+          partidaInicial={pantalla.partida}
+          equipos={catalogo.equipos}
+          alTerminar={(partida) => setPantalla({ tipo: "resultado", partida, peticion: pantalla.peticion })}
+          alSalir={irAlMenu}
+        />
+      );
+    case "resultado":
+      return (
+        <Resultado
+          partida={pantalla.partida}
+          peticion={pantalla.peticion}
+          equipos={catalogo.equipos}
+          alJugarDeNuevo={(partida) => setPantalla({ tipo: "partida", partida, peticion: pantalla.peticion })}
+          alIrAlMenu={irAlMenu}
+        />
+      );
+  }
 }
