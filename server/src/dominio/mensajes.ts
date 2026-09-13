@@ -9,6 +9,7 @@ export const MENSAJES = {
   partidaTerminada: "La partida ya terminó",
   noEsTuTurno: "No es tu turno",
   tapitaRival: "Ese jugador no es tuyo",
+  noEsTurnoDelRival: "Todavía no le toca al rival",
   tiempoAgotado: "Se acabó tu tiempo: pierdes el turno",
   tiroInvalido: "Tiro inválido",
   sinTirosDePoder: "Ya no te quedan tiros de poder",

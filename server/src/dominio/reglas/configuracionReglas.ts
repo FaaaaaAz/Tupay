@@ -15,3 +15,13 @@ export const REGLAS = {
   aparicionesMaximasDelPerro: 5,
   dificultadPorDefecto: "medio",
 } as const;
+
+/** Cómo juega el servidor en el modo de 1 jugador. */
+export const RIVAL = {
+  /** Error máximo de puntería, en radianes: cuanto más alto, más falla. */
+  errorDePunteria: { facil: 0.35, medio: 0.18, dificil: 0.06 },
+  /** Velocidad con la que intenta llegar a la pelota, en unidades por segundo. */
+  velocidadAlLlegar: 900,
+  /** Variación al azar de la fuerza, para que no tire siempre igual. */
+  variacionDeFuerza: 0.1,
+} as const;

@@ -5,10 +5,15 @@ import type {
   RespuestaTiro,
 } from "../../../compartido/partida.js";
 import { ErrorDeJuego } from "../dominio/errores.js";
+import { CUADROS_POR_SEGUNDO } from "../dominio/fisica/configuracionFisica.js";
 import { MENSAJES } from "../dominio/mensajes.js";
 import { crearRegistro, type RegistroPartida } from "../dominio/reglas/partida.js";
 import { actualizarTiempo } from "../dominio/reglas/tiempo.js";
-import { ejecutarTiro } from "../dominio/reglas/tiro.js";
+import {
+  jugarTurnoDelRival,
+  tirarComoHumano,
+  type ResultadoDelTiro,
+} from "../dominio/reglas/tiro.js";
 import { aPartidaPublica } from "../dominio/reglas/vistaPublica.js";
 import type { RepositorioPartidas } from "../repositorios/repositorioPartidas.js";
 
@@ -20,6 +25,8 @@ export interface DependenciasServicioPartidas {
   /** Semilla para las partidas que no piden una. */
   semillaAleatoria: () => number;
 }
+
+type Jugada = (registro: RegistroPartida, ahora: number) => ResultadoDelTiro;
 
 /** Coordina cada caso de uso: busca la partida, le aplica las reglas y la guarda. */
 export class ServicioPartidas {
@@ -49,12 +56,25 @@ export class ServicioPartidas {
   }
 
   tirar(id: string, peticion: PeticionTiro): RespuestaTiro {
+    return this.jugar(id, (registro, momento) => tirarComoHumano(registro, peticion, momento));
+  }
+
+  turnoRival(id: string): RespuestaTiro {
+    return this.jugar(id, (registro, momento) => jugarTurnoDelRival(registro, momento));
+  }
+
+  private jugar(id: string, jugada: Jugada): RespuestaTiro {
     const registro = this.buscar(id);
     const momento = this.dependencias.ahora();
-    const { recorrido, eventos } = ejecutarTiro(registro, peticion, momento);
+    const { recorrido, eventos } = jugada(registro, momento);
 
     this.dependencias.repositorio.guardar(registro);
-    return { recorrido, eventos, partida: aPartidaPublica(registro, momento) };
+    return {
+      recorrido,
+      eventos,
+      cuadrosPorSegundo: CUADROS_POR_SEGUNDO,
+      partida: aPartidaPublica(registro, momento),
+    };
   }
 
   private buscar(id: string): RegistroPartida {

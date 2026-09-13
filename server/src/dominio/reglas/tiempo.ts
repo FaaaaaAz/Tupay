@@ -38,5 +38,6 @@ export function relojPublico(reloj: NonNullable<RegistroPartida["reloj"]>, ahora
   return {
     minutoDeJuego: Math.floor((transcurridoMs / reloj.duracionMs) * REGLAS.minutosDeJuego),
     segundosRealesRestantes: Math.ceil((reloj.duracionMs - transcurridoMs) / 1000),
+    duracionRealSegundos: reloj.duracionMs / 1000,
   };
 }

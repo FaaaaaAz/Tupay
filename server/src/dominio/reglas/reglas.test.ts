@@ -87,7 +87,11 @@ describe("crear una partida", () => {
     const partida = aPartidaPublica(crearPartida({ modo: "liga" }), INICIO);
 
     assert.equal(partida.golesParaGanar, null);
-    assert.deepEqual(partida.reloj, { minutoDeJuego: 0, segundosRealesRestantes: 300 });
+    assert.deepEqual(partida.reloj, {
+      minutoDeJuego: 0,
+      segundosRealesRestantes: 300,
+      duracionRealSegundos: 300,
+    });
   });
 });
 

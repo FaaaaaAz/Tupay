@@ -79,6 +79,8 @@ export interface Perro {
 export interface Reloj {
   minutoDeJuego: number;
   segundosRealesRestantes: number;
+  /** Cuánto dura el partido completo en tiempo real. Con esto el cliente avanza el minuto por su cuenta. */
+  duracionRealSegundos: number;
 }
 
 export interface Resultado {
@@ -174,6 +176,8 @@ export type Evento =
 export interface RespuestaTiro {
   recorrido: Cuadro[];
   eventos: Evento[];
+  /** Velocidad a la que hay que reproducir el recorrido para que dure lo mismo que en el servidor. */
+  cuadrosPorSegundo: number;
   /** Estado confirmado por el servidor, que React aplica al terminar la animación. */
   partida: Partida;
 }

@@ -18,5 +18,9 @@ export function crearRutaPartidas(servicio: ServicioPartidas): Router {
     respuesta.json(servicio.tirar(peticion.params.id, leerPeticionTiro(peticion.body)));
   });
 
+  ruta.post("/:id/turno-rival", (peticion, respuesta) => {
+    respuesta.json(servicio.turnoRival(peticion.params.id));
+  });
+
   return ruta;
 }

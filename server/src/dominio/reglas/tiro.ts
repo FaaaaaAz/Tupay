@@ -5,6 +5,7 @@ import { intentarAparicion } from "../eventos/perro.js";
 import { CUADROS_POR_SEGUNDO } from "../fisica/configuracionFisica.js";
 import { simularTiro } from "../fisica/simulacion.js";
 import { MENSAJES } from "../mensajes.js";
+import { decidirTiroDelRival } from "../rival/rivalSimple.js";
 import { REGLAS } from "./configuracionReglas.js";
 import { CENTRO_DE_LA_CANCHA, formacionInicial } from "./formacion.js";
 import { ladoDelArcoMasCercano, ladoQueAnota, rival } from "./lados.js";
@@ -116,4 +117,28 @@ function validarTiro(registro: RegistroPartida, peticion: PeticionTiro, ahora: n
   }
 
   return indice;
+}
+
+/** Un tiro que llega desde el navegador: nunca puede mover al equipo que controla el servidor. */
+export function tirarComoHumano(
+  registro: RegistroPartida,
+  peticion: PeticionTiro,
+  ahora: number,
+): ResultadoDelTiro {
+  if (registro.jugadores[peticion.lado].tipo === "servidor") {
+    throw new ErrorDeJuego(MENSAJES.noEsTuTurno);
+  }
+  return ejecutarTiro(registro, peticion, ahora);
+}
+
+/** El servidor decide el tiro del equipo que controla y lo ejecuta con las mismas reglas que una persona. */
+export function jugarTurnoDelRival(registro: RegistroPartida, ahora: number): ResultadoDelTiro {
+  actualizarTiempo(registro, ahora);
+  if (registro.estado === "finalizada") {
+    throw new ErrorDeJuego(MENSAJES.partidaTerminada, 409);
+  }
+  if (registro.jugadores[registro.turno].tipo !== "servidor") {
+    throw new ErrorDeJuego(MENSAJES.noEsTurnoDelRival);
+  }
+  return ejecutarTiro(registro, decidirTiroDelRival(registro), ahora);
 }
