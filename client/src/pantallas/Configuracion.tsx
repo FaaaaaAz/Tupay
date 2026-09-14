@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from "react";
 import type { Equipo, Estadio, IdEquipo, IdEstadio } from "../../../compartido/catalogo.js";
 import type { Dificultad, Modo, Partida, PeticionCrearPartida } from "../../../compartido/partida.js";
-import { DIFICULTADES, DURACIONES_DE_LIGA } from "../componentes/opcionesDeJuego";
+import { DESCRIPCION_DE_EFECTO, DIFICULTADES, DURACIONES_DE_LIGA } from "../componentes/opcionesDeJuego";
 import { SelectorDeEquipo } from "../componentes/SelectorDeEquipo";
 import { equipoPorId } from "../hooks/useCatalogo";
 import { useCrearPartida } from "../hooks/useCrearPartida";
+import { IMAGEN_DE_ESTADIO } from "../recursos/indice";
 
 const METAS_DE_GOLES = [1, 2, 3, 4, 5];
 
@@ -30,6 +31,7 @@ export function Configuracion({ modo, equipos, estadios, alJugar, alVolver }: Pr
   const estadioDelLocal = estadios.find(
     (candidato) => candidato.id === equipoPorId(equipos, local).estadio,
   );
+  const estadioElegido = estadios.find((candidato) => candidato.id === estadio) ?? estadioDelLocal;
 
   // Que los dos equipos sean distintos no se revisa aquí: lo valida Express y aquí se muestra su respuesta.
   async function empezar(evento: FormEvent) {
@@ -104,17 +106,27 @@ export function Configuracion({ modo, equipos, estadios, alJugar, alVolver }: Pr
           />
         </div>
 
-        <label className="campo">
-          <span className="campo__etiqueta">Estadio</span>
-          <select value={estadio} onChange={(evento) => setEstadio(evento.target.value as IdEstadio | "")}>
-            <option value="">El del equipo local ({estadioDelLocal?.nombre})</option>
-            {estadios.map((opcion) => (
-              <option key={opcion.id} value={opcion.id}>
-                {opcion.nombre} · {opcion.ciudad}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="estadio-elegido">
+          <label className="campo">
+            <span className="campo__etiqueta">Estadio</span>
+            <select value={estadio} onChange={(evento) => setEstadio(evento.target.value as IdEstadio | "")}>
+              <option value="">El del equipo local ({estadioDelLocal?.nombre})</option>
+              {estadios.map((opcion) => (
+                <option key={opcion.id} value={opcion.id}>
+                  {opcion.nombre} · {opcion.ciudad}
+                </option>
+              ))}
+            </select>
+            {estadioElegido && (
+              <span className="estadio-elegido__efecto" data-testid="efecto-estadio">
+                {DESCRIPCION_DE_EFECTO[estadioElegido.efecto]}
+              </span>
+            )}
+          </label>
+          {estadioElegido && (
+            <img className="estadio-elegido__vista" src={IMAGEN_DE_ESTADIO[estadioElegido.id]} alt="" />
+          )}
+        </div>
 
         {modo === "eliminatoria" ? (
           <fieldset className="grupo">

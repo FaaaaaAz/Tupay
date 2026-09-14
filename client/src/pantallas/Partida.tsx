@@ -1,6 +1,13 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import type { Equipo } from "../../../compartido/catalogo.js";
-import type { Partida as DatosPartida, Evento, Jugador, Lado } from "../../../compartido/partida.js";
+import type {
+  Partida as DatosPartida,
+  Evento,
+  Jugador,
+  Lado,
+  Pelota,
+} from "../../../compartido/partida.js";
+import { BarraDeEmotes } from "../componentes/BarraDeEmotes";
 import { Cancha } from "../componentes/Cancha";
 import { equipoPorId } from "../hooks/useCatalogo";
 import { usePartida, type TiroDesdeLaCancha } from "../hooks/usePartida";
@@ -41,10 +48,23 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir }: Props)
     if (window.confirm("¿Salir del partido? Se va a perder el marcador.")) alSalir();
   }
 
+  /** Solo las personas tienen caritas: el equipo del servidor no las usa. */
+  function barraDeEmotes(lado: Lado) {
+    if (partida[lado].tipo !== "humano") return null;
+    return (
+      <BarraDeEmotes
+        nombreDelEquipo={equipoDe(lado).nombre}
+        espera={juego.esperaEmote[lado]}
+        deshabilitada={!juego.puedeLanzarEmote}
+        alElegir={(emote) => void juego.lanzarEmote(lado, emote)}
+      />
+    );
+  }
+
   const mensaje =
     juego.error ??
     describirEventos(juego.eventos, (lado) => equipoDe(lado).nombre) ??
-    instruccion(juego.puedeTirar, juego.animando, jugadorDelTurno, equipoDe(ladoDelTurno).nombre);
+    instruccion(juego.puedeTirar, juego.animando, jugadorDelTurno, equipoDe(ladoDelTurno).nombre, partida.pelota);
 
   return (
     <main className="partida">
@@ -53,7 +73,9 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir }: Props)
           equipo={equipoDe("local")}
           jugador={partida.local}
           activo={ladoDelTurno === "local" && !terminada}
-        />
+        >
+          {barraDeEmotes("local")}
+        </EquipoEnMarcador>
         <div className="marcador__centro">
           <span className="marcador__goles" data-testid="marcador">
             {partida.marcador.local} – {partida.marcador.visitante}
@@ -68,7 +90,9 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir }: Props)
           equipo={equipoDe("visitante")}
           jugador={partida.visitante}
           activo={ladoDelTurno === "visitante" && !terminada}
-        />
+        >
+          {barraDeEmotes("visitante")}
+        </EquipoEnMarcador>
       </header>
 
       <section className="partida__cancha">
@@ -77,6 +101,7 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir }: Props)
           cuadro={juego.cuadro}
           puedeApuntar={juego.puedeTirar}
           tiroDePoder={tiroDePoder}
+          emotes={juego.emotes}
           alTirar={tirar}
         />
       </section>
@@ -145,9 +170,11 @@ interface PropsEquipo {
   equipo: Equipo;
   jugador: Jugador;
   activo: boolean;
+  /** La barra de emotes, cuando el equipo lo maneja una persona. */
+  children?: ReactNode;
 }
 
-function EquipoEnMarcador({ equipo, jugador, activo }: PropsEquipo) {
+function EquipoEnMarcador({ equipo, jugador, activo, children }: PropsEquipo) {
   const clases = ["marcador__equipo", `marcador__equipo--${jugador.lado}`, activo && "marcador__equipo--activo"]
     .filter(Boolean)
     .join(" ");
@@ -161,6 +188,7 @@ function EquipoEnMarcador({ equipo, jugador, activo }: PropsEquipo) {
           {jugador.tipo === "servidor" ? "Servidor" : "Jugador"} · tiros de poder: {jugador.tirosDePoder}
         </span>
       </div>
+      {children}
     </div>
   );
 }
@@ -177,7 +205,7 @@ function describirEventos(eventos: Evento[], nombre: (lado: Lado) => string): st
         case "finDelPartido":
           return "¡Final del partido!";
         case "pelotaAtrapada":
-          return "La pelota quedó atrapada en un charco.";
+          return `¡La pelota cayó en un charco de ${evento.tipoCharco}!`;
         case "pelotaLiberada":
           return "La pelota salió del charco.";
         case "turnoPerdido":
@@ -187,8 +215,19 @@ function describirEventos(eventos: Evento[], nombre: (lado: Lado) => string): st
     .join(" ");
 }
 
-function instruccion(puedeTirar: boolean, animando: boolean, jugador: Jugador, nombre: string): string {
+function instruccion(
+  puedeTirar: boolean,
+  animando: boolean,
+  jugador: Jugador,
+  nombre: string,
+  pelota: Pelota,
+): string {
   if (animando) return "";
+  if (puedeTirar && pelota.atrapadaEn) {
+    const golpes =
+      pelota.golpesParaLiberar === 1 ? "hace falta un golpe" : `hacen falta ${pelota.golpesParaLiberar} golpes`;
+    return `La pelota está atrapada en un charco: ${golpes} para sacarla, o un tiro de poder.`;
+  }
   if (puedeTirar) return "Arrastra hacia atrás desde una de tus tapitas y suelta para tirar.";
   if (jugador.tipo === "servidor") return `${nombre} está pensando su tiro…`;
   return "";

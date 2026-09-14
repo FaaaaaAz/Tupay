@@ -613,3 +613,59 @@ input[type="checkbox"] {
 .calendario__partido--enJuego strong {
   color: var(--dorado);
 }
+
+/* Estadio elegido en la configuración */
+
+.estadio-elegido {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 9.5rem;
+  align-items: center;
+  gap: 1rem;
+}
+
+.estadio-elegido__efecto {
+  font-size: 0.88rem;
+  opacity: 0.85;
+}
+
+.estadio-elegido__vista {
+  width: 100%;
+  aspect-ratio: 1672 / 941;
+  object-fit: cover;
+  border: 1px solid var(--borde);
+  border-radius: 0.5rem;
+}
+
+/* Instrucciones con imágenes */
+
+.instrucciones__charcos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+}
+
+.instrucciones__charcos figure {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.instrucciones__charcos img {
+  display: block;
+  width: 9rem;
+  margin: 0 auto -0.8rem;
+}
+
+.instrucciones__emotes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.instrucciones__emotes img {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #fff8e1, #e3b95a);
+}

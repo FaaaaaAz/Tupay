@@ -203,3 +203,83 @@
   padding: 2rem;
   background: rgba(0, 0, 0, 0.65);
 }
+
+/* Charcos y pelota atrapada */
+
+.charco {
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+
+/* En su último tiro el charco se ve más claro: está por secarse. */
+.charco--secandose {
+  opacity: 0.55;
+}
+
+.pelota__atrapada {
+  fill: none;
+  stroke: #bfe6ff;
+  stroke-width: 4;
+  stroke-dasharray: 8 6;
+  pointer-events: none;
+  animation: titilar 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pelota__atrapada {
+    animation: none;
+  }
+}
+
+/* Emotes */
+
+.tapita__emote {
+  pointer-events: none;
+}
+
+.emotes {
+  position: relative;
+  display: flex;
+  gap: 0.2rem;
+  margin: 0 0.4rem;
+}
+
+.emotes__boton {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  border: 1px solid var(--borde);
+  border-radius: 50%;
+  /* Las caritas se pensaron sobre una tapita: un disco claro las deja leer sobre el marcador oscuro. */
+  background: radial-gradient(circle at 40% 35%, #fff8e1, #e3b95a);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.emotes__boton img {
+  width: 2.3rem;
+  height: 2.3rem;
+}
+
+.emotes__boton:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.08);
+}
+
+.emotes__boton:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+  opacity: 0.45;
+}
+
+.emotes__espera {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  text-shadow: 0 1px 3px #000;
+}

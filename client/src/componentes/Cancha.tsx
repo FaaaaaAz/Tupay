@@ -1,9 +1,16 @@
 import { useMemo, useRef, useState, type PointerEvent } from "react";
+import type { IdEmote } from "../../../compartido/catalogo.js";
 import type { Vector } from "../../../compartido/geometria.js";
-import type { Cuadro, Partida, Tapita } from "../../../compartido/partida.js";
+import type { Cuadro, Lado, Partida, Tapita } from "../../../compartido/partida.js";
 import type { TiroDesdeLaCancha } from "../hooks/usePartida";
-import { IMAGENES, IMAGEN_DE_EQUIPO, IMAGEN_DE_ESTADIO } from "../recursos/indice";
-import { geometriaDeLaCancha, IMAGEN_ESTADIO } from "./calibracionCancha";
+import {
+  IMAGENES,
+  IMAGEN_DE_CHARCO,
+  IMAGEN_DE_EMOTE,
+  IMAGEN_DE_EQUIPO,
+  IMAGEN_DE_ESTADIO,
+} from "../recursos/indice";
+import { geometriaDeLaCancha, IMAGEN_ESTADIO, rectanguloDelCharco } from "./calibracionCancha";
 
 /** Arrastrar menos que esto, en unidades de cancha, cuenta como un toque sin tiro. */
 const ARRASTRE_MINIMO = 25;
@@ -17,6 +24,8 @@ interface Props {
   cuadro: Cuadro | null;
   puedeApuntar: boolean;
   tiroDePoder: boolean;
+  /** La carita que se ve sobre las tapitas de cada jugador. */
+  emotes: Record<Lado, IdEmote | null>;
   alTirar: (tiro: TiroDesdeLaCancha) => void;
 }
 
@@ -29,7 +38,7 @@ interface Apuntado {
  * Dibuja la cancha en SVG y convierte el arrastre sobre una tapita en un tiro. No decide
  * nada del juego: muestra el estado que llegó de Express o el cuadro que se está animando.
  */
-export function Cancha({ partida, cuadro, puedeApuntar, tiroDePoder, alTirar }: Props) {
+export function Cancha({ partida, cuadro, puedeApuntar, tiroDePoder, emotes, alTirar }: Props) {
   const { cancha } = partida;
   const geometria = useMemo(() => geometriaDeLaCancha(cancha), [cancha]);
   const grupo = useRef<SVGGElement>(null);
@@ -38,6 +47,8 @@ export function Cancha({ partida, cuadro, puedeApuntar, tiroDePoder, alTirar }: 
   const quieta = cuadro === null && partida.estado === "enJuego";
   const apuntadoVigente = puedeApuntar ? apuntado : null;
   const pelota = cuadro ? cuadro.pelota : partida.pelota.posicion;
+  // Durante la animación la pelota puede salir del charco: el aviso se muestra con el estado final.
+  const pelotaAtrapada = cuadro === null && partida.pelota.atrapadaEn !== null;
   const perro = cuadro?.perro ?? null;
   const { escala, origen, arco } = geometria;
 
@@ -86,6 +97,25 @@ export function Cancha({ partida, cuadro, puedeApuntar, tiroDePoder, alTirar }: 
       />
 
       <g ref={grupo} transform={`translate(${origen.x} ${origen.y}) scale(${escala})`}>
+        {/* Los charcos van sobre el césped y debajo de todo lo que se mueve. */}
+        {partida.charcos.map((charco) => {
+          const { x, y, ancho, alto } = rectanguloDelCharco(charco);
+          const clases = ["charco", charco.turnosRestantes === 1 && "charco--secandose"].filter(Boolean).join(" ");
+          return (
+            <image
+              key={charco.id}
+              className={clases}
+              href={IMAGEN_DE_CHARCO[charco.tipo]}
+              x={x}
+              y={y}
+              width={ancho}
+              height={alto}
+              preserveAspectRatio="none"
+              data-testid={`charco-${charco.id}`}
+            />
+          );
+        })}
+
         {partida.tapitas.map((tapita, indice) => {
           const posicion = cuadro ? cuadro.tapitas[indice] : tapita.posicion;
           const activa = quieta && tapita.lado === partida.turno.lado;
@@ -94,6 +124,7 @@ export function Cancha({ partida, cuadro, puedeApuntar, tiroDePoder, alTirar }: 
             .filter(Boolean)
             .join(" ");
           const tamano = geometria.tamanoTapita;
+          const emote = emotes[tapita.lado];
 
           return (
             <g
@@ -113,11 +144,33 @@ export function Cancha({ partida, cuadro, puedeApuntar, tiroDePoder, alTirar }: 
                 width={tamano}
                 height={tamano}
               />
+              {/* La carita está centrada en un lienzo del mismo tamaño que la tapita: cae siempre dentro del disco. */}
+              {emote && (
+                <image
+                  className="tapita__emote"
+                  href={IMAGEN_DE_EMOTE[emote]}
+                  x={-tamano / 2}
+                  y={-tamano / 2}
+                  width={tamano}
+                  height={tamano}
+                  data-testid={`emote-${tapita.id}`}
+                />
+              )}
             </g>
           );
         })}
 
         {perro && <Sprite href={IMAGENES.perro} centro={perro} tamano={geometria.tamanoPerro} testId="perro" />}
+
+        {pelotaAtrapada && (
+          <circle
+            className="pelota__atrapada"
+            cx={pelota.x}
+            cy={pelota.y}
+            r={cancha.radioPelota + 9}
+            data-testid="pelota-atrapada"
+          />
+        )}
 
         {/* La pelota nunca se superpone con una tapita, así que puede ir encima: se ve en la boca del perro. */}
         <Sprite href={IMAGENES.pelota} centro={pelota} tamano={geometria.tamanoPelota} testId="pelota" />

@@ -1,4 +1,4 @@
-import type { Cancha } from "../../../compartido/partida.js";
+import type { Cancha, Charco } from "../../../compartido/partida.js";
 
 // Medidas tomadas de las imágenes con un script. Los seis estadios comparten la misma cancha
 // dibujada, con diferencias de un píxel. Si se cambia una imagen, hay que volver a medir.
@@ -24,6 +24,24 @@ const IMAGEN_ARCO = {
 
 /** Qué parte de cada imagen ocupa el dibujo, para que coincida con el radio de la física. */
 const RELLENO = { tapita: 0.935, pelota: 0.856, perro: 0.81 };
+
+/**
+ * `juego/charcoDeAgua.webp` y `charcoDeNieve.webp`, en proporciones de la imagen. La mancha ocupa
+ * casi todo el ancho pero solo la mitad del alto, y queda un poco por debajo del centro.
+ */
+const IMAGEN_CHARCO = { rellenoAncho: 0.935, rellenoAlto: 0.544, centroY: 0.557 };
+
+/** Dónde dibujar la imagen para que la mancha ocupe exactamente la elipse de la física. */
+export function rectanguloDelCharco(charco: Charco) {
+  const ancho = charco.ancho / IMAGEN_CHARCO.rellenoAncho;
+  const alto = charco.alto / IMAGEN_CHARCO.rellenoAlto;
+  return {
+    x: charco.posicion.x - ancho / 2,
+    y: charco.posicion.y - alto * IMAGEN_CHARCO.centroY,
+    ancho,
+    alto,
+  };
+}
 
 /** Margen alrededor de la cancha que siempre queda a la vista, en píxeles de la imagen. */
 const MARGEN_VISIBLE = 30;

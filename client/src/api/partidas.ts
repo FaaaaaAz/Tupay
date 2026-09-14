@@ -1,6 +1,7 @@
 import type {
   Partida,
   PeticionCrearPartida,
+  PeticionEmote,
   PeticionTiro,
   RespuestaTiro,
 } from "../../../compartido/partida.js";
@@ -22,4 +23,8 @@ export function tirar(id: string, peticion: PeticionTiro): Promise<RespuestaTiro
 
 export function jugarTurnoRival(id: string): Promise<RespuestaTiro> {
   return enviar(`${rutaDe(id)}/turno-rival`);
+}
+
+export function lanzarEmote(id: string, peticion: PeticionEmote): Promise<Partida> {
+  return enviar(`${rutaDe(id)}/emotes`, peticion);
 }

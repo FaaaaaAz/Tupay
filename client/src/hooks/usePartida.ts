@@ -1,7 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Evento, Partida, PeticionTiro, RespuestaTiro } from "../../../compartido/partida.js";
+import type { IdEmote } from "../../../compartido/catalogo.js";
+import type {
+  Evento,
+  Jugador,
+  Lado,
+  Partida,
+  PeticionTiro,
+  RespuestaTiro,
+} from "../../../compartido/partida.js";
 import { ErrorDeApi } from "../api/cliente";
-import { jugarTurnoRival, obtenerPartida, tirar as pedirTiro } from "../api/partidas";
+import {
+  jugarTurnoRival,
+  lanzarEmote as pedirEmote,
+  obtenerPartida,
+  tirar as pedirTiro,
+} from "../api/partidas";
 import { useAnimacion } from "./useAnimacion";
 
 /** Pausa antes de que tire el servidor, para que se note de quién es el turno. */
@@ -14,6 +27,21 @@ export type TiroDesdeLaCancha = Omit<PeticionTiro, "lado">;
 interface JugadaEnCurso {
   respuesta: RespuestaTiro;
   recibidaEn: number;
+}
+
+/** Hasta cuándo se ve la carita de un jugador y hasta cuándo tiene que esperar para lanzar otra. */
+interface RelojDeEmote {
+  id: IdEmote | null;
+  hasta: number;
+  esperaHasta: number;
+}
+
+function relojDeEmote(jugador: Jugador, recibido: number): RelojDeEmote {
+  return {
+    id: jugador.emote?.id ?? null,
+    hasta: recibido + (jugador.emote?.segundosRestantes ?? 0) * 1000,
+    esperaHasta: recibido + jugador.esperaEmote * 1000,
+  };
 }
 
 /**
@@ -33,6 +61,13 @@ export function usePartida(inicial: Partida) {
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [perdida, setPerdida] = useState(false);
+  // Los emotes llevan su propio reloj: si se lanzan durante una animación, la jugada que termina
+  // trae un estado anterior al emote y no debe borrar la carita.
+  const [relojesDeEmote, setRelojesDeEmote] = useState<Record<Lado, RelojDeEmote>>(() => ({
+    local: relojDeEmote(inicial.local, Date.now()),
+    visitante: relojDeEmote(inicial.visitante, Date.now()),
+  }));
+  const [enviandoEmote, setEnviandoEmote] = useState(false);
 
   const aplicar = useCallback((nueva: Partida, respondida = Date.now()) => {
     setPartida(nueva);
@@ -95,6 +130,23 @@ export function usePartida(inicial: Partida) {
     [libre, leTocaAlServidor, reproducir, partida.id, partida.turno.lado],
   );
 
+  /** Se puede en cualquier momento, incluso mientras se anima una jugada: el servidor valida la espera. */
+  const lanzarEmote = useCallback(
+    async (lado: Lado, emote: IdEmote) => {
+      setEnviandoEmote(true);
+      try {
+        const actualizada = await pedirEmote(partida.id, { lado, emote });
+        const recibida = Date.now();
+        setRelojesDeEmote((anteriores) => ({ ...anteriores, [lado]: relojDeEmote(actualizada[lado], recibida) }));
+      } catch (causa) {
+        informarError(causa);
+      } finally {
+        setEnviandoEmote(false);
+      }
+    },
+    [partida.id, informarError],
+  );
+
   useEffect(() => {
     if (!libre || !leTocaAlServidor) return;
     const espera = setTimeout(
@@ -129,6 +181,10 @@ export function usePartida(inicial: Partida) {
         )
       : null;
 
+  const emoteVisible = (lado: Lado) => (ahora < relojesDeEmote[lado].hasta ? relojesDeEmote[lado].id : null);
+  const segundosDeEspera = (lado: Lado) =>
+    Math.max(0, Math.ceil((relojesDeEmote[lado].esperaHasta - ahora) / 1000));
+
   return {
     partida,
     cuadro,
@@ -140,5 +196,9 @@ export function usePartida(inicial: Partida) {
     error,
     perdida,
     tirar,
+    emotes: { local: emoteVisible("local"), visitante: emoteVisible("visitante") },
+    esperaEmote: { local: segundosDeEspera("local"), visitante: segundosDeEspera("visitante") },
+    puedeLanzarEmote: partida.estado === "enJuego" && !perdida && !enviandoEmote,
+    lanzarEmote,
   };
 }
