@@ -79,7 +79,7 @@ Reglas del turno:
 
 - Cada jugador dispone de 2 tiros de poder por partido (se restablecen en cada partido, no se acumulan entre partidos de una misma temporada).
 - El tiro de poder aumenta en 50% la fuerza máxima del lanzamiento.
-- Si el choque libera la pelota de un charco (de agua o de nieve), lo hace de una sola vez, sin importar cuántos golpes le falten al charco normalmente.
+- Si la tapita lanzada con tiro de poder choca una pelota atrapada en un charco (de agua o de nieve), la libera de una sola vez, sin importar cuántos golpes le falten. Igual que un golpe común, no sirve en el mismo tiro en que la pelota cayó al charco.
 
 ## Emotes
 
@@ -90,6 +90,7 @@ Los emotes son la forma de festejar, quejarse o burlarse durante el partido, com
 - La carita dura **5 segundos** y después las tapitas vuelven a verse sin cara. Ese es su estado normal.
 - Para no llenar la pantalla, cada jugador puede lanzar **un emote cada 15 segundos**. Mientras espera, el botón se ve deshabilitado con el tiempo restante.
 - Hay siete caritas disponibles: dormido, enojado, enojado serio, feliz, feliz eufórico, llorando y sorprendido.
+- Cada persona tiene su fila de caritas junto a su equipo, en el marcador. El equipo que maneja el servidor no tiene.
 - El enfriamiento lo controla el servidor, igual que el resto de las acciones: el cliente pide el emote, el servidor lo acepta o lo rechaza, y React anima los 5 segundos.
 
 ## Física de la cancha
@@ -101,15 +102,20 @@ Los emotes son la forma de festejar, quejarse o burlarse durante el partido, com
 
 ## Rival controlado por el servidor (1 jugador)
 
-**Versión actual: rival simple.** Juega como en el billar. Entre sus tapitas elige la más cercana que esté detrás de la pelota respecto del arco que ataca, y apunta al punto de la pelota opuesto a ese arco, para mandarla hacia allá. Calcula la fuerza necesaria para llegar con impulso y le agrega un error de puntería según la dificultad: fácil, medio o difícil. Todo sale de la semilla del partido, así que es repetible. Antes de tirar espera un instante, para que se note de quién es el turno.
+El rival juega **por muestreo**. No usa minimax: en este juego las jugadas posibles son continuas (cualquier tapita, cualquier ángulo, cualquier fuerza) y el resultado depende de la física, así que no hay un árbol de jugadas que recorrer por completo.
 
-**Versión por muestreo: mejora planificada (tarea 8.3).**
+1. **Arma tiros candidatos.** Primero, un tiro de billar por cada tapita propia: apunta al punto de la pelota opuesto al arco que ataca, con la fuerza justa para llegar con impulso, empezando por las tapitas que están detrás de la pelota. Si la dificultad pide más candidatos, el resto son variaciones al azar de esos tiros (hasta 0,4 radianes de desvío y 30 % de diferencia de fuerza).
+2. **Simula cada candidato** con la misma física del juego, incluidos los charcos del estadio.
+3. **Elige el de mejor puntuación.** El gol a favor vale 1000 puntos y el autogol resta 1000. Si no hay gol, suma hasta 100 por llevar la pelota hacia el arco rival y resta hasta 150 por dejarla a menos de 350 unidades del arco propio.
+4. **Tira con error.** Al tiro elegido le suma un error de puntería al azar.
 
-- No se usa minimax: en este juego las jugadas posibles son continuas (cualquier tapita, cualquier ángulo, cualquier fuerza) y el resultado depende de la física, así que no hay un árbol de jugadas que recorrer por completo.
-- En su turno, el servidor genera varios tiros candidatos dirigidos hacia la pelota (algunos apuntando, como en el billar, al punto de la pelota opuesto al arco rival), los simula con la misma física del juego y ejecuta el que obtiene mejor puntuación.
-- La puntuación premia el gol y acercar la pelota al arco rival, y castiga el autogol y dejar la pelota cerca del arco propio. Después de elegir el mejor tiro, se le agrega un pequeño error de puntería para que el rival no sea perfecto.
-- Dificultades: fácil (pocos tiros candidatos, error alto), medio y difícil (muchos tiros candidatos, error bajo).
-- Los tiros candidatos y el error se generan con la semilla del partido, por lo que las pruebas E2E son repetibles.
+| Dificultad | Candidatos | Error máximo de puntería |
+|---|---|---|
+| Fácil | 3 | 0,30 radianes (unos 17°) |
+| Medio | 12 | 0,12 radianes (unos 7°) |
+| Difícil | 36 | 0,04 radianes (unos 2°) |
+
+Solo gasta un tiro de poder cuando la pelota está atrapada en la nieve y le faltan dos golpes. Los candidatos y el error salen de la semilla del partido, así que es repetible. Antes de tirar espera un instante, para que se note de quién es el turno. El equipo del servidor no lanza emotes.
 
 ## Estadios
 
@@ -124,17 +130,27 @@ Por defecto, el partido se juega en el estadio del equipo local (ver la tabla de
 | El Titán de Villa Ingenio | El Alto | Charcos de nieve que aparecen y desaparecen durante el partido (ver abajo). |
 | Víctor Agustín Ugarte | Potosí | Charcos de nieve que aparecen y desaparecen durante el partido (ver abajo). |
 
+**Cómo funcionan los charcos** (en los cuatro estadios que los tienen):
+
+- Cada charco es una mancha ovalada de 170 × 80 unidades de cancha. Al empezar el partido ya hay dos, y después de cada tiro aparece uno nuevo con 40 % de probabilidad, sin pasar de tres a la vez.
+- Aparecen en cualquier sector de la cancha, incluida, con algo de suerte, la línea de gol. Nunca nacen debajo de la pelota ni encima de otro charco.
+- La pelota queda **atrapada** cuando su centro entra al charco: se detiene en el acto y se comporta como un poste, sin que ningún choque la mueva.
+- Los golpes para liberarla **cuentan desde el tiro siguiente**. La tapita que la llevó al charco suele venir detrás y volver a tocarla; ese choque no la saca.
+- Una pelota que se libera no vuelve a quedar atrapada en el mismo charco hasta que sale de él.
+- Solo afectan a la pelota: las tapitas pasan por encima como si no estuvieran.
+- Si el charco se seca con la pelota adentro, la pelota queda libre. Si el perro se la lleva, también. Después de un gol, la pelota vuelve libre al centro.
+
 **Charcos de agua** (Hernando Siles y Jesús Bermúdez):
 
-- Aparecen y desaparecen en distintos sectores de la cancha durante la partida, incluida, con algo de suerte, la línea de gol.
-- Cada charco dura como máximo 2 turnos y luego desaparece.
-- Si la pelota cae en uno, queda atrapada: un solo choque de una tapita la libera, pero sale con mucho menos impulso del que tenía el tiro.
+- Duran 2 tiros y luego se secan.
+- Un solo choque de una tapita libera la pelota, pero sale con mucho menos impulso: el 40 % de la velocidad que le daría ese choque si estuviera libre.
 
 **Charcos de nieve** (El Titán de Villa Ingenio y Víctor Agustín Ugarte):
 
-- Misma dinámica que los charcos de agua, pero más severa: frenan la pelota por completo en vez de solo demorarla.
-- Liberarla necesita dos choques de una tapita, no uno.
-- Duran más turnos que los charcos de agua (valor inicial sugerido: 4 turnos, a ajustar al probar el juego).
+- Misma dinámica que los de agua, pero más severa: hacen falta dos choques para liberar la pelota, y sale con apenas el 25 % del impulso.
+- Duran 4 tiros.
+
+Todos estos números están en `server/src/dominio/estadios/configuracionEstadios.ts`.
 
 ## Acciones inválidas
 
@@ -149,6 +165,8 @@ El servidor valida cada acción y rechaza las inválidas con un mensaje que se m
 | Fuerza o dirección fuera de rango | "Tiro inválido" |
 | Usar el tiro de poder sin tener disponibles | "Ya no te quedan tiros de poder" |
 | Lanzar un emote antes de que pasen 15 segundos del anterior | "Espera unos segundos para volver a usar un emote" |
+| Lanzar un emote por el equipo que maneja el servidor | "Ese jugador no es tuyo" |
+| Pedir un emote que no existe | "Ese emote no existe" |
 | Crear una temporada con cero o más de dos equipos humanos | "Elige uno o dos equipos para jugar la temporada" |
 | Jugar un partido de temporada de una jornada posterior | "Primero hay que terminar la jornada N" |
 | Tomar el control del rival en una temporada de un solo jugador | "Solo un segundo jugador puede tomar el control del rival" |
@@ -159,6 +177,7 @@ El servidor valida cada acción y rechaza las inválidas con un mensaje que se m
 ## Estados principales
 
 - Posición y velocidad de cada tapita (5 por equipo) y de la pelota.
+- Charcos en la cancha, con los tiros que les quedan, y si la pelota está atrapada y cuántos golpes le faltan.
 - Turno actual y tiempo restante del turno.
 - Minuto de partido (modo Liga) o goles rumbo a la meta (modo Eliminatoria).
 - Marcador del partido.
@@ -189,3 +208,5 @@ Al crear un partido o una temporada se pueden enviar valores opcionales para que
 5. **El perro, versión final:** en vez de pasar el turno siempre al rival después de su aparición, el turno pasa al equipo cuyo arco está más cerca de donde quedó la pelota, para que pueda defenderse si el perro la deja cerca de su propio arco.
 6. **Equipos reales:** se pasó de un puñado de equipos inventados a diez equipos reales de la Liga boliviana, uno o dos por cada plaza futbolística importante del país, con la aclaración de que los escudos son ilustraciones propias y no reproducciones oficiales.
 7. **Emotes:** al dibujar las tapitas aparecieron caritas propias como recurso visual. En vez de dejarlas como decoración fija, se convirtieron en una acción del jugador: una carita que se aplica a todas sus tapitas, dura 5 segundos y tiene 15 segundos de enfriamiento para que nadie pueda llenar la pantalla.
+8. **Charcos, versión final:** al probarlos se vio que la tapita que manda la pelota al charco suele venir detrás y volver a tocarla, así que la pelota salía en el mismo tiro en que caía. Desde entonces los golpes para liberarla cuentan recién desde el tiro siguiente.
+9. **Rival por muestreo:** el rival simple, que solo apuntaba como en el billar, pasó a probar varios tiros con la física del juego y elegir el mejor. Su tiro de billar sigue existiendo como punto de partida de los candidatos.

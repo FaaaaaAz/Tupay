@@ -74,7 +74,9 @@ piden al servidor (`GET /api/equipos` y `GET /api/estadios`): el cliente no los 
 │  │  [ Bolívar      ▾] │        │  [ The Strongest ▾]│    │
 │  └────────────────────┘        └────────────────────┘    │
 │                                                          │
-│  Estadio:  [ Hernando Siles ▾ ]   charcos de agua        │
+│  Estadio:  [ Hernando Siles ▾ ]   ┌──────────┐           │
+│  Charcos de agua: atrapan la      │ miniatura│           │
+│  pelota y un golpe la saca        └──────────┘           │
 │  Meta de goles:  ( ) 1  ( ) 2  ( • ) 3  ( ) 4  ( ) 5     │
 │  Perro en la cancha:  [ ✓ ] activado                     │
 │                                                          │
@@ -90,6 +92,9 @@ Express a propósito: es la acción inválida que exige la rúbrica y debe demos
 real, no con una comprobación escondida en el navegador.
 
 En modo Liga, en lugar de la meta de goles aparece la duración real del partido.
+
+Debajo del selector de estadio se describe su efecto y, al lado, una miniatura del estadio elegido:
+así se sabe qué va a pasar en la cancha antes de empezar.
 
 ## Partida
 
@@ -114,6 +119,11 @@ La cancha ocupa casi toda la pantalla. Todo lo demás es una franja delgada arri
 └──────────────────────────────────────────────────────────┘
 ```
 
+**Charcos**: se dibujan sobre el césped, con la imagen estirada para cubrir exactamente la elipse
+que usa la física. En su último tiro se ven más claros, porque están por secarse. Cuando la pelota
+queda atrapada, un anillo punteado titila a su alrededor y el mensaje de abajo dice cuántos golpes
+faltan para sacarla.
+
 **Orden de capas**, de atrás hacia adelante: fondo del estadio → charcos → pelota y tapitas →
 caritas de emote sobre cada tapita → **arcos por encima de todo**. Los arcos van al final para que la
 pelota se vea entrando dentro del arco y no por delante de la red. El arco es un único archivo: para
@@ -131,9 +141,10 @@ gesto empieza sobre una tapita rival o el arrastre es demasiado corto, se cancel
 servidor y, al terminar, aplica el estado confirmado: la posición final siempre la decide Express,
 nunca el navegador.
 
-**Emotes**: la fila de caritas de abajo a la izquierda. Al elegir una, aparece sobre las cinco
-tapitas del jugador durante 5 segundos. Después quedan deshabilitadas 15 segundos, con la cuenta
-regresiva visible sobre el botón.
+**Emotes**: cada persona tiene su fila de siete caritas junto a su equipo, en el marcador. Al elegir
+una, aparece sobre sus cinco tapitas durante 5 segundos. Después la fila queda deshabilitada 15
+segundos, con la cuenta regresiva encima. El boceto original la ponía abajo a la izquierda, pero con
+dos jugadores cada uno necesita la suya, y junto a su equipo se entiende de quién es cada fila.
 
 ## Resultado
 

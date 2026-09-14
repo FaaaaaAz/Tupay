@@ -492,6 +492,164 @@ Bolívar salía campeón solo por ser el primero del catálogo, que además es e
 | La temporada nunca anota el resultado de una partida terminada | "cuando termina la partida de la persona, se anota el resultado y avanza la jornada" |
 | El calendario no rota a los equipos entre jornadas | "cada par se cruza una sola vez" y "cada uno descansa una jornada" |
 
+## Decisiones de la Fase 8: estadios, rival, tiro de poder y emotes
+
+Los números de los charcos viven en `server/src/dominio/estadios/configuracionEstadios.ts`; los del
+rival y los emotes, en `server/src/dominio/reglas/configuracionReglas.ts`.
+
+### Los charcos son parte de la física
+
+**Decisión.** La simulación recibe los charcos como zonas que atrapan la pelota y avisa cuándo la
+atrapó o la soltó. No sabe si son de agua o de nieve: recibe cuántos golpes hacen falta y con cuánto
+impulso sale. Cuándo aparecen, cuánto duran y de qué tipo son lo decide `dominio/estadios`.
+
+**Por qué.** Atrapar la pelota ocurre en medio del recorrido, así que tiene que calcularse en cada
+subpaso, junto a los choques. Y el reparto es el mismo que con los goles: la física informa en qué
+arco entró la pelota y las reglas deciden de quién es el gol.
+
+**Alternativa descartada.** Revisar los charcos solo al final del tiro. Una pelota que cruza un charco
+a toda velocidad no quedaría atrapada, y la animación mostraría algo distinto de lo que decidió el
+servidor.
+
+### El charco es una elipse, no un círculo
+
+**Decisión.** Cada charco mide 170 × 80 unidades, y la pelota queda atrapada cuando su centro entra a
+esa elipse. La imagen se estira para que la mancha dibujada cubra exactamente esa elipse.
+
+**Por qué.** Las imágenes de los charcos son manchas alargadas, casi 2,5 veces más anchas que altas.
+Con un círculo, la pelota quedaba atrapada arriba o abajo de la mancha, donde se ve césped. Se midió
+con un script qué parte de cada imagen ocupa la mancha: el 93,5 % del ancho y el 54 % del alto, un
+poco por debajo del centro.
+
+### La pelota atrapada es un poste
+
+**Decisión.** Al quedar atrapada, la pelota se detiene y su masa inversa pasa a 0, igual que los
+postes del arco. Cuando se libera, recupera su masa y sale con el 40 % (agua) o el 25 % (nieve) de la
+velocidad que le dio el choque.
+
+**Por qué.** No hizo falta escribir un caso especial de choque: la misma función que hace rebotar una
+tapita en el palo la hace rebotar en una pelota atrapada.
+
+### Los golpes cuentan desde el tiro siguiente
+
+**Decisión.** En el tiro en que la pelota cae al charco, ningún choque la libera.
+
+**Por qué.** Lo encontró una prueba. La primera versión fallaba en "la pelota que entra a un charco
+queda atrapada": la tapita que lanza la pelota pierde velocidad al chocarla pero sigue detrás, la
+alcanza cuando se detiene en el charco y, en el agua, la liberaba en el mismo tiro. En la cancha se
+veía como si el charco no hubiera hecho nada.
+
+**También.** Una pelota que se libera no vuelve a quedar atrapada en ese charco hasta que sale de él.
+Sin eso, quedaría atrapada de nuevo en el subpaso siguiente, porque sigue adentro.
+
+### Los charcos usan el azar solo donde existen
+
+**Decisión.** El sorteo de charcos consume el generador de la partida solo en los estadios que los
+tienen, y los charcos iniciales se sortean después del saque.
+
+**Por qué.** Así una semilla sigue dando el mismo saque que antes de la Fase 8, y en Santa Cruz y
+Cochabamba toda la partida es idéntica. Las pruebas de reglas usan Cochabamba, el estadio de
+referencia, para no depender de dónde cae un charco.
+
+### El rival prueba tiros en vez de calcular uno
+
+**Decisión.** El rival arma tiros candidatos, los simula con la misma física y elige el de mejor
+puntuación. Los primeros candidatos son un tiro de billar por cada tapita propia, que es lo que hacía
+el rival simple; el resto son variaciones al azar de esos tiros. La dificultad decide cuántos
+candidatos prueba (3, 12 o 36) y cuánto error de puntería le agrega al elegido (0,30, 0,12 o 0,04
+radianes).
+
+**Por qué.** El rival simple no veía lo que iba a pasar: tiraba igual aunque hubiera una tapita en el
+camino o la pelota fuera a quedar frente a su propio arco. Simular reutiliza el motor que ya existe,
+incluidos los charcos, sin escribir reglas de estrategia a mano.
+
+**Puntuación.** El gol a favor vale 1000 y el autogol resta 1000; si no hay gol, suma hasta 100 por
+llevar la pelota hacia el arco rival y resta hasta 150 por dejarla cerca del propio. Castigar más el
+peligro que premiar el avance hace que no despeje hacia su arco por intentar avanzar.
+
+**Tiro de poder.** Solo lo usa cuando la pelota está atrapada en la nieve y le faltan dos golpes. Si lo
+usara cada vez que un candidato con más fuerza puntuara mejor, gastaría los dos en los primeros
+turnos.
+
+**Medido.** Partidos completos a 3 goles entre dos rivales del servidor, alternando los lados, en
+Félix Capriles:
+
+| Duelo | Resultado | Tiros por partido |
+|---|---|---|
+| Difícil contra fácil | 10 a 0 | 31 |
+| Medio contra fácil | 9 a 1 | 68 |
+| Difícil contra medio | 10 a 0 | 40 |
+
+Con dos rivales de nivel medio en estadios con charcos, la pelota quedó atrapada 2,4 veces por partido
+en Hernando Siles y 2,7 en Villa Ingenio. Y en 4800 tiros del rival, en estadios con y sin charcos, el
+recorrido más largo duró 7,8 segundos: ninguno llegó al tope de 20.
+
+**Costo aceptado.** Difícil tarda unos 140 ms en responder el turno contra el servidor local, porque
+simula 36 tiros. Se suma a la pausa de 800 ms que el cliente ya hace antes del turno del rival, así
+que no se nota. En el plan gratuito de Render la CPU es más lenta; si se notara, bajar los candidatos
+de difícil es cambiar un número.
+
+**Alternativa descartada.** Probar ángulos y fuerzas en una grilla fija. Da siempre los mismos
+candidatos, y con 36 tiros la grilla es tan gruesa que se pierde el tiro bueno entre dos casillas.
+
+### Los emotes llevan su propio reloj en el cliente
+
+**Decisión.** El servidor guarda cuándo se lanzó cada emote y responde los segundos que le quedan a la
+carita y a la espera. `usePartida` convierte esos segundos en instantes y los guarda aparte del
+estado de la partida.
+
+**Por qué.** Un emote se puede lanzar mientras se anima una jugada. Al terminar la animación, el
+cliente aplica el estado que trajo la respuesta del tiro, que es anterior al emote: si la carita
+viviera en ese estado, desaparecería antes de tiempo.
+
+**Dónde se ven.** Cada persona tiene su fila de caritas junto a su equipo, en el marcador. El boceto
+las ponía abajo a la izquierda, pero con dos jugadores cada uno necesita la suya. Las caritas se
+dibujaron para ir sobre una tapita, así que en los botones van sobre un disco claro; sobre el
+marcador oscuro no se leían.
+
+### Los recursos visuales: herramientas y autoría
+
+**Herramientas.** Las imágenes originales de `assets/` se generaron con el modelo de imágenes de
+OpenAI (gpt-image), a partir de las indicaciones del autor para cada equipo, estadio, elemento y
+carita. Lo registran los propios archivos: cada PNG trae un manifiesto C2PA de "OpenAI Media Service
+API" que declara el origen como contenido generado por un algoritmo. Las versiones web se obtuvieron
+con `scripts/optimizar-recursos.mjs`, que usa `sharp` para reducirlas y convertirlas a WebP, y la
+calibración sobre la cancha se midió con otro script sobre las mismas imágenes.
+
+**Autoría y escudos.** Las ilustraciones fueron creadas para este proyecto y no reproducen ningún
+escudo oficial: cada tapita lleva los colores del club, que es lo que permite reconocerlo, con un
+diseño propio. No se usó ninguna imagen de terceros que exija atribución.
+
+**Qué se conectó en esta fase.** Los charcos en la cancha, las siete caritas sobre las tapitas y en la
+barra de emotes, una miniatura del estadio elegido en la configuración, y los charcos y las caritas
+en las instrucciones. Con eso, todos los archivos de `client/src/recursos/` se usan en alguna
+pantalla.
+
+### Una falla intermitente escondía un error de la animación
+
+**Decisión.** `useAnimacion` no deja que la posición dentro del recorrido sea negativa.
+
+**Por qué.** Al correr las pruebas E2E, "se juega un partido de la temporada desde el navegador" falló
+una vez de cada 80 ejecuciones, y sola nunca fallaba. Se repitió la suite guardando la traza de las
+pruebas que fallaran, y la traza mostró que React se caía con `Cannot read properties of undefined
+(reading 'tapitas')` justo después del turno del rival. `requestAnimationFrame` le pasa a cada
+cuadro el instante en que el navegador empezó a dibujarlo, que con la máquina ocupada puede ser un
+poco anterior al momento en que arrancó la animación: la posición daba negativa y se pedía el cuadro
+-1. El error existía desde la Fase 6; la Fase 8 solo lo hizo más probable. Después del arreglo, la
+suite pasó 240 ejecuciones seguidas.
+
+### Se comprobó que las pruebas de la Fase 8 pueden fallar
+
+Se rompió cada regla a propósito, de a una, y se volvió a dejar como estaba:
+
+| Regla rota | Prueba que falló |
+|---|---|
+| Los golpes cuentan también en el tiro en que la pelota cae | "la pelota que entra a un charco queda atrapada y quieta" y "si la pelota cae en un charco, el tiro lo avisa y la partida la muestra atrapada" |
+| El tiro de poder no libera de un solo golpe | "un tiro de poder saca la pelota de la nieve de una sola vez" |
+| Un charco nuevo puede nacer debajo de la pelota o encima de otro | "un charco nuevo nunca nace debajo de la pelota ni encima de otro, y nunca hay más de tres" |
+| No hay espera entre emotes | "la carita se va a los 5 segundos, y recién a los 15 se puede lanzar otra" |
+| El rival premia el autogol como un gol | "la puntuación prefiere el gol, castiga el autogol y dejar la pelota cerca del propio arco" |
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano
@@ -535,6 +693,8 @@ necesitara servicios adicionales.
 | La Liga completa consume todo el tiempo | Avanza el calendario y todavía no hay un partido de Liga suelto jugable | Detenerse en el punto de control de la Fase 7. Liga como partido suelto ya cumple el núcleo obligatorio. **Superado:** la temporada se empezó recién con el núcleo terminado y publicado, reutilizando el motor de partidas sin modificarlo. |
 | Pruebas E2E intermitentes | Una prueba falla una de cada tres veces sin cambios de código | Semilla fija, esperar respuestas reales en vez de tiempos arbitrarios, localizadores por rol accesible. |
 | Pipeline lento | Supera los 6 minutos | Un solo navegador en CI, caché de npm, lint y E2E en paralelo. Volver a medir en la tarea 9.7. |
+| El rival difícil tarda en Render | El turno del servidor en difícil se nota lento en la URL pública | Medido en local: 140 ms. Si en Render se nota, bajar los candidatos de difícil en `RIVAL.dificultades`; las pruebas no dependen del número exacto. |
+| Pruebas unitarias lentas | `npm run test:unit` pasa de unos pocos segundos | Las pruebas del rival simulan partidos completos. Se achicaron a 20 tiros y 10 partidos: toda la suite tarda unos 8 segundos. |
 | Arranque en frío durante la defensa | La primera visita tarda casi un minuto | Tiempos de espera largos en las pruebas de producción y despertar el servicio unos minutos antes. |
 | Partidas perdidas por reinicio | Una partida abierta deja de existir | Limitación aceptada del repositorio en memoria: mensaje claro y opción de crear otra partida. |
 | Reclamo por la identidad de los clubes | Uso de escudos oficiales | Ilustraciones propias, sin escudos oficiales, con el criterio documentado y sin fines comerciales. |
@@ -559,3 +719,8 @@ necesitara servicios adicionales.
 | `Jornada` pasó a llamarse `PartidoDeTemporada` | En fútbol la jornada es la fecha completa; el nombre anterior confundía un partido con una jornada. |
 | Los partidos sin personas se simulan solos | Simularlos a mano obligaba a hacer clics sin ninguna decisión en cada jornada. |
 | El empate total en la tabla lo decide un sorteo | Con el orden de la lista, Bolívar, el primero del catálogo, ganaba todos los empates totales. |
+| Los charcos son elipses | Las imágenes son manchas alargadas: con un círculo, la pelota quedaba atrapada sobre el césped. |
+| Los golpes para sacar la pelota de un charco cuentan desde el tiro siguiente | La tapita que la llevaba al charco la volvía a tocar y la liberaba en el mismo tiro. |
+| El rival simple pasó a ser el punto de partida del rival por muestreo | Su tiro de billar sigue siendo bueno como candidato, pero no veía qué iba a pasar después del golpe. |
+| Los emotes se mudaron al marcador | Con dos jugadores cada uno necesita su fila de caritas, y junto a su equipo se entiende de quién es. |
+| La animación no admite posiciones negativas | Una falla intermitente de las pruebas E2E mostró que el primer cuadro podía pedir el cuadro -1. |

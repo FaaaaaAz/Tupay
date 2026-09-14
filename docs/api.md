@@ -5,9 +5,9 @@ Toda la comunicación es JSON, de entrada y de salida. Los tipos de cada cuerpo 
 compilación de ambos lados en vez de fallar recién en tiempo de ejecución.
 
 Los ejemplos de las secciones **Catálogo**, **Partida** y **Temporada** son solicitudes y respuestas reales,
-capturadas contra el servidor local el 13 de septiembre de 2026 (tarea 5.9 del plan). Solo se
+capturadas contra el servidor local el 13 de septiembre de 2026 (tarea 5.9 del plan). Los de charcos,
+rival por muestreo y emotes se capturaron el 14 de septiembre, al terminar la Fase 8. Solo se
 compactó el formato de algunos arreglos para que entren en pantalla; los valores no se tocaron.
-Las secciones marcadas como *diseño* todavía no están implementadas.
 
 ## Convenciones
 
@@ -164,6 +164,26 @@ Respuesta `201`:
 El local defiende el arco izquierdo y forma en la mitad izquierda; el visitante, en espejo. Con la
 semilla `12345` el saque le toca siempre al visitante: esa es la razón de que exista la semilla.
 
+Ese ejemplo es anterior a la Fase 8, cuando ningún estadio tenía efecto. Hoy, en un estadio con
+charcos, la partida arranca con dos. La misma solicitud en El Titán de Villa Ingenio
+(`"estadio": "villaIngenio"`, `"semilla": 12345`) responde:
+
+```json
+{
+  "estadio": "villaIngenio",
+  "pelota": { "posicion": { "x": 600, "y": 350 }, "atrapadaEn": null, "golpesParaLiberar": 0 },
+  "charcos": [
+    { "id": "nieve-1", "tipo": "nieve", "posicion": { "x": 384.5, "y": 340.2 }, "ancho": 170, "alto": 80, "turnosRestantes": 4 },
+    { "id": "nieve-2", "tipo": "nieve", "posicion": { "x": 954.5, "y": 355.8 }, "ancho": 170, "alto": 80, "turnosRestantes": 4 }
+  ],
+  "turno": { "lado": "visitante", "segundosRestantes": 15 }
+}
+```
+
+Cada charco es una elipse de `ancho` × `alto` centrada en `posicion`. `turnosRestantes` baja con cada
+tiro. El saque sigue siendo del visitante: los charcos se sortean después del saque, así que no le
+cambian el resultado a ninguna semilla.
+
 En Liga cambian dos campos. Solicitud con `"modo": "liga"`, Wilstermann contra Aurora y
 `"duracionRealSegundos": 1`:
 
@@ -216,7 +236,7 @@ entra el perro, cambia el turno y devuelve el recorrido para que React lo anime.
 | `tapita` | Id de una tapita propia, por ejemplo `"visitante-4"`. |
 | `direccion` | Vector hacia donde sale la tapita. No hace falta normalizarlo. |
 | `fuerza` | Proporción de la fuerza máxima, mayor que 0 y hasta 1. |
-| `tiroDePoder` | Opcional. Multiplica la fuerza por 1,5 y gasta uno de los dos disponibles. |
+| `tiroDePoder` | Opcional. Multiplica la fuerza por 1,5, gasta uno de los dos disponibles y saca la pelota de un charco de un solo golpe. |
 
 Solicitud, sobre la partida `p_7b989188` de arriba:
 
@@ -283,6 +303,33 @@ mismo punto:
 El turno pasó al visitante aunque tiró el local: el perro dejó la pelota en la mitad derecha, cerca
 del arco del visitante, y el reglamento le da el turno a quien tiene que defender.
 
+**Cuando la pelota cae en un charco.** Partida en Hernando Siles con `"semilla": 3`, que arrancó con
+un charco de agua en `(85.6, 322.8)`, cerca del arco del local. Tiró el visitante:
+
+```json
+{ "lado": "visitante", "tapita": "visitante-4", "direccion": { "x": -74, "y": 72 }, "fuerza": 0.5 }
+```
+
+Respuesta `200`, con 94 cuadros y 24 kB:
+
+```json
+{
+  "eventos": [{ "tipo": "pelotaAtrapada", "charco": "agua-1", "tipoCharco": "agua" }],
+  "partida": {
+    "pelota": { "posicion": { "x": 170.5, "y": 324.4 }, "atrapadaEn": "agua-1", "golpesParaLiberar": 1 },
+    "charcos": [
+      { "id": "agua-1", "tipo": "agua", "posicion": { "x": 85.6, "y": 322.8 }, "ancho": 170, "alto": 80, "turnosRestantes": 1 },
+      { "id": "agua-2", "tipo": "agua", "posicion": { "x": 126, "y": 513.1 }, "ancho": 170, "alto": 80, "turnosRestantes": 1 }
+    ],
+    "turno": { "lado": "local", "segundosRestantes": 15 }
+  }
+}
+```
+
+La pelota quedó en el borde del charco, donde entró su centro. Al local le hace falta un golpe para
+sacarla, y a los dos charcos les queda un tiro antes de secarse. Cuando la pelota sale, el evento es
+`{ "tipo": "pelotaLiberada" }`, tanto por un golpe como porque el charco se secó con ella adentro.
+
 Los otros eventos posibles son `{ "tipo": "gol", "lado": "local" }` y
 `{ "tipo": "finDelPartido", "resultado": { ... } }`.
 
@@ -304,7 +351,8 @@ el servidor responde el error y el turno ya es del rival.
 ### `POST /api/partidas/:id/turno-rival`
 
 En el modo de 1 jugador, el cliente lo llama cuando le toca al equipo que controla el servidor. No
-lleva cuerpo: el servidor decide el tiro, lo ejecuta con las mismas reglas que una persona y
+lleva cuerpo: el servidor prueba varios tiros candidatos con la física del juego, elige el de mejor
+puntuación, le agrega un error de puntería según la dificultad, lo ejecuta con las mismas reglas que una persona y
 responde igual que `/tiros`.
 
 Partida de Bolívar contra The Strongest manejado por el servidor en difícil, con `"semilla": 12345`
@@ -467,15 +515,64 @@ Errores reales:
 | Crear con `"humanos": []` | `400` | `{ "error": "Elige uno o dos equipos para jugar la temporada" }` |
 | La temporada no existe | `404` | `{ "error": "Esa temporada no existe" }` |
 
-## Pendiente de implementar (diseño)
+Tiempo de respuesta medido contra el servidor local, con 10 partidas por dificultad desde la formación
+inicial: 28 ms en fácil, 60 ms en medio y 140 ms en difícil. La diferencia es la cantidad de tiros que
+simula antes de elegir: 3, 12 y 36.
 
-### `POST /api/partidas/:id/emotes` — tarea 8.6
+## Emotes
+
+### `POST /api/partidas/:id/emotes`
+
+Lanza una carita sobre las cinco tapitas de un jugador. Se puede en cualquier momento, sea o no su
+turno. El servidor valida la espera y guarda cuándo se lanzó; la duración y la espera se calculan al
+responder, igual que el reloj del turno.
+
+| Campo | Qué es |
+|---|---|
+| `lado` | Quién lo lanza: `"local"` o `"visitante"`. |
+| `emote` | `"dormido"`, `"enojado"`, `"enojadoSerio"`, `"feliz"`, `"felizEuforico"`, `"llorando"` o `"sorprendido"`. |
+
+Solicitud:
 
 ```json
 { "lado": "local", "emote": "felizEuforico" }
 ```
 
-Responde el objeto `Partida` con `emote: { "id": "felizEuforico", "segundosRestantes": 5 }` y
-`esperaEmote: 15` en el jugador. En enfriamiento: `400` con
-`{ "error": "Espera unos segundos para volver a usar un emote" }`.
+Respuesta `200`: el objeto `Partida` completo. Lo que cambia está en los jugadores:
 
+```json
+{
+  "local": {
+    "lado": "local",
+    "equipo": "bolivar",
+    "tipo": "humano",
+    "dificultad": null,
+    "tirosDePoder": 2,
+    "emote": { "id": "felizEuforico", "segundosRestantes": 5 },
+    "esperaEmote": 15
+  },
+  "visitante": {
+    "lado": "visitante",
+    "equipo": "theStrongest",
+    "tipo": "humano",
+    "dificultad": null,
+    "tirosDePoder": 2,
+    "emote": null,
+    "esperaEmote": 0
+  }
+}
+```
+
+Cada jugador tiene su propia espera: el visitante puede lanzar el suyo aunque el local esté esperando.
+A los 5 segundos `emote` vuelve a `null`, y a los 15 `esperaEmote` llega a `0`. Para las pruebas se
+pueden acortar con `duracionEmoteSegundos` y `esperaEmoteSegundos` al crear la partida.
+
+Errores reales:
+
+| Situación | Código | Respuesta |
+|---|---|---|
+| Otro emote antes de los 15 segundos | `400` | `{ "error": "Espera unos segundos para volver a usar un emote" }` |
+| Por el equipo que maneja el servidor | `400` | `{ "error": "Ese jugador no es tuyo" }` |
+| `"emote": "bailando"` o falta `lado` | `400` | `{ "error": "Ese emote no existe" }` |
+| Partida terminada | `409` | `{ "error": "La partida ya terminó" }` |
+| La partida no existe | `404` | `{ "error": "Esa partida no existe" }` |
