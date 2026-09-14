@@ -39,7 +39,10 @@ export interface Charco {
   id: string;
   tipo: TipoCharco;
   posicion: Vector;
-  radio: number;
+  /** El charco es una elipse de este ancho y este alto, en unidades de cancha. */
+  ancho: number;
+  alto: number;
+  /** Tiros que faltan para que se seque. */
   turnosRestantes: number;
 }
 

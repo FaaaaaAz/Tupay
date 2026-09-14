@@ -1,6 +1,7 @@
 import type { Jugador, Lado, Partida } from "../../../../compartido/partida.js";
 import { redondear } from "../../utilidades/vector.js";
 import { CANCHA } from "../fisica/configuracionFisica.js";
+import { emoteActivo, segundosDeEsperaDelEmote } from "./emotes.js";
 import type { RegistroPartida } from "./partida.js";
 import { relojPublico, segundosRestantesDelTurno } from "./tiempo.js";
 
@@ -14,11 +15,15 @@ export function aPartidaPublica(registro: RegistroPartida, ahora: number): Parti
     estado: registro.estado,
     estadio: registro.estadio,
     cancha: CANCHA,
-    local: jugadorPublico(registro, "local"),
-    visitante: jugadorPublico(registro, "visitante"),
+    local: jugadorPublico(registro, "local", ahora),
+    visitante: jugadorPublico(registro, "visitante", ahora),
     tapitas: registro.tapitas.map((tapita) => ({ ...tapita, posicion: redondear(tapita.posicion) })),
-    pelota: { posicion: redondear(registro.pelota), atrapadaEn: null, golpesParaLiberar: 0 },
-    charcos: [],
+    pelota: {
+      posicion: redondear(registro.pelota),
+      atrapadaEn: registro.pelotaAtrapada?.charco ?? null,
+      golpesParaLiberar: registro.pelotaAtrapada?.golpesParaLiberar ?? 0,
+    },
+    charcos: registro.charcos.map((charco) => ({ ...charco, posicion: redondear(charco.posicion) })),
     turno: {
       lado: registro.turno,
       segundosRestantes: enJuego ? segundosRestantesDelTurno(registro, ahora) : 0,
@@ -31,7 +36,15 @@ export function aPartidaPublica(registro: RegistroPartida, ahora: number): Parti
   };
 }
 
-function jugadorPublico(registro: RegistroPartida, lado: Lado): Jugador {
+function jugadorPublico(registro: RegistroPartida, lado: Lado, ahora: number): Jugador {
   const { equipo, tipo, dificultad, tirosDePoder } = registro.jugadores[lado];
-  return { lado, equipo, tipo, dificultad, tirosDePoder, emote: null, esperaEmote: 0 };
+  return {
+    lado,
+    equipo,
+    tipo,
+    dificultad,
+    tirosDePoder,
+    emote: emoteActivo(registro, lado, ahora),
+    esperaEmote: segundosDeEsperaDelEmote(registro, lado, ahora),
+  };
 }

@@ -1,15 +1,16 @@
 import type { Cuadro, Evento, PeticionTiro } from "../../../../compartido/partida.js";
 import { longitud, redondear } from "../../utilidades/vector.js";
+import { avanzarCharcos, eventosDeCharco } from "../estadios/charcos.js";
 import { ErrorDeJuego } from "../errores.js";
 import { intentarAparicion } from "../eventos/perro.js";
 import { CUADROS_POR_SEGUNDO } from "../fisica/configuracionFisica.js";
-import { simularTiro } from "../fisica/simulacion.js";
 import { MENSAJES } from "../mensajes.js";
-import { decidirTiroDelRival } from "../rival/rivalSimple.js";
+import { decidirTiroDelRival } from "../rival/rivalPorMuestreo.js";
 import { REGLAS } from "./configuracionReglas.js";
 import { CENTRO_DE_LA_CANCHA, formacionInicial } from "./formacion.js";
 import { ladoDelArcoMasCercano, ladoQueAnota, rival } from "./lados.js";
 import { finalizar, type RegistroPartida } from "./partida.js";
+import { simularEnLaPartida } from "./simulacionEnLaPartida.js";
 import { actualizarTiempo } from "./tiempo.js";
 
 export interface ResultadoDelTiro {
@@ -17,33 +18,25 @@ export interface ResultadoDelTiro {
   eventos: Evento[];
 }
 
-/** Valida el tiro, lo simula y aplica sus consecuencias: gol, perro, turno y final. */
+/** Valida el tiro, lo simula y aplica sus consecuencias: charcos, gol, perro, turno y final. */
 export function ejecutarTiro(
   registro: RegistroPartida,
   peticion: PeticionTiro,
   ahora: number,
 ): ResultadoDelTiro {
   const indice = validarTiro(registro, peticion, ahora);
+  if (peticion.tiroDePoder) registro.jugadores[peticion.lado].tirosDePoder -= 1;
 
-  let fuerza = peticion.fuerza;
-  if (peticion.tiroDePoder) {
-    registro.jugadores[peticion.lado].tirosDePoder -= 1;
-    fuerza *= REGLAS.multiplicadorTiroDePoder;
-  }
-
-  const simulacion = simularTiro({
-    tapitas: registro.tapitas.map((tapita) => tapita.posicion),
-    pelota: registro.pelota,
-    tiro: { tapita: indice, direccion: peticion.direccion, fuerza },
-  });
+  const simulacion = simularEnLaPartida(registro, indice, peticion);
 
   let recorrido = simulacion.cuadros;
-  const eventos: Evento[] = [];
+  const eventos = eventosDeCharco(registro.charcos, simulacion.eventosDeCharco);
   registro.tapitas = registro.tapitas.map((tapita, i) => ({
     ...tapita,
     posicion: simulacion.tapitas[i],
   }));
   registro.pelota = simulacion.pelota;
+  registro.pelotaAtrapada = simulacion.pelotaAtrapada;
   registro.turnoVencido = null;
   registro.turno = rival(peticion.lado);
 
@@ -54,6 +47,7 @@ export function ejecutarTiro(
 
     registro.tapitas = formacionInicial();
     registro.pelota = CENTRO_DE_LA_CANCHA;
+    registro.pelotaAtrapada = null;
     registro.turno = rival(anota);
 
     const alcanzoLaMeta =
@@ -74,6 +68,8 @@ export function ejecutarTiro(
     if (aparicion) {
       recorrido = [...recorrido, ...aparicion.cuadros];
       registro.pelota = aparicion.pelota;
+      // Si la pelota estaba en un charco, el perro también la saca de ahí.
+      registro.pelotaAtrapada = null;
       registro.perro.apariciones += 1;
       registro.turno = ladoDelArcoMasCercano(aparicion.pelota) ?? registro.turno;
       eventos.push({
@@ -83,6 +79,8 @@ export function ejecutarTiro(
       });
     }
   }
+
+  if (registro.estado === "enJuego") eventos.push(...avanzarCharcos(registro));
 
   // El reloj del turno siguiente arranca cuando termina la animación, no cuando responde el servidor.
   registro.inicioTurno = ahora + (recorrido.length / CUADROS_POR_SEGUNDO) * 1000;

@@ -1,6 +1,7 @@
-import type { IdEquipo, IdEstadio } from "../../../../compartido/catalogo.js";
+import type { IdEmote, IdEquipo, IdEstadio } from "../../../../compartido/catalogo.js";
 import type { Vector } from "../../../../compartido/geometria.js";
 import type {
+  Charco,
   ConfiguracionJugador,
   Dificultad,
   EstadoPartida,
@@ -15,7 +16,9 @@ import type {
 } from "../../../../compartido/partida.js";
 import { crearAzar, type Azar } from "../../utilidades/azar.js";
 import { EQUIPOS } from "../catalogo.js";
+import { crearCharcosIniciales } from "../estadios/charcos.js";
 import { ErrorDeJuego } from "../errores.js";
+import type { PelotaAtrapada } from "../fisica/charcos.js";
 import { MENSAJES } from "../mensajes.js";
 import { REGLAS } from "./configuracionReglas.js";
 import { CENTRO_DE_LA_CANCHA, formacionInicial } from "./formacion.js";
@@ -25,6 +28,8 @@ export interface JugadorInterno {
   tipo: TipoJugador;
   dificultad: Dificultad | null;
   tirosDePoder: number;
+  /** Último emote lanzado y cuándo. De ahí salen su duración y la espera para el siguiente. */
+  emote: { id: IdEmote; desde: number } | null;
 }
 
 /**
@@ -40,6 +45,11 @@ export interface RegistroPartida {
   jugadores: Record<Lado, JugadorInterno>;
   tapitas: Tapita[];
   pelota: Vector;
+  /** `null` mientras la pelota está libre. */
+  pelotaAtrapada: PelotaAtrapada | null;
+  charcos: Charco[];
+  /** Para darle a cada charco un id que no se repita en la partida. */
+  charcosCreados: number;
   marcador: Marcador;
   turno: Lado;
   /** Cuándo empieza a correr el turno. Queda en el futuro mientras se anima el tiro anterior. */
@@ -52,6 +62,7 @@ export interface RegistroPartida {
   /** Solo en Liga. */
   reloj: { inicio: number; duracionMs: number } | null;
   perro: { activo: boolean; probabilidad: number; apariciones: number };
+  emotes: { duracionMs: number; esperaMs: number };
   resultado: Resultado | null;
   azar: Azar;
 }
@@ -67,7 +78,7 @@ export function crearRegistro(
   const esLiga = peticion.modo === "liga";
   const duracionLigaSegundos = peticion.duracionRealSegundos ?? REGLAS.duracionLigaSegundos;
 
-  return {
+  const registro: RegistroPartida = {
     id,
     modo: peticion.modo,
     estado: "enJuego",
@@ -78,6 +89,9 @@ export function crearRegistro(
     },
     tapitas: formacionInicial(),
     pelota: CENTRO_DE_LA_CANCHA,
+    pelotaAtrapada: null,
+    charcos: [],
+    charcosCreados: 0,
     marcador: { local: 0, visitante: 0 },
     turno: azar() < 0.5 ? "local" : "visitante",
     inicioTurno: ahora,
@@ -90,9 +104,16 @@ export function crearRegistro(
       probabilidad: peticion.probabilidadPerro ?? REGLAS.probabilidadPerro,
       apariciones: 0,
     },
+    emotes: {
+      duracionMs: (peticion.duracionEmoteSegundos ?? REGLAS.duracionEmoteSegundos) * 1000,
+      esperaMs: (peticion.esperaEmoteSegundos ?? REGLAS.esperaEmoteSegundos) * 1000,
+    },
     resultado: null,
     azar,
   };
+  // Después del sorteo del saque: así los charcos no cambian quién saca con cada semilla.
+  crearCharcosIniciales(registro);
+  return registro;
 }
 
 /** Cierra el partido y decide el resultado por el marcador. En Liga puede ser empate. */
@@ -127,15 +148,17 @@ function validarConfiguracion(peticion: PeticionCrearPartida): void {
 
 /** Las opciones de prueba pueden faltar, pero si vienen: duraciones positivas y probabilidad entre 0 y 1. */
 export function validarOpcionesDePrueba(opciones: OpcionesDePrueba): void {
-  const { duracionRealSegundos, limiteTurnoSegundos, probabilidadPerro } = opciones;
-  const esPositivoUOmitido = (valor: number | undefined) => valor === undefined || valor > 0;
+  const { probabilidadPerro } = opciones;
+  const duraciones = [
+    opciones.duracionRealSegundos,
+    opciones.limiteTurnoSegundos,
+    opciones.duracionEmoteSegundos,
+    opciones.esperaEmoteSegundos,
+  ];
+  const duracionesValidas = duraciones.every((valor) => valor === undefined || valor > 0);
   const probabilidadValida =
     probabilidadPerro === undefined || (probabilidadPerro >= 0 && probabilidadPerro <= 1);
-  if (
-    !esPositivoUOmitido(duracionRealSegundos) ||
-    !esPositivoUOmitido(limiteTurnoSegundos) ||
-    !probabilidadValida
-  ) {
+  if (!duracionesValidas || !probabilidadValida) {
     throw new ErrorDeJuego(MENSAJES.configuracionInvalida);
   }
 }
@@ -146,5 +169,6 @@ function crearJugador({ equipo, tipo, dificultad }: ConfiguracionJugador): Jugad
     tipo,
     dificultad: tipo === "servidor" ? (dificultad ?? REGLAS.dificultadPorDefecto) : null,
     tirosDePoder: REGLAS.tirosDePoderPorPartido,
+    emote: null,
   };
 }

@@ -21,6 +21,8 @@ export const MENSAJES = {
   tiempoAgotado: "Se acabó tu tiempo: pierdes el turno",
   tiroInvalido: "Tiro inválido",
   sinTirosDePoder: "Ya no te quedan tiros de poder",
+  esperaEmote: "Espera unos segundos para volver a usar un emote",
+  emoteInvalido: "Ese emote no existe",
   cuerpoNoJson: "El cuerpo de la solicitud no es JSON válido",
   rutaInexistente: "Ruta de API no encontrada",
   errorInterno: "Error interno del servidor",

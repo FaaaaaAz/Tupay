@@ -1,4 +1,4 @@
-import type { Equipo, Estadio, IdEquipo, IdEstadio } from "../../../compartido/catalogo.js";
+import type { Equipo, Estadio, IdEmote, IdEquipo, IdEstadio } from "../../../compartido/catalogo.js";
 
 // Los colores se tomaron de las tapitas de `assets/players`: son los dos tonos que más
 // superficie ocupan en cada una. Agregar o quitar un equipo es cambiar solo este archivo.
@@ -124,6 +124,21 @@ export const ESTADIOS: Record<IdEstadio, Estadio> = {
     efecto: "charcosDeAgua",
   },
 };
+
+/** Las siete caritas. Las imágenes viven en el cliente; aquí solo se valida el nombre. */
+export const EMOTES: readonly IdEmote[] = [
+  "dormido",
+  "enojado",
+  "enojadoSerio",
+  "feliz",
+  "felizEuforico",
+  "llorando",
+  "sorprendido",
+];
+
+export function esIdEmote(valor: unknown): valor is IdEmote {
+  return typeof valor === "string" && (EMOTES as readonly string[]).includes(valor);
+}
 
 export function esIdEquipo(valor: unknown): valor is IdEquipo {
   return typeof valor === "string" && Object.hasOwn(EQUIPOS, valor);
