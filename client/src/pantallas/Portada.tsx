@@ -1,8 +1,14 @@
+import { useEffect } from "react";
+import { precargarImagen } from "../recursos/precargar";
 import { useSalud } from "../hooks/useSalud";
 import { IMAGENES } from "../recursos/indice";
 
 export function Portada({ alIniciar }: { alIniciar: () => void }) {
   const { salud, sinConexion } = useSalud();
+  useEffect(() => {
+    // Primero la portada; luego el menú, sin competir con la imagen principal.
+    void precargarImagen(IMAGENES.inicio).then(() => precargarImagen(IMAGENES.menu));
+  }, []);
 
   let estadoDelServidor = "Conectando con el servidor…";
   if (sinConexion) estadoDelServidor = "Sin conexión con el servidor";

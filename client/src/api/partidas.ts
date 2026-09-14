@@ -9,6 +9,14 @@ import { enviar, obtener } from "./cliente";
 
 const rutaDe = (id: string) => `/partidas/${encodeURIComponent(id)}`;
 
+export function cambiarPausa(id: string, pausada: boolean): Promise<Partida> {
+  return enviar(`${rutaDe(id)}/${pausada ? "pausar" : "reanudar"}`);
+}
+
+export function abandonarPartida(id: string): Promise<{ abandonada: boolean }> {
+  return enviar(`${rutaDe(id)}/abandonar`);
+}
+
 export function crearPartida(peticion: PeticionCrearPartida): Promise<Partida> {
   return enviar("/partidas", peticion);
 }

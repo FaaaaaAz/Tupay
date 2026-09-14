@@ -58,6 +58,7 @@ export function Resultado({ partida, equipos, revancha, alJugarDeNuevo, textoPar
           <button
             type="button"
             className={revancha ? "boton boton--secundario" : "boton boton--principal"}
+            disabled={enviando}
             onClick={alSalir}
           >
             {textoParaSalir}

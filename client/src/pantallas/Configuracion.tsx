@@ -44,7 +44,7 @@ export function Configuracion({ modo, equipos, estadios, alJugar, alVolver }: Pr
           ? { equipo: visitante, tipo: "servidor", dificultad }
           : { equipo: visitante, tipo: "humano" },
       perroActivo,
-      ...(estadio ? { estadio } : {}),
+      estadio: estadioElegido?.id,
       ...(modo === "eliminatoria" ? { golesParaGanar } : { duracionRealSegundos: duracion }),
     };
     const partida = await crear(peticion);
@@ -55,7 +55,7 @@ export function Configuracion({ modo, equipos, estadios, alJugar, alVolver }: Pr
     <main className="fondo-panel">
       <form className="panel configuracion" onSubmit={(evento) => void empezar(evento)}>
         <header className="panel__cabecera">
-          <button type="button" className="boton boton--enlace" onClick={alVolver}>
+          <button type="button" className="boton boton--enlace" disabled={enviando} onClick={alVolver}>
             ← Volver
           </button>
           <h1>{modo === "eliminatoria" ? "Eliminatoria" : "Liga"}</h1>

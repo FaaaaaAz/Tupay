@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { IdEmote } from "../../../compartido/catalogo.js";
 import type {
   Evento,
@@ -14,6 +14,8 @@ import {
   lanzarEmote as pedirEmote,
   obtenerPartida,
   tirar as pedirTiro,
+  cambiarPausa as pedirPausa,
+  abandonarPartida,
 } from "../api/partidas";
 import { useAnimacion } from "./useAnimacion";
 
@@ -50,6 +52,10 @@ function relojDeEmote(jugador: Jugador, recibido: number): RelojDeEmote {
  * Ningún componente visual llama a la API: todo pasa por este hook.
  */
 export function usePartida(inicial: Partida) {
+  const ocupado = useRef(false);
+  const emoteOcupado = useRef(false);
+  const [pausada, setPausada] = useState(inicial.pausada);
+  const [cambiandoPausa, setCambiandoPausa] = useState(false);
   const [partida, setPartida] = useState(inicial);
   /** Cuándo respondió el servidor con este estado: desde ahí corre el reloj de la Liga. */
   const [respondidaEn, setRespondidaEn] = useState(() => Date.now());
@@ -81,15 +87,23 @@ export function usePartida(inicial: Partida) {
   }, []);
 
   const refrescar = useCallback(async () => {
+    if (ocupado.current) return;
+    ocupado.current = true;
+    setEsperando(true);
     try {
       aplicar(await obtenerPartida(partida.id));
     } catch (causa) {
       informarError(causa);
+    } finally {
+      ocupado.current = false;
+      setEsperando(false);
     }
   }, [partida.id, aplicar, informarError]);
 
   const reproducir = useCallback(
     async (pedirJugada: () => Promise<RespuestaTiro>) => {
+      if (ocupado.current) return;
+      ocupado.current = true;
       setEsperando(true);
       setError(null);
       setEventos([]);
@@ -98,8 +112,10 @@ export function usePartida(inicial: Partida) {
       } catch (causa) {
         informarError(causa);
         // Un turno vencido o una partida terminada se entienden mejor con el estado al día.
+        ocupado.current = false;
         await refrescar();
       } finally {
+        ocupado.current = false;
         setEsperando(false);
       }
     },
@@ -113,13 +129,15 @@ export function usePartida(inicial: Partida) {
     setJugada(null);
   }, [jugada, aplicar]);
 
-  const cuadro = useAnimacion(
+  const { cuadro, rotacion } = useAnimacion(
     jugada?.respuesta.recorrido ?? null,
     jugada?.respuesta.cuadrosPorSegundo ?? 0,
     terminarAnimacion,
+    pausada || cambiandoPausa || perdida,
+    partida.cancha.radioPelota,
   );
 
-  const libre = partida.estado === "enJuego" && !perdida && !jugada && !esperando;
+  const libre = partida.estado === "enJuego" && !perdida && !jugada && !esperando && !pausada && !cambiandoPausa;
   const leTocaAlServidor = partida[partida.turno.lado].tipo === "servidor";
 
   const tirar = useCallback(
@@ -133,6 +151,8 @@ export function usePartida(inicial: Partida) {
   /** Se puede en cualquier momento, incluso mientras se anima una jugada: el servidor valida la espera. */
   const lanzarEmote = useCallback(
     async (lado: Lado, emote: IdEmote) => {
+      if (emoteOcupado.current || ocupado.current || pausada || cambiandoPausa || perdida) return;
+      emoteOcupado.current = true;
       setEnviandoEmote(true);
       try {
         const actualizada = await pedirEmote(partida.id, { lado, emote });
@@ -141,11 +161,58 @@ export function usePartida(inicial: Partida) {
       } catch (causa) {
         informarError(causa);
       } finally {
+        emoteOcupado.current = false;
         setEnviandoEmote(false);
       }
     },
-    [partida.id, informarError],
+    [partida.id, informarError, pausada, cambiandoPausa, perdida],
   );
+
+  async function cambiarPausa(valor: boolean): Promise<boolean> {
+    if (ocupado.current || emoteOcupado.current || perdida) return false;
+    ocupado.current = true;
+    setCambiandoPausa(true);
+    setError(null);
+    try {
+      const nueva = await pedirPausa(partida.id, valor);
+      const recibida = Date.now();
+      setPausada(nueva.pausada);
+      setAhora(recibida);
+      setRelojesDeEmote({ local: relojDeEmote(nueva.local, recibida), visitante: relojDeEmote(nueva.visitante, recibida) });
+      if (jugada) {
+        // Express ya tiene el final del tiro, pero la cancha debe conservar el cuadro pausado.
+        setJugada({ respuesta: { ...jugada.respuesta, partida: nueva }, recibidaEn: recibida });
+        setPartida((anterior) => ({ ...anterior, reloj: nueva.reloj }));
+        setRespondidaEn(recibida);
+      } else aplicar(nueva, recibida);
+      return true;
+    } catch (causa) {
+      informarError(causa);
+      // Una respuesta perdida puede ocultar una pausa aceptada. El modal permite reintentar.
+      setPausada(true);
+      return false;
+    } finally {
+      ocupado.current = false;
+      setCambiandoPausa(false);
+    }
+  }
+
+  async function abandonar(): Promise<boolean> {
+    if (ocupado.current) return false;
+    ocupado.current = true;
+    setCambiandoPausa(true);
+    try {
+      await abandonarPartida(partida.id);
+      return true;
+    } catch (causa) {
+      if (causa instanceof ErrorDeApi && causa.estado === 404) return true;
+      informarError(causa);
+      return false;
+    } finally {
+      ocupado.current = false;
+      setCambiandoPausa(false);
+    }
+  }
 
   useEffect(() => {
     if (!libre || !leTocaAlServidor) return;
@@ -157,9 +224,10 @@ export function usePartida(inicial: Partida) {
   }, [libre, leTocaAlServidor, reproducir, partida.id]);
 
   useEffect(() => {
+    if (pausada || cambiandoPausa || perdida) return;
     const intervalo = setInterval(() => setAhora(Date.now()), 250);
     return () => clearInterval(intervalo);
-  }, []);
+  }, [pausada, cambiandoPausa, perdida]);
 
   // Express informa los segundos que quedaban al responder; aquí se descuenta lo que pasó desde entonces.
   const restanteDelTurno = partida.turno.segundosRestantes - Math.max(0, ahora - turnoDesde) / 1000;
@@ -188,6 +256,12 @@ export function usePartida(inicial: Partida) {
   return {
     partida,
     cuadro,
+    rotacion,
+    pausada,
+    cambiandoPausa,
+    puedePausar: !esperando && !enviandoEmote && !cambiandoPausa && !perdida,
+    cambiarPausa,
+    abandonar,
     animando: jugada !== null,
     puedeTirar: libre && !leTocaAlServidor,
     segundosDelTurno: jugada || esperando ? null : Math.max(0, Math.ceil(restanteDelTurno)),
@@ -198,7 +272,7 @@ export function usePartida(inicial: Partida) {
     tirar,
     emotes: { local: emoteVisible("local"), visitante: emoteVisible("visitante") },
     esperaEmote: { local: segundosDeEspera("local"), visitante: segundosDeEspera("visitante") },
-    puedeLanzarEmote: partida.estado === "enJuego" && !perdida && !enviandoEmote,
+    puedeLanzarEmote: partida.estado === "enJuego" && !perdida && !enviandoEmote && !pausada && !cambiandoPausa,
     lanzarEmote,
   };
 }

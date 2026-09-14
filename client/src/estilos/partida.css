@@ -5,6 +5,31 @@
   background: #06120b;
 }
 
+.partida__acciones { display: flex; align-items: center; gap: 0.5rem; }
+.partida--pausada .cancha * { animation-play-state: paused; }
+.pelota__imagen {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: rotate(var(--rotacion-pelota, 0deg));
+  pointer-events: none;
+}
+
+@media (max-width: 1400px) {
+  .marcador .marcador__equipo { flex-wrap: wrap; gap: 0.4rem; padding: 0.3rem; }
+  .partida .partida__pie { gap: 0.6rem; padding: 0.5rem 0.7rem; }
+  .partida__pie .boton { padding: 0.6rem 0.8rem; }
+  .partida__pie .mensaje { font-size: 0.85rem; }
+}
+@media (max-width: 900px) {
+  .partida .partida__pie { grid-template-columns: 1fr auto; }
+  .partida__pie .mensaje { grid-column: 1; }
+  .marcador .marcador__rol { display: none; }
+  .marcador .emotes { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pelota__imagen { transform: none; }
+}
+
 /* Marcador */
 
 .marcador {

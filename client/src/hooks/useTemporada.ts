@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Partida } from "../../../compartido/partida.js";
 import type { ControlDelRival, Temporada } from "../../../compartido/temporada.js";
 import { jugarPartidoDeTemporada, obtenerTemporada } from "../api/temporadas";
 
 /** Carga la temporada al entrar: Express aprovecha la consulta para anotar los partidos que terminaron. */
 export function useTemporada(id: string) {
+  const ocupado = useRef(false);
   const [temporada, setTemporada] = useState<Temporada | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -25,6 +26,8 @@ export function useTemporada(id: string) {
 
   const jugar = useCallback(
     async (partidoId: string, rivalControladoPor?: ControlDelRival): Promise<Partida | null> => {
+      if (ocupado.current) return null;
+      ocupado.current = true;
       setEnviando(true);
       setError(null);
       try {
@@ -35,6 +38,7 @@ export function useTemporada(id: string) {
         setError(causa instanceof Error ? causa.message : "No se pudo empezar el partido");
         return null;
       } finally {
+        ocupado.current = false;
         setEnviando(false);
       }
     },

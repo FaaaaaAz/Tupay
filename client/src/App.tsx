@@ -104,6 +104,7 @@ export function App() {
         <Partida
           key={pantalla.partida.id}
           partidaInicial={pantalla.partida}
+          esTemporada={pantalla.origen.tipo === "temporada"}
           equipos={catalogo.equipos}
           alTerminar={(partida) => setPantalla({ tipo: "resultado", partida, origen: pantalla.origen })}
           alSalir={() => volverAlOrigen(pantalla.origen)}

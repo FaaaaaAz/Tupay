@@ -37,7 +37,7 @@ export function ConfigurarTemporada({ equipos, alEmpezar, alVolver }: Props) {
     <main className="fondo-panel">
       <form className="panel configuracion" onSubmit={(evento) => void empezar(evento)}>
         <header className="panel__cabecera">
-          <button type="button" className="boton boton--enlace" onClick={alVolver}>
+          <button type="button" className="boton boton--enlace" disabled={enviando} onClick={alVolver}>
             ← Volver
           </button>
           <h1>Temporada</h1>

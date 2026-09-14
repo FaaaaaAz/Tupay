@@ -9,6 +9,7 @@ import type {
 } from "../../../compartido/partida.js";
 import { BarraDeEmotes } from "../componentes/BarraDeEmotes";
 import { Cancha } from "../componentes/Cancha";
+import { Modal } from "../componentes/Modal";
 import { equipoPorId } from "../hooks/useCatalogo";
 import { usePartida, type TiroDesdeLaCancha } from "../hooks/usePartida";
 import { IMAGEN_DE_ESCUDO } from "../recursos/indice";
@@ -21,12 +22,18 @@ interface Props {
   equipos: Equipo[];
   alTerminar: (partida: DatosPartida) => void;
   alSalir: () => void;
+  esTemporada: boolean;
 }
 
-export function Partida({ partidaInicial, equipos, alTerminar, alSalir }: Props) {
+export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTemporada }: Props) {
   const juego = usePartida(partidaInicial);
   const { partida } = juego;
   const [tiroDePoder, setTiroDePoder] = useState(false);
+  const [modal, setModal] = useState<"pausa" | "salir" | null>(null);
+  const [volverAPausa, setVolverAPausa] = useState(false);
+  // La selección de poder no se hereda cuando se agota un turno.
+  const [turnoDelPoder, setTurnoDelPoder] = useState(partida.turno);
+  const poderVigente = tiroDePoder && turnoDelPoder === partida.turno;
 
   const equipoDe = (lado: Lado) => equipoPorId(equipos, partida[lado].equipo);
   const ladoDelTurno = partida.turno.lado;
@@ -34,18 +41,36 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir }: Props)
   const terminada = partida.estado === "finalizada" && !juego.animando;
 
   useEffect(() => {
-    if (!terminada) return;
+    if (!terminada || modal || juego.pausada || juego.cambiandoPausa) return;
     const espera = setTimeout(() => alTerminar(partida), PAUSA_ANTES_DEL_RESULTADO_MS);
     return () => clearTimeout(espera);
-  }, [terminada, partida, alTerminar]);
+  }, [terminada, partida, alTerminar, modal, juego.pausada, juego.cambiandoPausa]);
+
+  useEffect(() => {
+    function tecla(evento: KeyboardEvent) {
+      if (evento.key !== "Escape" || modal || juego.perdida || terminada || !juego.puedePausar) return;
+      evento.preventDefault();
+      setModal("pausa");
+      void juego.cambiarPausa(true);
+    }
+    window.addEventListener("keydown", tecla);
+    return () => window.removeEventListener("keydown", tecla);
+  }, [juego, modal, terminada]);
 
   function tirar(tiro: TiroDesdeLaCancha) {
-    juego.tirar({ ...tiro, tiroDePoder });
+    juego.tirar({ ...tiro, tiroDePoder: poderVigente });
     setTiroDePoder(false);
   }
 
   function salir() {
-    if (window.confirm("¿Salir del partido? Se va a perder el marcador.")) alSalir();
+    setVolverAPausa(modal === "pausa");
+    setModal("salir");
+    if (!juego.pausada) void juego.cambiarPausa(true);
+  }
+
+  async function continuar() {
+    if (modal === "salir" && volverAPausa) { setModal("pausa"); return; }
+    if (await juego.cambiarPausa(false)) setModal(null);
   }
 
   /** Solo las personas tienen caritas: el equipo del servidor no las usa. */
@@ -67,7 +92,7 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir }: Props)
     instruccion(juego.puedeTirar, juego.animando, jugadorDelTurno, equipoDe(ladoDelTurno).nombre, partida.pelota);
 
   return (
-    <main className="partida">
+    <main className={juego.pausada || modal ? "partida partida--pausada" : "partida"}>
       <header className="marcador">
         <EquipoEnMarcador
           equipo={equipoDe("local")}
@@ -99,8 +124,9 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir }: Props)
         <Cancha
           partida={partida}
           cuadro={juego.cuadro}
-          puedeApuntar={juego.puedeTirar}
-          tiroDePoder={tiroDePoder}
+          rotacionPelota={juego.rotacion}
+          puedeApuntar={juego.puedeTirar && !modal}
+          tiroDePoder={poderVigente}
           emotes={juego.emotes}
           alTirar={tirar}
         />
@@ -132,9 +158,9 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir }: Props)
         <button
           type="button"
           className="boton boton--secundario boton--poder"
-          aria-pressed={tiroDePoder}
+          aria-pressed={poderVigente}
           disabled={!juego.puedeTirar || jugadorDelTurno.tirosDePoder === 0}
-          onClick={() => setTiroDePoder((activo) => !activo)}
+          onClick={() => { setTurnoDelPoder(partida.turno); setTiroDePoder(!poderVigente); }}
         >
           Tiro de poder ({jugadorDelTurno.tirosDePoder})
         </button>
@@ -143,24 +169,46 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir }: Props)
           {mensaje}
         </p>
 
-        <button type="button" className="boton boton--enlace" onClick={salir}>
-          Salir
-        </button>
+        <div className="partida__acciones">
+          <button type="button" className="boton boton--secundario" disabled={!juego.puedePausar || terminada}
+            onClick={() => { setModal("pausa"); void juego.cambiarPausa(true); }}>
+            <span aria-hidden="true">Ⅱ </span>Pausar
+          </button>
+          <button type="button" className="boton boton--enlace" disabled={!juego.puedePausar} onClick={salir}>Salir</button>
+        </div>
       </footer>
 
       {juego.perdida && (
-        <div className="aviso-perdida" role="alertdialog" aria-labelledby="titulo-perdida">
-          <div className="panel">
-            <h2 id="titulo-perdida">Esta partida ya no existe</h2>
-            <p>
-              El servidor se reinició y las partidas se guardan en memoria. Empieza una nueva desde el
-              menú.
-            </p>
+        <Modal titulo="Esta partida ya no existe" detalle="No pudimos recuperar el partido. Puedes volver y empezar uno nuevo." alCancelar={alSalir}>
             <button type="button" className="boton boton--principal" onClick={alSalir}>
-              Ir al menú
+              {esTemporada ? "Volver a la temporada" : "Ir al menú"}
             </button>
-          </div>
-        </div>
+        </Modal>
+      )}
+      {modal && !juego.perdida && (
+        <Modal titulo={modal === "salir" ? "¿Abandonar el partido?" : "Partido en pausa"}
+          detalle={modal === "salir"
+            ? esTemporada
+              ? "Si el partido no terminó, el marcador se descarta y podrás volver a jugarlo desde la temporada. Los resultados ya confirmados se conservan."
+              : "Perderás el progreso de este partido y volverás al menú."
+            : juego.error
+              ? "No pudimos confirmar el estado del partido. Reintenta reanudar cuando vuelva la conexión."
+              : juego.cambiandoPausa
+                ? "Estamos sincronizando la pausa. Un momento…"
+                : "Respira, prepara tu próxima jugada y vuelve a la cancha. El tiempo está detenido."}
+          ocupado={juego.cambiandoPausa} alCancelar={() => void continuar()}>
+          <div className="modal__marcador" aria-label="Marcador actual">{equipoDe("local").nombre}<strong>{partida.marcador.local} – {partida.marcador.visitante}</strong>{equipoDe("visitante").nombre}</div>
+          {juego.error && <p role="alert" className="mensaje mensaje--error">{juego.error}</p>}
+          <button type="button" className="boton boton--principal" disabled={juego.cambiandoPausa} onClick={() => void continuar()}>
+            {modal === "salir" ? "Seguir jugando" : "Reanudar partido"}
+          </button>
+          <button type="button" className={modal === "salir" ? "boton boton--peligro" : "boton boton--secundario"}
+            disabled={juego.cambiandoPausa} onClick={modal === "salir"
+              ? () => { void juego.abandonar().then((salio) => { if (salio) alSalir(); }); }
+              : salir}>
+            {modal === "salir" ? "Sí, abandonar" : "Salir del partido"}
+          </button>
+        </Modal>
       )}
     </main>
   );

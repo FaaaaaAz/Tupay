@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import type { IdEmote } from "../../../compartido/catalogo.js";
 import type { Vector } from "../../../compartido/geometria.js";
 import type { Cuadro, Lado, Partida, Tapita } from "../../../compartido/partida.js";
@@ -22,6 +22,7 @@ interface Props {
   partida: Partida;
   /** Cuadro de la animación en curso, o `null` si no se está reproduciendo ninguna jugada. */
   cuadro: Cuadro | null;
+  rotacionPelota: number;
   puedeApuntar: boolean;
   tiroDePoder: boolean;
   /** La carita que se ve sobre las tapitas de cada jugador. */
@@ -32,17 +33,27 @@ interface Props {
 interface Apuntado {
   tapita: Tapita;
   puntero: Vector;
+  pointerId: number;
 }
 
 /**
  * Dibuja la cancha en SVG y convierte el arrastre sobre una tapita en un tiro. No decide
  * nada del juego: muestra el estado que llegó de Express o el cuadro que se está animando.
  */
-export function Cancha({ partida, cuadro, puedeApuntar, tiroDePoder, emotes, alTirar }: Props) {
+export function Cancha({ partida, cuadro, rotacionPelota, puedeApuntar, tiroDePoder, emotes, alTirar }: Props) {
   const { cancha } = partida;
   const geometria = useMemo(() => geometriaDeLaCancha(cancha), [cancha]);
   const grupo = useRef<SVGGElement>(null);
   const [apuntado, setApuntado] = useState<Apuntado | null>(null);
+  const gesto = useRef<Apuntado | null>(null);
+  function cancelar() { gesto.current = null; setApuntado(null); }
+  useEffect(() => {
+    cancelar();
+  }, [puedeApuntar, partida.turno]);
+  useEffect(() => {
+    window.addEventListener("blur", cancelar);
+    return () => window.removeEventListener("blur", cancelar);
+  }, []);
 
   const quieta = cuadro === null && partida.estado === "enJuego";
   const apuntadoVigente = puedeApuntar ? apuntado : null;
@@ -61,22 +72,28 @@ export function Cancha({ partida, cuadro, puedeApuntar, tiroDePoder, emotes, alT
   }
 
   function empezarAApuntar(evento: PointerEvent<SVGGElement>, tapita: Tapita) {
+    if (evento.button !== 0 || !evento.isPrimary || gesto.current) return;
     const puntero = enUnidadesDeCancha(evento);
     if (!puntero) return;
     evento.currentTarget.ownerSVGElement?.setPointerCapture(evento.pointerId);
-    setApuntado({ tapita, puntero });
+    gesto.current = { tapita, puntero, pointerId: evento.pointerId };
+    setApuntado(gesto.current);
   }
 
   function seguirApuntando(evento: PointerEvent<SVGSVGElement>) {
-    if (!apuntado) return;
+    if (!gesto.current || evento.pointerId !== gesto.current.pointerId) return;
     const puntero = enUnidadesDeCancha(evento);
-    if (puntero) setApuntado({ tapita: apuntado.tapita, puntero });
+    if (puntero) { gesto.current = { ...gesto.current, puntero }; setApuntado(gesto.current); }
   }
 
-  function soltar() {
-    const tiro = apuntadoVigente && calcularTiro(apuntadoVigente);
-    if (apuntadoVigente && tiro) alTirar({ tapita: apuntadoVigente.tapita.id, ...tiro });
-    setApuntado(null);
+  function soltar(evento: PointerEvent<SVGSVGElement>) {
+    const actual = gesto.current;
+    if (!actual || actual.pointerId !== evento.pointerId) return;
+    const puntero = enUnidadesDeCancha(evento) ?? actual.puntero;
+    const tiro = puedeApuntar && actual.tapita.lado === partida.turno.lado && calcularTiro({ ...actual, puntero });
+    cancelar();
+    if (evento.currentTarget.hasPointerCapture(evento.pointerId)) evento.currentTarget.releasePointerCapture(evento.pointerId);
+    if (tiro) alTirar({ tapita: actual.tapita.id, ...tiro });
   }
 
   return (
@@ -88,7 +105,8 @@ export function Cancha({ partida, cuadro, puedeApuntar, tiroDePoder, emotes, alT
       aria-label="Cancha de juego"
       onPointerMove={seguirApuntando}
       onPointerUp={soltar}
-      onPointerCancel={() => setApuntado(null)}
+      onPointerCancel={cancelar}
+      onLostPointerCapture={cancelar}
     >
       <image
         href={IMAGEN_DE_ESTADIO[partida.estadio]}
@@ -173,7 +191,12 @@ export function Cancha({ partida, cuadro, puedeApuntar, tiroDePoder, emotes, alT
         )}
 
         {/* La pelota nunca se superpone con una tapita, así que puede ir encima: se ve en la boca del perro. */}
-        <Sprite href={IMAGENES.pelota} centro={pelota} tamano={geometria.tamanoPelota} testId="pelota" />
+        <g transform={`translate(${pelota.x} ${pelota.y})`}>
+          <image href={IMAGENES.pelota} className="pelota__imagen" data-testid="pelota"
+            x={-geometria.tamanoPelota / 2} y={-geometria.tamanoPelota / 2}
+            width={geometria.tamanoPelota} height={geometria.tamanoPelota}
+            style={{ "--rotacion-pelota": `${rotacionPelota}deg` } as CSSProperties} />
+        </g>
 
         {/* Los arcos van encima de todo: así la pelota se ve entrando dentro de la red. */}
         <image href={IMAGENES.arco} x={arco.x} y={arco.y} width={arco.ancho} height={arco.alto} />

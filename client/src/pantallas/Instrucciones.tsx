@@ -33,6 +33,13 @@ export function Instrucciones({ alVolver }: { alVolver: () => void }) {
           </li>
         </ul>
 
+        <h2>Pausar y salir</h2>
+        <p>
+          Pulsa <strong>Pausar</strong> o <strong>Esc</strong> para detener el partido, incluso mientras
+          las tapitas se mueven. Reanudar continúa desde ese instante. Al salir, puedes confirmar o
+          seguir jugando; en una temporada, un partido abandonado sin terminar vuelve a quedar pendiente.
+        </p>
+
         <h2>Los modos</h2>
         <ul>
           <li>

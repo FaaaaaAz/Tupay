@@ -57,7 +57,7 @@ export function Temporada({ temporadaId, equipos, alJugar, alIrAlMenu }: Props) 
     <main className="fondo-panel">
       <section className="panel temporada">
         <header className="panel__cabecera">
-          <button type="button" className="boton boton--enlace" onClick={alIrAlMenu}>
+          <button type="button" className="boton boton--enlace" disabled={enviando} onClick={alIrAlMenu}>
             ← Menú
           </button>
           <h1>Temporada</h1>
