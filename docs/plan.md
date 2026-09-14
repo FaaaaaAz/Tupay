@@ -152,7 +152,7 @@ Las dependencias del backend avanzan en un solo sentido: `rutas → servicios �
 | Azar con semilla | Hace reproducibles los eventos variables, el rival y las pruebas. |
 | Repositorio en memoria | Suficiente para el alcance del examen; se documenta como limitación. |
 | Temporada como capa sobre la partida | El calendario y la tabla son datos y orquestación; el partido en sí sigue siendo el mismo motor de física y reglas. |
-| Originales en `assets/`, versiones web en `client/src/recursos/` | Los originales pesan 46 MB y no deben publicarse; `scripts/optimizar-recursos.mjs` genera las versiones WebP (2,2 MB en total) que sí se empaquetan. Vite les pone hash y el navegador las cachea. |
+| Originales en `assets/`, versiones web en `client/src/recursos/` | Los originales pesan 60,1 MB y no deben publicarse; `scripts/optimizar-recursos.mjs` genera las versiones WebP (2,4 MB en total) que sí se empaquetan. Vite les pone hash y el navegador las cachea. |
 | Arcos como imagen sobrepuesta | Dibujar el arco por encima de todo crea el efecto de que la pelota entra al arco. El mismo archivo sirve para los dos lados: se voltea en espejo horizontal, no se rota. |
 | Partidos sin humanos resueltos por simulación rápida | Evita que jugar una Liga completa signifique jugar decenas de partidos que nadie observaría. |
 | CSS propio, sin React Router ni librerías de estado | Cumple la restricción del examen de no usar frameworks o bibliotecas externas para la interfaz. |

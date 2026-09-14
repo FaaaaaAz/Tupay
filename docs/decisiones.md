@@ -124,10 +124,10 @@ movimiento: no se nota.
 
 ### Recursos: originales pesados, versiones livianas
 
-**Decisión.** `assets/` guarda los originales (46 MB) y no se publica; `client/src/recursos/` tiene
-las versiones WebP que usa el juego (2,2 MB), generadas con `scripts/optimizar-recursos.mjs`.
+**Decisión.** `assets/` guarda los originales (60,1 MB) y no se publica; `client/src/recursos/` tiene
+las versiones WebP que usa el juego (2,4 MB), generadas con `scripts/optimizar-recursos.mjs`.
 
-**Por qué.** Las tapitas venían en 1254 px y se ven a unos 50 px en la cancha. Publicar 46 MB en el
+**Por qué.** Las tapitas venían en 1254 px y se ven a unos 50 px en la cancha. Publicar 60,1 MB en el
 plan gratuito de Render haría que la primera carga tardara una eternidad, justo durante la defensa.
 
 **Autoría.** Todas las imágenes son ilustraciones propias generadas para este proyecto. Ningún equipo
@@ -717,6 +717,28 @@ visible contra producción: todas en verde. Una primera ejecución de la defensa
 de Chrome se cerró mientras corría; la traza mostraba "Target page, context or browser has been closed",
 y sola volvió a pasar.
 
+## Decisiones de la Fase 10: experiencia de usuario
+
+### Los escudos identifican al equipo; las tapitas se juegan
+
+**Decisión.** Cada equipo tiene ahora un escudo propio, en `client/src/recursos/escudos/`. Se usa en
+todo lo que identifica a un equipo: el selector de la configuración, el marcador, el resultado, el
+campeón, el próximo partido, la tabla y el calendario. En la cancha siguen las tapitas.
+
+**Por qué.** La tapita es la ficha del juego: en la configuración o en la tabla se leía como una pieza
+suelta, no como el club. El escudo lleva el nombre del equipo y se reconoce aunque se vea chico, y en
+el calendario, donde antes solo había texto, deja ver de un vistazo quién juega con quién.
+
+**Recursos.** Los diez originales de `assets/teams/` pesaban cerca de 14 MB. El script
+`scripts/optimizar-recursos.mjs` los recorta al contenido y los encaja en 256 × 256 px en WebP: 280 kB
+entre los diez. El script ahora acepta el nombre de un grupo (`node scripts/optimizar-recursos.mjs
+escudos`), para no regenerar las imágenes que no cambiaron.
+
+**Autoría.** Igual que el resto de las imágenes, los escudos se generaron con gpt-image de OpenAI a
+partir de las indicaciones del autor; lo registra el manifiesto C2PA de cada PNG. Son diseños
+ilustrados para el juego, con los colores y el nombre de cada club, y siguen el criterio de
+`docs/introduccion.md`: que se reconozca al equipo sin copiar su escudo oficial.
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano
@@ -796,3 +818,4 @@ necesitara servicios adicionales.
 | `juego.spec.ts` se repartió en un archivo por tarea de la Fase 9 | Cada prueba se puede señalar en la defensa por lo que demuestra: inicio, interacción, validación, finalización y recorrido. |
 | Las trazas se guardan en toda prueba que falla, no solo en el reintento | Sin reintentos en local no quedaba ninguna traza, y fue una traza la que explicó la falla de la animación. |
 | El deploy también prueba la URL pública | Probar solo antes del deploy no demuestra que la versión publicada funcione. |
+| Los escudos reemplazan a las tapitas fuera de la cancha | La tapita es la ficha del juego; el escudo identifica al club en el marcador, la temporada y el resultado. |

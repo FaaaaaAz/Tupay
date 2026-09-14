@@ -222,13 +222,14 @@ están en `docs/introduccion.md` y en `docs/decisiones.md`.
 
 ### Recursos
 
-Los originales sin comprimir están en `assets/` y pesan 46 MB; no se publican. Las versiones que usa
-el juego están en `client/src/recursos/` y pesan 2,2 MB en total, generadas con
+Los originales sin comprimir están en `assets/` y pesan 60,1 MB; no se publican. Las versiones que usa
+el juego están en `client/src/recursos/` y pesan 2,4 MB en total, generadas con
 `scripts/optimizar-recursos.mjs`.
 
 | Carpeta | Contenido | Medida |
 |---|---|---|
-| `equipos/` | las 10 tapitas | 256 × 256 |
+| `equipos/` | las 10 tapitas: las fichas de la cancha | 256 × 256 |
+| `escudos/` | los 10 escudos: identifican a cada equipo fuera de la cancha | 256 × 256 |
 | `estadios/` | los 6 estadios | 1672 × 941 |
 | `pantallas/` | portada y menú | 1672 × 941 |
 | `juego/` | pelota, perro, arco, charcos de agua y de nieve | según elemento |

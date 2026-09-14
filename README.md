@@ -56,7 +56,8 @@ un script que se corre a mano, solo cuando cambia algún original:
 
 ```bash
 npm install --no-save sharp
-node scripts/optimizar-recursos.mjs
+node scripts/optimizar-recursos.mjs            # todos los grupos
+node scripts/optimizar-recursos.mjs escudos    # solo los grupos nombrados
 ```
 
 `sharp` no es dependencia del proyecto: hace falta para regenerar las imágenes, no para compilar
