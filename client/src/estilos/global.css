@@ -310,7 +310,7 @@ input[type="checkbox"] {
   border-radius: 0.9rem;
 }
 
-.selector-equipo__tapita {
+.selector-equipo__escudo {
   width: 5.5rem;
   height: 5.5rem;
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
@@ -597,8 +597,22 @@ input[type="checkbox"] {
   gap: 0.5rem;
 }
 
-.calendario__partido span:first-child {
+.calendario__equipo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.calendario__equipo--local {
+  justify-content: flex-end;
   text-align: right;
+}
+
+.calendario__equipo img {
+  flex: none;
+  width: 1.35rem;
+  height: 1.35rem;
 }
 
 .calendario__partido small {

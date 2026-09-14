@@ -8,7 +8,7 @@ import type {
 } from "../../../compartido/temporada.js";
 import { equipoPorId } from "../hooks/useCatalogo";
 import { useTemporada } from "../hooks/useTemporada";
-import { IMAGEN_DE_EQUIPO } from "../recursos/indice";
+import { IMAGEN_DE_ESCUDO } from "../recursos/indice";
 
 type Nombre = (equipo: IdEquipo) => string;
 
@@ -70,7 +70,7 @@ export function Temporada({ temporadaId, equipos, alJugar, alIrAlMenu }: Props) 
 
         {temporada.campeon && (
           <div className="temporada__campeon" data-testid="campeon">
-            <img src={IMAGEN_DE_EQUIPO[temporada.campeon]} alt="" />
+            <img src={IMAGEN_DE_ESCUDO[temporada.campeon]} alt="" />
             <p>¡{nombre(temporada.campeon)} es el campeón!</p>
           </div>
         )}
@@ -139,11 +139,11 @@ export function Temporada({ temporadaId, equipos, alJugar, alIrAlMenu }: Props) 
 function Cruce({ partido, nombre }: { partido: PartidoDeTemporada; nombre: Nombre }) {
   return (
     <div className="cruce">
-      <img src={IMAGEN_DE_EQUIPO[partido.local]} alt="" />
+      <img src={IMAGEN_DE_ESCUDO[partido.local]} alt="" />
       <span>{nombre(partido.local)}</span>
       <span className="cruce__vs">vs</span>
       <span>{nombre(partido.visitante)}</span>
-      <img src={IMAGEN_DE_EQUIPO[partido.visitante]} alt="" />
+      <img src={IMAGEN_DE_ESCUDO[partido.visitante]} alt="" />
     </div>
   );
 }
@@ -187,7 +187,7 @@ function TablaDePosiciones({ temporada, nombre }: { temporada: DatosTemporada; n
               <td>{posicion + 1}</td>
               <td className="tabla__equipo">
                 <span className="tabla__nombre">
-                  <img src={IMAGEN_DE_EQUIPO[fila.equipo]} alt="" />
+                  <img src={IMAGEN_DE_ESCUDO[fila.equipo]} alt="" />
                   {nombre(fila.equipo)}
                 </span>
               </td>
@@ -227,11 +227,17 @@ function Calendario({ temporada, nombre }: { temporada: DatosTemporada; nombre: 
                 .filter((partido) => partido.jornada === jornada)
                 .map((partido) => (
                   <li key={partido.id} className={`calendario__partido calendario__partido--${partido.estado}`}>
-                    <span>{nombre(partido.local)}</span>
+                    <span className="calendario__equipo calendario__equipo--local">
+                      {nombre(partido.local)}
+                      <img src={IMAGEN_DE_ESCUDO[partido.local]} alt="" />
+                    </span>
                     <strong>
                       {partido.marcador ? `${partido.marcador.local} – ${partido.marcador.visitante}` : "vs"}
                     </strong>
-                    <span>{nombre(partido.visitante)}</span>
+                    <span className="calendario__equipo">
+                      <img src={IMAGEN_DE_ESCUDO[partido.visitante]} alt="" />
+                      {nombre(partido.visitante)}
+                    </span>
                     <small>{partido.estado === "simulado" ? "sim." : ""}</small>
                   </li>
                 ))}

@@ -11,7 +11,7 @@ import { BarraDeEmotes } from "../componentes/BarraDeEmotes";
 import { Cancha } from "../componentes/Cancha";
 import { equipoPorId } from "../hooks/useCatalogo";
 import { usePartida, type TiroDesdeLaCancha } from "../hooks/usePartida";
-import { IMAGEN_DE_EQUIPO } from "../recursos/indice";
+import { IMAGEN_DE_ESCUDO } from "../recursos/indice";
 
 /** Tiempo para ver la última jugada antes de pasar a la pantalla de resultado. */
 const PAUSA_ANTES_DEL_RESULTADO_MS = 1800;
@@ -181,7 +181,7 @@ function EquipoEnMarcador({ equipo, jugador, activo, children }: PropsEquipo) {
 
   return (
     <div className={clases} style={{ "--color-equipo": equipo.colorPrincipal } as CSSProperties}>
-      <img className="marcador__tapita" src={IMAGEN_DE_EQUIPO[equipo.id]} alt="" />
+      <img className="marcador__escudo" src={IMAGEN_DE_ESCUDO[equipo.id]} alt="" />
       <div>
         <span className="marcador__nombre">{equipo.nombre}</span>
         <span className="marcador__rol">

@@ -2,7 +2,7 @@ import type { Equipo } from "../../../compartido/catalogo.js";
 import type { Lado, Partida, PeticionCrearPartida } from "../../../compartido/partida.js";
 import { equipoPorId } from "../hooks/useCatalogo";
 import { useCrearPartida } from "../hooks/useCrearPartida";
-import { IMAGEN_DE_EQUIPO } from "../recursos/indice";
+import { IMAGEN_DE_ESCUDO } from "../recursos/indice";
 
 interface Props {
   partida: Partida;
@@ -71,7 +71,7 @@ export function Resultado({ partida, equipos, revancha, alJugarDeNuevo, textoPar
 function EquipoFinal({ equipo, gano }: { equipo: Equipo; gano: boolean }) {
   return (
     <div className={gano ? "resultado__equipo resultado__equipo--ganador" : "resultado__equipo"}>
-      <img src={IMAGEN_DE_EQUIPO[equipo.id]} alt="" />
+      <img src={IMAGEN_DE_ESCUDO[equipo.id]} alt="" />
       <span>{equipo.nombre}</span>
     </div>
   );

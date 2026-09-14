@@ -7,6 +7,16 @@ import feliz from "./emotes/feliz.webp";
 import felizEuforico from "./emotes/felizEuforico.webp";
 import llorando from "./emotes/llorando.webp";
 import sorprendido from "./emotes/sorprendido.webp";
+import escudoAlwaysReady from "./escudos/alwaysReady.webp";
+import escudoAurora from "./escudos/aurora.webp";
+import escudoBlooming from "./escudos/blooming.webp";
+import escudoBolivar from "./escudos/bolivar.webp";
+import escudoNacionalPotosi from "./escudos/nacionalPotosi.webp";
+import escudoOrientePetrolero from "./escudos/orientePetrolero.webp";
+import escudoRealPotosi from "./escudos/realPotosi.webp";
+import escudoSanJose from "./escudos/sanJose.webp";
+import escudoTheStrongest from "./escudos/theStrongest.webp";
+import escudoWilstermann from "./escudos/wilstermann.webp";
 import alwaysReady from "./equipos/alwaysReady.webp";
 import aurora from "./equipos/aurora.webp";
 import blooming from "./equipos/blooming.webp";
@@ -34,6 +44,7 @@ import menu from "./pantallas/menu.webp";
 // Vite les agrega un hash a las imágenes importadas, así el navegador puede guardarlas en caché.
 // Si falta la imagen de un equipo, estadio, emote o charco del contrato, TypeScript no compila.
 
+/** La tapita de cada equipo: la ficha que se mueve en la cancha. */
 export const IMAGEN_DE_EQUIPO: Record<IdEquipo, string> = {
   alwaysReady,
   aurora,
@@ -45,6 +56,20 @@ export const IMAGEN_DE_EQUIPO: Record<IdEquipo, string> = {
   sanJose,
   theStrongest,
   wilstermann,
+};
+
+/** El escudo de cada equipo: lo identifica en el marcador, la configuración, el resultado y la temporada. */
+export const IMAGEN_DE_ESCUDO: Record<IdEquipo, string> = {
+  alwaysReady: escudoAlwaysReady,
+  aurora: escudoAurora,
+  blooming: escudoBlooming,
+  bolivar: escudoBolivar,
+  nacionalPotosi: escudoNacionalPotosi,
+  orientePetrolero: escudoOrientePetrolero,
+  realPotosi: escudoRealPotosi,
+  sanJose: escudoSanJose,
+  theStrongest: escudoTheStrongest,
+  wilstermann: escudoWilstermann,
 };
 
 export const IMAGEN_DE_ESTADIO: Record<IdEstadio, string> = {

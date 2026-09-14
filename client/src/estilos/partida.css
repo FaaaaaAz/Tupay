@@ -41,7 +41,7 @@
   box-shadow: 0 0 18px color-mix(in srgb, var(--color-equipo) 55%, transparent);
 }
 
-.marcador__tapita {
+.marcador__escudo {
   width: 2.6rem;
   height: 2.6rem;
 }
