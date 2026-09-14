@@ -9,6 +9,9 @@ capturadas contra el servidor local el 13 de septiembre de 2026 (tarea 5.9 del p
 rival por muestreo y emotes se capturaron el 14 de septiembre, al terminar la Fase 8. Solo se
 compactó el formato de algunos arreglos para que entren en pantalla; los valores no se tocaron.
 
+Desde la tarea 10.3, toda respuesta de tipo `Partida` incluye además `pausada: boolean` (inicialmente
+`false`). Los ejemplos históricos anteriores se conservan como evidencia de aquellas versiones.
+
 ## Convenciones
 
 - Base: la misma dirección que sirve el frontend. En producción, `https://tupay.onrender.com`.
@@ -28,8 +31,38 @@ compactó el formato de algunos arreglos para que entren en pantalla; los valore
 | `201` | Partida creada. |
 | `400` | Acción inválida o cuerpo con forma incorrecta. |
 | `404` | No existe la partida o la ruta. |
-| `409` | La partida ya terminó. |
+| `409` | La partida ya terminó o se intenta jugar mientras está pausada. |
 | `500` | Error inesperado del servidor. El detalle queda en el log, nunca en la respuesta. |
+
+## Pausa y salida (tareas 10.2–10.3)
+
+Estas acciones usan `POST` con cuerpo `{}` y devuelven JSON. Funcionan en Eliminatoria, Liga suelta
+y los partidos de temporada; no crean un resultado nuevo ni reinician el reloj del turno.
+
+| Ruta | Respuesta `200` | Comportamiento |
+|---|---|---|
+| `/api/partidas/:id/pausar` | `Partida` con `pausada: true` | Actualiza el tiempo vencido antes de pausar; congela turno, Liga y emotes desde ese instante. |
+| `/api/partidas/:id/reanudar` | `Partida` con `pausada: false` | Desplaza los orígenes de los relojes por el tiempo de pausa y conserva el tiempo restante. |
+| `/api/partidas/:id/abandonar` | `{ "abandonada": true }` | Elimina la partida sin terminar de la memoria. Un resultado ya finalizado se conserva para la tabla. |
+
+Pausar una partida pausada o reanudar una activa es idempotente: repetir la solicitud no reinicia
+ni suma tiempo. Una partida finalizada sigue finalizada aunque se pause su presentación.
+`GET /api/partidas/:id` mantiene los relojes constantes durante la pausa. Mientras está pausada,
+los endpoints de tiro, turno rival y emote responden `409`:
+
+```json
+{ "error": "La partida está pausada. Reanuda para seguir jugando" }
+```
+
+Las tres acciones responden `404` con `{ "error": "Esa partida no existe" }` si no se encuentra el
+identificador. Tras abandonar una partida sin terminar, la siguiente consulta de temporada detecta
+su ausencia y deja el cruce pendiente, sin registrar puntos. El cliente considera un `404` al
+abandonar como una salida ya resuelta.
+
+La animación permanece en React. Pausar no revierte una jugada que Express ya calculó: el cliente
+conserva el cuadro visible y continúa ese mismo recorrido al reanudar, aplicando después el estado
+confirmado. Mientras se espera una solicitud de juego, los botones de pausa y salida se deshabilitan
+brevemente para no cruzar solicitudes incompatibles.
 
 ## Catálogo
 

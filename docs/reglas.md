@@ -52,6 +52,19 @@ Notas:
 - **Fin de la temporada:** cuando todos los partidos del calendario tienen resultado (jugado o resuelto por simulación), la temporada termina. El campeón es el equipo que encabeza la tabla.
 - **Alcance de la temporada:** con los 10 equipos, cada jugador tiene 9 partidos en su calendario. Como los partidos sin humanos se resuelven por simulación rápida (ver arriba), jugar la temporada completa no significa jugar 9 partidos completos de física, solo los que de verdad involucran a una persona. Si en algún momento conviene acortarla, reducir la cantidad de equipos participantes es una opción válida: los equipos son datos, no lógica, así que no exige cambios de código, solo de configuración.
 
+## Pausa y salida
+
+- El botón **Pausar** o la tecla **Esc** detienen la partida, incluso durante la animación de un tiro.
+- En pausa no avanza el turno, el reloj de Liga ni la duración/enfriamiento de los emotes. El rival
+  espera y no se aceptan tiros ni emotes. Reanudar continúa la jugada desde el mismo cuadro.
+- **Salir** abre una confirmación y pausa mientras se decide. Cancelar permite continuar; si se
+  llegó desde el menú de pausa, vuelve a ese menú y la partida sigue pausada.
+- Confirmar la salida descarta un partido sin terminar. En temporada queda pendiente para jugarlo
+  nuevamente. Un resultado que Express ya confirmó se conserva, aunque todavía se esté mostrando
+  la animación del último tiro.
+- La pausa no guarda partidas entre recargas ni reinicios del servidor. Sigue aplicando la limitación
+  del almacenamiento en memoria.
+
 ## El perro
 
 - Se activa o desactiva al crear cada partido (por defecto, activado). Puede desactivarse tanto en Eliminatoria como en cada partido de una Liga.

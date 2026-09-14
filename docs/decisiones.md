@@ -739,6 +739,52 @@ partir de las indicaciones del autor; lo registra el manifiesto C2PA de cada PNG
 ilustrados para el juego, con los colores y el nombre de cada club, y siguen el criterio de
 `docs/introduccion.md`: que se reconozca al equipo sin copiar su escudo oficial.
 
+### La pausa congela el tiempo en Express y el recorrido en React
+
+**Decisión.** `pausadaDesde` guarda el inicio de pausa. Al reanudar se desplazan los orígenes del turno,
+Liga y emotes por la duración transcurrida. Las consultas usan el instante congelado; repetir pausa
+o reanudación no suma tiempo. Los tiros y emotes se rechazan durante la pausa.
+
+**Cliente.** `useAnimacion` conserva el tiempo reproducido y la orientación del balón. `usePartida`
+detiene el rival y la cuenta regresiva, actualiza los relojes al reanudar y conserva el recorrido
+pendiente aunque Express ya haya calculado su resultado. Las solicitudes se protegen con referencias
+sincrónicas para impedir dobles envíos antes del siguiente render. Pausa y salida esperan a que
+termine cualquier solicitud de juego en curso.
+
+**Salida.** Confirmar abandonar elimina solo partidas sin terminar. La sincronización existente de
+la temporada las vuelve a dejar pendientes. Los resultados ya finalizados se conservan. Esto evita
+que un encuentro abandonado termine por tiempo en el servidor y cuente como jugado.
+
+### Modales propios con semántica nativa
+
+**Decisión.** Un componente `<dialog>` reemplaza `window.confirm` y el aviso de partida inexistente.
+CSS aporta el panel iluminado y la entrada animada. El fondo queda inerte, el foco se mantiene entre
+las acciones del modal (incluido `Shift+Tab`), `Esc` cancela y el foco vuelve al botón de origen.
+Los errores de conexión se muestran dentro del modal para permitir reintentar.
+
+### La pelota conserva su imagen y gira según el recorrido
+
+**Decisión.** Se precalcula una tabla de ángulos por jugada: distancia acumulada dividida por el radio,
+convertida a grados. En cada cuadro solo se interpola ese ángulo y se rota la imagen alrededor de su
+centro. Es una aproximación visual 2D al rodado; no agrega física angular ni cambia colisiones.
+
+**Casos especiales.** Sin movimiento no hay giro; mientras el perro la transporta tampoco. El regreso
+al centro tras un gol no se cuenta como recorrido y la orientación se conserva entre tiros y pausas.
+`prefers-reduced-motion` oculta el giro decorativo manteniendo el desplazamiento necesario para jugar.
+
+### Precargar lo próximo y cachear los recursos versionados
+
+**Decisión.** La portada se declara como precarga de alta prioridad en el HTML, antes de ejecutar React.
+Vite transforma su URL con el hash del recurso. Después se precarga el menú. Al crear una partida
+suelta o revancha se decodifican sus sprites y el estadio explícito antes de pedirla a Express, con
+un límite de espera de 2,5 segundos. El estadio de configuración ya se descarga como vista previa.
+No se descargan todos los estadios al abrir la aplicación.
+
+**Caché.** Express sirve `/assets` con un año de caché e `immutable`; el HTML conserva la política
+normal para descubrir las nuevas URLs después de publicar. No se modificaron los WebP ni se añadieron
+dependencias. La mejora reduce descargas repetidas y anticipa la primera imagen; el tiempo de red
+y el arranque en frío del servidor siguen dependiendo de la conexión y del alojamiento.
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano

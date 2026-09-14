@@ -146,6 +146,20 @@ una, aparece sobre sus cinco tapitas durante 5 segundos. Después la fila queda 
 segundos, con la cuenta regresiva encima. El boceto original la ponía abajo a la izquierda, pero con
 dos jugadores cada uno necesita la suya, y junto a su equipo se entiende de quién es cada fila.
 
+### Pausa y confirmación de salida
+
+El pie de la cancha incorpora **Pausar** (también `Esc`) y **Salir**. Los modales son componentes React
+con `<dialog>` y CSS: panel azul oscuro, iluminación verde, borde dorado, entrada breve y fondo
+oscurecido/desenfocado. Muestran el marcador y priorizan la acción de continuar sobre abandonar.
+
+El foco empieza en la acción segura, `Tab`/`Shift+Tab` recorren el modal y `Esc` vuelve; al cerrarlo
+se restaura el foco. Si falla la conexión, el error permanece dentro del diálogo y se puede reintentar.
+El mensaje de salida distingue partida suelta y temporada. La preferencia de movimiento reducido
+elimina la entrada animada del modal y el giro decorativo de la pelota.
+
+Capturas locales verificadas en 1280 × 720, 1366 × 768 y 1920 × 1080. Evidencias de pausa y salida
+en `docs/evidencias/fase-10-pausa.jpg` y `docs/evidencias/fase-10-salida.jpg`.
+
 ## Resultado
 
 ```text
