@@ -14,7 +14,8 @@ export default defineConfig({
   reporter: [["list"], ["html", { outputFolder: "playwright-report", open: "never" }]],
   use: {
     baseURL: URL_BASE,
-    trace: "on-first-retry",
+    // Si una prueba falla, queda su traza: pedidos, consola y cada paso (`npx playwright show-trace`).
+    trace: "retain-on-failure",
   },
   projects: [
     // Para GitHub Actions: sin ventana.

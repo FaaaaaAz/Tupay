@@ -1,5 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import type { Partida } from "../compartido/partida.js";
+import { empezarPartido } from "./ayudantes.js";
 
 const PARTIDA_BASE = {
   modo: "eliminatoria",
@@ -7,17 +8,6 @@ const PARTIDA_BASE = {
   visitante: { equipo: "theStrongest", tipo: "humano" },
   perroActivo: false,
 };
-
-async function empezarPartidoDeDosEn(page: Page, estadio: string) {
-  await page.goto("/");
-  await page.getByRole("button", { name: "Iniciar" }).click();
-  await page.getByRole("button", { name: /Eliminatoria/ }).click();
-  await page.getByLabel("2 jugadores en este dispositivo").check();
-  await page.getByLabel("Estadio").selectOption(estadio);
-  await page.getByLabel("El perro puede meterse a la cancha").uncheck();
-  await page.getByRole("button", { name: "Jugar" }).click();
-  await expect(page.getByTestId("cancha")).toBeVisible();
-}
 
 test("cada estadio trae sus charcos desde el servidor", async ({ request }) => {
   const crearEn = async (estadio: string): Promise<Partida> =>
@@ -49,13 +39,13 @@ test("un emote se acepta y el siguiente tiene que esperar", async ({ request }) 
 });
 
 test("en El Alto la cancha muestra los charcos de nieve", async ({ page }) => {
-  await empezarPartidoDeDosEn(page, "villaIngenio");
+  await empezarPartido(page, { estadio: "villaIngenio" });
 
   await expect(page.locator('[data-testid^="charco-nieve-"]').first()).toBeVisible();
 });
 
 test("un emote pone la carita sobre las cinco tapitas y deshabilita la barra", async ({ page }) => {
-  await empezarPartidoDeDosEn(page, "felixCapriles");
+  await empezarPartido(page, { estadio: "felixCapriles" });
   const barra = page.getByRole("group", { name: "Emotes de Bolívar" });
 
   await barra.getByRole("button", { name: "Feliz eufórico" }).click();

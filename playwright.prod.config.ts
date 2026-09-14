@@ -25,7 +25,7 @@ export default defineConfig({
     baseURL: URL_PRODUCCION,
     navigationTimeout: ESPERA_ARRANQUE_EN_FRIO,
     actionTimeout: 30_000,
-    trace: "on-first-retry",
+    trace: "retain-on-failure",
   },
   projects: [
     {
