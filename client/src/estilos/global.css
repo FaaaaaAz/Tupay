@@ -108,18 +108,25 @@ input {
 /* Portada */
 
 .portada {
+  /*
+   * La imagen mide 1672 × 941 y se dibuja con `cover`: llena la pantalla y se recorta lo que sobra.
+   * Este es el alto con que queda dibujada, para ubicar el botón sobre un punto del dibujo y no
+   * sobre un punto de la ventana.
+   */
+  --alto-de-la-imagen: max(100vw * 941 / 1672, 100vh);
   position: relative;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 11vh;
   background-size: cover;
   background-position: center;
 }
 
 .portada__iniciar {
+  position: absolute;
+  left: 50%;
+  /* El borde de abajo del botón queda justo encima del travesaño del arco: y = 495 de 941 en la imagen. */
+  top: calc(50% + (495 / 941 - 0.5) * var(--alto-de-la-imagen));
+  /* `translate` y no `transform`: los botones ya usan `transform` al pasar el mouse. */
+  translate: -50% -100%;
   padding: 1rem 3.6rem;
   font-size: clamp(1.2rem, 2.2vw, 1.9rem);
 }
