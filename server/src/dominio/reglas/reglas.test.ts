@@ -13,12 +13,14 @@ import { aPartidaPublica } from "./vistaPublica.js";
 
 const INICIO = 1_000_000;
 
+/** En el estadio de referencia, sin charcos: estas pruebas son de las reglas, no de los estadios. */
 function crearPartida(cambios: Partial<PeticionCrearPartida> = {}, semilla = 1): RegistroPartida {
   const peticion: PeticionCrearPartida = {
     modo: "eliminatoria",
     local: { equipo: "bolivar", tipo: "humano" },
     visitante: { equipo: "theStrongest", tipo: "humano" },
     perroActivo: false,
+    estadio: "felixCapriles",
     ...cambios,
   };
   return crearRegistro(peticion, "p_prueba", INICIO, semilla);
@@ -67,7 +69,7 @@ describe("crear una partida", () => {
   });
 
   it("juega en el estadio del local, salvo que se elija otro", () => {
-    assert.equal(crearPartida().estadio, "hernandoSiles");
+    assert.equal(crearPartida({ estadio: undefined }).estadio, "hernandoSiles");
     assert.equal(crearPartida({ estadio: "villaIngenio" }).estadio, "villaIngenio");
   });
 
@@ -208,6 +210,71 @@ describe("goles y final del partido", () => {
 
     assert.equal(registro.estado, "finalizada");
     assert.deepEqual(registro.resultado, { ganador: null, marcador: { local: 0, visitante: 0 } });
+  });
+});
+
+describe("los charcos en el partido", () => {
+  /** Un charco en el centro de la cancha, con la pelota ya atrapada adentro. */
+  function conPelotaAtrapada(tipo: "agua" | "nieve", golpesParaLiberar: number): RegistroPartida {
+    const registro = crearPartida({ estadio: tipo === "agua" ? "hernandoSiles" : "villaIngenio" });
+    registro.turno = "local";
+    registro.charcos = [
+      { id: `${tipo}-9`, tipo, posicion: CENTRO_DE_LA_CANCHA, ancho: 170, alto: 80, turnosRestantes: 4 },
+    ];
+    registro.pelotaAtrapada = { charco: `${tipo}-9`, golpesParaLiberar };
+    registro.tapitas = registro.tapitas.map((tapita) =>
+      tapita.id === "local-4" ? { ...tapita, posicion: { x: 450, y: 350 } } : tapita,
+    );
+    return registro;
+  }
+  const golpeALaPelota = (cambios: Partial<PeticionTiro> = {}): PeticionTiro => ({
+    lado: "local",
+    tapita: "local-4",
+    direccion: { x: 1, y: 0 },
+    fuerza: 0.3,
+    ...cambios,
+  });
+
+  it("si la pelota cae en un charco, el tiro lo avisa y la partida la muestra atrapada", () => {
+    const registro = crearPartida({ estadio: "hernandoSiles" });
+    registro.turno = "local";
+    registro.charcos = [
+      { id: "agua-9", tipo: "agua", posicion: { x: 800, y: 350 }, ancho: 170, alto: 80, turnosRestantes: 2 },
+    ];
+    registro.tapitas = registro.tapitas.map((tapita) =>
+      tapita.id === "local-4" ? { ...tapita, posicion: { x: 520, y: 350 } } : tapita,
+    );
+
+    const { eventos } = ejecutarTiro(registro, golpeALaPelota({ fuerza: 0.5 }), INICIO);
+    const { pelota } = aPartidaPublica(registro, INICIO);
+
+    assert.deepEqual(eventos[0], { tipo: "pelotaAtrapada", charco: "agua-9", tipoCharco: "agua" });
+    assert.equal(pelota.atrapadaEn, "agua-9");
+    assert.equal(pelota.golpesParaLiberar, 1);
+  });
+
+  it("de la nieve un tiro normal no la saca, pero descuenta un golpe", () => {
+    const registro = conPelotaAtrapada("nieve", 2);
+    ejecutarTiro(registro, golpeALaPelota(), INICIO);
+
+    assert.deepEqual(registro.pelotaAtrapada, { charco: "nieve-9", golpesParaLiberar: 1 });
+  });
+
+  it("un tiro de poder saca la pelota de la nieve de una sola vez", () => {
+    const registro = conPelotaAtrapada("nieve", 2);
+    const { eventos } = ejecutarTiro(registro, golpeALaPelota({ tiroDePoder: true }), INICIO);
+
+    assert.ok(eventos.some((evento) => evento.tipo === "pelotaLiberada"));
+    assert.equal(registro.pelotaAtrapada, null);
+    assert.equal(registro.jugadores.local.tirosDePoder, 1);
+  });
+
+  it("los charcos se secan tiro a tiro", () => {
+    const registro = conPelotaAtrapada("agua", 1);
+    registro.charcos[0].turnosRestantes = 2;
+
+    ejecutarTiro(registro, tiroInofensivo(registro), INICIO);
+    assert.equal(registro.charcos.find((charco) => charco.id === "agua-9")?.turnosRestantes, 1);
   });
 });
 
