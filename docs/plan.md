@@ -327,29 +327,56 @@ Esta fase solo se inicia si el núcleo (fases 0 a 6) está completo, publicado y
 
 **Evidencia:** Chrome visual ejecutando la prueba pública y Actions en verde. Tag: `fase-9`.
 
-### Fase 10 — Documentación final y video
+### Fase 10 — Pulido de experiencia, interfaz y audio
 
-- [ ] **10.1 Revisar experiencia de usuario.** Estados de carga, doble clic, gestos cancelados, partido inexistente, contraste y foco visible. Commit: `fix: mejorar robustez y experiencia de juego`.
-- [ ] **10.2 Completar el README.** Requisitos, instalación, comandos, arquitectura, endpoints JSON, variables de entorno, pruebas, despliegue y URL pública. Commit: `docs: completar README`.
-- [ ] **10.3 Completar la documentación.** Revisar `introduccion.md`, `reglas.md`, `plan.md`, `api.md`, `boceto.md`, `decisiones.md` (riesgos con su mitigación y cambios importantes con su justificación), `investigacion.md` y `uso-ia.md`. Commit: `docs: completar documentación técnica`.
-- [ ] **10.4 Reunir evidencias.** Capturas útiles en `docs/evidencias/`, sin secretos ni datos irrelevantes. Commit: `docs: agregar evidencias finales`.
-- [ ] **10.5 Grabar el video.** Entre 3 y 5 minutos: una partida, una solicitud JSON, una prueba E2E visual, GitHub Actions y la aplicación publicada.
-- [ ] **10.6 Auditoría final.** Comparar el proyecto con la lista de verificación de la sección 10 de este documento y revisar que no haya ninguna librería prohibida instalada.
+Esta fase no cambia las reglas del juego ni reemplaza la física ya probada. Se ejecuta en cambios pequeños,
+en el orden siguiente, y cada tarea conserva las pruebas E2E existentes. Las tarjetas, paneles y modales
+siguen hechos con React y CSS propio; las tres imágenes de interfaz existentes se reutilizan y solo se crea
+otro recurso gráfico si cumple una función visual concreta.
+
+- [ ] **10.1 Corregir la robustez de la interacción.** Revisar estados de carga, doble clic, botones durante solicitudes, gesto de apuntado cancelado, partida inexistente, contraste y foco visible. Añadir una comprobación E2E para cada regresión que se encuentre. Commit: `fix: mejorar robustez de la interacción`.
+- [ ] **10.2 Crear un modal accesible y confirmar la salida.** Reemplazar `window.confirm` por un componente reutilizable con fondo oscurecido, foco inicial, cierre con `Escape`, devolución del foco y acciones claras: continuar jugando o abandonar. La advertencia debe distinguir una partida suelta de una de temporada. Commit: `feat: confirmar salida con un modal accesible`.
+- [ ] **10.3 Implementar una pausa real.** Añadir Pausar/Reanudar y un modal con continuar o salir. Express debe conservar el tiempo restante del turno y de la Liga; React debe detener la animación, el turno automático del rival, el apuntado y las entradas hasta reanudar. Pausar no puede cambiar el marcador, consumir tiempo ni dejar solicitudes duplicadas. Documentar el contrato en `docs/api.md` y probar pausa, reanudación y salida. Commit: `feat: pausar y reanudar partidos`.
+- [ ] **10.4 Hacer rodar visualmente la pelota.** Mantener la imagen 2D y calcular su rotación acumulada en React a partir de la distancia recorrida entre cuadros (`ángulo = distancia / radio`). La rotación es solo presentación: no modifica posiciones ni resultados de Express, se detiene con la pelota y evita saltos al reiniciarse tras un gol o al moverla el perro. Respetar `prefers-reduced-motion`. Commit: `feat: animar el rodado de la pelota`.
+- [ ] **10.5 Mejorar la respuesta visual de la partida.** Dar más claridad a fuerza y dirección del tiro, estado del tiro de poder, cambio de turno, gol, pelota atrapada, aparición del perro y final del partido. Usar transiciones cortas y legibles, sin ocultar la cancha ni retrasar la interacción. Commit: `feat: mejorar animaciones y respuesta de la partida`.
+- [ ] **10.6 Unificar fondos, tarjetas y modales.** Convertir colores, sombras, radios y capas en variables reutilizables; reforzar la identidad de videojuego con gradientes, iluminación, viñeta y patrones CSS. Conservar las imágenes de Portada, Menú y estadios como protagonistas y evitar generar una imagen distinta para cada panel. Verificar al menos en 1280 × 720, 1366 × 768 y 1920 × 1080. Commit: `style: pulir fondos paneles y tarjetas`.
+- [ ] **10.7 Crear el sistema de audio.** Centralizar carga y reproducción, desbloquear audio después del primer gesto por las restricciones del navegador y añadir controles de silencio y volumen persistidos en `localStorage`. Separar ambiente, interfaz y efectos para que puedan mezclarse sin reproducir audios duplicados. La aplicación debe seguir siendo completamente jugable sin sonido. Commit: `feat: agregar controles y sistema de audio`.
+- [ ] **10.8 Integrar ambiente y efectos.** Añadir ambiente de hinchada en bucle y sonidos de apuntado tipo resortera, pateo, tiro de poder, gol y perro. Dispararlos desde transiciones o eventos confirmados, no desde cada render de React; detener o atenuar el ambiente al pausar y evitar repeticiones al actualizar el estado. Guardar originales en `assets/audio/`, versiones web livianas en `client/src/recursos/audio/` y registrar autoría, licencia y herramienta de cada archivo. Commit: `feat: integrar sonidos de la partida`.
+- [ ] **10.9 Revisar accesibilidad, rendimiento y regresiones.** Respetar movimiento reducido y silencio, comprobar navegación por teclado, roles y nombres accesibles de los modales, revisar que audio y animaciones no degraden la fluidez y ejecutar lint, tipos, unitarias, E2E y build. Guardar evidencia visual y actualizar `docs/decisiones.md`. Commit: `test: validar el pulido audiovisual y de UX`.
+
+**Orden de prioridad si el tiempo obliga a recortar:** primero 10.1 y 10.2; después 10.3 y 10.4;
+luego 10.5 y 10.6; por último 10.7 y 10.8. La tarea 10.9 se ejecuta sobre todo lo que se alcance
+a incorporar y no se omite.
+
+**Criterio de salida:** jugar, pausar, reanudar y abandonar es claro; el balón y los eventos tienen
+respuesta audiovisual; la interfaz mantiene una identidad coherente y ninguna mejora altera el resultado
+que calcula Express ni rompe los recorridos E2E existentes.
+
+**Evidencia:** comparación visual antes/después, pausa sin pérdida de tiempo, pelota rodando, controles
+de audio y pruebas en verde. Tag: `fase-10`.
+
+### Fase 11 — Documentación final y video
+
+- [ ] **11.1 Completar el README.** Requisitos, instalación, comandos, arquitectura, endpoints JSON, variables de entorno, pruebas, despliegue y URL pública. Commit: `docs: completar README`.
+- [ ] **11.2 Completar la documentación.** Revisar `introduccion.md`, `reglas.md`, `plan.md`, `api.md`, `boceto.md`, `decisiones.md` (riesgos con su mitigación y cambios importantes con su justificación), `investigacion.md` y `uso-ia.md`. Commit: `docs: completar documentación técnica`.
+- [ ] **11.3 Reunir evidencias.** Capturas útiles en `docs/evidencias/`, sin secretos ni datos irrelevantes. Commit: `docs: agregar evidencias finales`.
+- [ ] **11.4 Grabar el video.** Entre 3 y 5 minutos: una partida, una solicitud JSON, una prueba E2E visual, GitHub Actions y la aplicación publicada.
+- [ ] **11.5 Auditoría final.** Comparar el proyecto con la lista de verificación de la sección 10 de este documento y revisar que no haya ninguna librería prohibida instalada.
 
 **Criterio de salida:** repositorio, documentación, video, CI y aplicación pública corresponden a la misma versión estable.
 
-**Evidencia:** todo lo anterior reunido. Tag: `fase-10`.
+**Evidencia:** todo lo anterior reunido. Tag: `fase-11`.
 
-### Fase 11 — Preparación de la defensa
+### Fase 12 — Preparación de la defensa
 
-- [ ] **11.1 Preparar el recorrido de defensa.** Abrir previamente editor, terminal, repositorio, Actions, Render y la aplicación pública.
-- [ ] **11.2 Ensayar con cronómetro, al menos dos veces.** E2E visual contra producción, un cambio pequeño, verificarlo, activar CI/CD y mostrarlo publicado dentro de los 10 minutos.
-- [ ] **11.3 Preparar cambios configurables.** Saber modificar sin buscar por todo el proyecto: meta de goles, duración real de la Liga, probabilidad del perro, fricción de un estadio, un texto o un color. Cada valor debe estar centralizado.
-- [ ] **11.4 Preparar la explicación técnica.** Poder explicar un tiro completo: interacción en React, `fetch`, ruta Express, servicio, validación, física, JSON de respuesta, animación y renderizado; y, si se llegó a la Fase 7, cómo un resultado de partido se refleja en la tabla de la temporada.
-- [ ] **11.5 Preparar fallos controlados.** Saber demostrar que lint falla, cómo se ve una acción inválida y cómo se diagnostica una prueba E2E.
-- [ ] **11.6 Confirmar el procedimiento de la defensa.** Aclarar con el docente cómo se realiza el cambio obligatorio de la defensa sin contradecir el cierre del repositorio del 15 de septiembre.
-- [ ] **11.7 Congelar el repositorio.** Último commit antes de las 16:00 del martes. Tag `v1.0`.
-- [ ] **11.8 Preparar el equipo.** Batería, cargador, sesiones iniciadas, credenciales disponibles, Chrome instalado, dependencias listas y conexión de respaldo. Despertar el servicio de Render unos minutos antes de la defensa.
+- [ ] **12.1 Preparar el recorrido de defensa.** Abrir previamente editor, terminal, repositorio, Actions, Render y la aplicación pública.
+- [ ] **12.2 Ensayar con cronómetro, al menos dos veces.** E2E visual contra producción, un cambio pequeño, verificarlo, activar CI/CD y mostrarlo publicado dentro de los 10 minutos.
+- [ ] **12.3 Preparar cambios configurables.** Saber modificar sin buscar por todo el proyecto: meta de goles, duración real de la Liga, probabilidad del perro, fricción de un estadio, un texto o un color. Cada valor debe estar centralizado.
+- [ ] **12.4 Preparar la explicación técnica.** Poder explicar un tiro completo: interacción en React, `fetch`, ruta Express, servicio, validación, física, JSON de respuesta, animación y renderizado; y cómo un resultado de partido se refleja en la tabla de la temporada.
+- [ ] **12.5 Preparar fallos controlados.** Saber demostrar que lint falla, cómo se ve una acción inválida y cómo se diagnostica una prueba E2E.
+- [ ] **12.6 Confirmar el procedimiento de la defensa.** Aclarar con el docente cómo se realiza el cambio obligatorio de la defensa sin contradecir el cierre del repositorio del 15 de septiembre.
+- [ ] **12.7 Congelar el repositorio.** Último commit antes de las 16:00 del martes. Tag `v1.0`.
+- [ ] **12.8 Preparar el equipo.** Batería, cargador, sesiones iniciadas, credenciales disponibles, Chrome instalado, dependencias listas y conexión de respaldo. Despertar el servicio de Render unos minutos antes de la defensa.
 
 **Criterio de salida:** el recorrido completo se ejecuta de forma repetible y existe margen para explicar decisiones.
 
