@@ -32,10 +32,34 @@ function armarServidor(repositorioTemporadas = new RepositorioTemporadasEnMemori
     crearId: () => "t_1",
     semillaAleatoria: () => 1,
   });
-  return { reloj, temporadas };
+  return { reloj, temporadas, partidas };
 }
 
 describe("servicio de temporadas", () => {
+  it("abandonar un partido pausado lo deja pendiente sin registrar un empate", () => {
+    const { reloj, temporadas, partidas } = armarServidor();
+    const temporada = temporadas.crear(PETICION);
+    const id = temporada.proximosPartidos[0];
+    const { partida } = temporadas.jugar(temporada.id, id, {});
+    partidas.pausar(partida.id, true);
+    reloj.ahora += 60000;
+    assert.equal(temporadas.obtener(temporada.id).jornadaActual, 1);
+    partidas.abandonar(partida.id);
+    const actual = temporadas.obtener(temporada.id);
+    assert.equal(actual.partidos.find((p) => p.id === id)?.estado, "pendiente");
+    assert.ok(actual.tabla.every((fila) => fila.jugados === 0));
+    assert.notEqual(temporadas.jugar(temporada.id, id, {}).partida.id, partida.id);
+  });
+
+  it("salir después de finalizar conserva el resultado para la tabla", () => {
+    const { reloj, temporadas, partidas } = armarServidor();
+    const temporada = temporadas.crear(PETICION);
+    const { partida } = temporadas.jugar(temporada.id, temporada.proximosPartidos[0], {});
+    reloj.ahora += 1001;
+    partidas.obtener(partida.id);
+    partidas.abandonar(partida.id);
+    assert.equal(temporadas.obtener(temporada.id).jornadaActual, 2);
+  });
   it("cuando termina la partida de la persona, se anota el resultado y avanza la jornada", () => {
     const { reloj, temporadas } = armarServidor();
     const creada = temporadas.crear(PETICION);

@@ -8,7 +8,7 @@ import { finalizar, type RegistroPartida } from "./partida.js";
  * cuánto tiempo pasó y aplica lo que debería haber ocurrido mientras tanto.
  */
 export function actualizarTiempo(registro: RegistroPartida, ahora: number): void {
-  if (registro.estado === "finalizada") return;
+  if (registro.estado === "finalizada" || registro.pausadaDesde !== null) return;
 
   if (registro.reloj && ahora - registro.reloj.inicio >= registro.reloj.duracionMs) {
     finalizar(registro);

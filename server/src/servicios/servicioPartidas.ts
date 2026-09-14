@@ -11,6 +11,7 @@ import { MENSAJES } from "../dominio/mensajes.js";
 import { lanzarEmote } from "../dominio/reglas/emotes.js";
 import { crearRegistro, type RegistroPartida } from "../dominio/reglas/partida.js";
 import { actualizarTiempo } from "../dominio/reglas/tiempo.js";
+import { cambiarPausa } from "../dominio/reglas/pausa.js";
 import {
   jugarTurnoDelRival,
   tirarComoHumano,
@@ -59,6 +60,20 @@ export class ServicioPartidas {
 
   tirar(id: string, peticion: PeticionTiro): RespuestaTiro {
     return this.jugar(id, (registro, momento) => tirarComoHumano(registro, peticion, momento));
+  }
+
+  pausar(id: string, pausada: boolean): Partida {
+    const registro = this.buscar(id);
+    const ahora = this.dependencias.ahora();
+    cambiarPausa(registro, pausada, ahora);
+    this.dependencias.repositorio.guardar(registro);
+    return aPartidaPublica(registro, ahora);
+  }
+
+  abandonar(id: string): void {
+    const registro = this.buscar(id);
+    // Un resultado ya confirmado debe seguir disponible para la tabla de temporada.
+    if (registro.estado !== "finalizada") this.dependencias.repositorio.eliminar(id);
   }
 
   turnoRival(id: string): RespuestaTiro {

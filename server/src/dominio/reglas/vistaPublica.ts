@@ -7,10 +7,12 @@ import { relojPublico, segundosRestantesDelTurno } from "./tiempo.js";
 
 /** Convierte lo que guarda el servidor en el JSON del contrato `Partida`. */
 export function aPartidaPublica(registro: RegistroPartida, ahora: number): Partida {
+  ahora = registro.pausadaDesde ?? ahora;
   const enJuego = registro.estado === "enJuego";
 
   return {
     id: registro.id,
+    pausada: registro.pausadaDesde !== null,
     modo: registro.modo,
     estado: registro.estado,
     estadio: registro.estadio,

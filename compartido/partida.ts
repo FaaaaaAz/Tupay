@@ -95,6 +95,7 @@ export interface Resultado {
 /** Estado completo de un partido. Es lo que devuelven todos los endpoints de partida. */
 export interface Partida {
   id: string;
+  pausada: boolean;
   modo: Modo;
   estado: EstadoPartida;
   estadio: IdEstadio;

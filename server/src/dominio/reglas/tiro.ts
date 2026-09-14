@@ -12,6 +12,7 @@ import { ladoDelArcoMasCercano, ladoQueAnota, rival } from "./lados.js";
 import { finalizar, type RegistroPartida } from "./partida.js";
 import { simularEnLaPartida } from "./simulacionEnLaPartida.js";
 import { actualizarTiempo } from "./tiempo.js";
+import { exigirSinPausa } from "./pausa.js";
 
 export interface ResultadoDelTiro {
   recorrido: Cuadro[];
@@ -89,6 +90,7 @@ export function ejecutarTiro(
 
 /** Aplica en orden las acciones inválidas de `docs/reglas.md`. Devuelve el índice de la tapita. */
 function validarTiro(registro: RegistroPartida, peticion: PeticionTiro, ahora: number): number {
+  exigirSinPausa(registro);
   actualizarTiempo(registro, ahora);
   if (registro.estado === "finalizada") {
     throw new ErrorDeJuego(MENSAJES.partidaTerminada, 409);
@@ -131,6 +133,7 @@ export function tirarComoHumano(
 
 /** El servidor decide el tiro del equipo que controla y lo ejecuta con las mismas reglas que una persona. */
 export function jugarTurnoDelRival(registro: RegistroPartida, ahora: number): ResultadoDelTiro {
+  exigirSinPausa(registro);
   actualizarTiempo(registro, ahora);
   if (registro.estado === "finalizada") {
     throw new ErrorDeJuego(MENSAJES.partidaTerminada, 409);

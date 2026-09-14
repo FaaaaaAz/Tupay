@@ -3,6 +3,7 @@ import { ErrorDeJuego } from "../errores.js";
 import { MENSAJES } from "../mensajes.js";
 import type { RegistroPartida } from "./partida.js";
 import { actualizarTiempo } from "./tiempo.js";
+import { exigirSinPausa } from "./pausa.js";
 
 /**
  * Lanza una carita sobre las cinco tapitas de un jugador. Se puede en cualquier momento, sea o
@@ -10,6 +11,7 @@ import { actualizarTiempo } from "./tiempo.js";
  * servidor guarda cuándo se lanzó y calcula el resto al consultar.
  */
 export function lanzarEmote(registro: RegistroPartida, peticion: PeticionEmote, ahora: number): void {
+  exigirSinPausa(registro);
   actualizarTiempo(registro, ahora);
   if (registro.estado === "finalizada") {
     throw new ErrorDeJuego(MENSAJES.partidaTerminada, 409);

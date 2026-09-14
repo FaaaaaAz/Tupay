@@ -43,6 +43,8 @@ export function crearApp() {
 
   // En desarrollo el cliente lo sirve Vite; en producción lo sirve Express desde dist/cliente.
   if (existsSync(DIRECTORIO_CLIENTE)) {
+    // Vite versiona estos archivos con un hash; el HTML debe poder actualizarse en cada publicación.
+    app.use("/assets", express.static(path.join(DIRECTORIO_CLIENTE, "assets"), { maxAge: "1y", immutable: true }));
     app.use(express.static(DIRECTORIO_CLIENTE));
     app.use((_peticion, respuesta) => {
       respuesta.sendFile(path.join(DIRECTORIO_CLIENTE, "index.html"));

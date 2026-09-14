@@ -14,6 +14,19 @@ export function crearRutaPartidas(servicio: ServicioPartidas): Router {
     respuesta.json(servicio.obtener(peticion.params.id));
   });
 
+  ruta.post("/:id/pausar", (peticion, respuesta) => {
+    respuesta.json(servicio.pausar(peticion.params.id, true));
+  });
+
+  ruta.post("/:id/reanudar", (peticion, respuesta) => {
+    respuesta.json(servicio.pausar(peticion.params.id, false));
+  });
+
+  ruta.post("/:id/abandonar", (peticion, respuesta) => {
+    servicio.abandonar(peticion.params.id);
+    respuesta.json({ abandonada: true });
+  });
+
   ruta.post("/:id/tiros", (peticion, respuesta) => {
     respuesta.json(servicio.tirar(peticion.params.id, leerPeticionTiro(peticion.body)));
   });

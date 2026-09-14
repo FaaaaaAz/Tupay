@@ -39,6 +39,7 @@ export interface JugadorInterno {
  */
 export interface RegistroPartida {
   id: string;
+  pausadaDesde: number | null;
   modo: Modo;
   estado: EstadoPartida;
   estadio: IdEstadio;
@@ -80,6 +81,7 @@ export function crearRegistro(
 
   const registro: RegistroPartida = {
     id,
+    pausadaDesde: null,
     modo: peticion.modo,
     estado: "enJuego",
     estadio: peticion.estadio ?? EQUIPOS[peticion.local.equipo].estadio,
