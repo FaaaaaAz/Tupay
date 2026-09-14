@@ -34,6 +34,7 @@ npm install
 | `npm run test:e2e` | Pruebas end-to-end sin ventana (lo que corre GitHub Actions). |
 | `npm run test:e2e:visual` | Las mismas pruebas con ventana, en el Google Chrome instalado. |
 | `npm run test:e2e:prod` | Las mismas pruebas contra la aplicación publicada. Necesita `URL_PRODUCCION`. |
+| `npm run test:e2e:defensa` | Solo el recorrido de defensa, en Chrome visible, contra la aplicación publicada. Necesita `URL_PRODUCCION`. |
 
 En desarrollo son dos procesos: Vite sirve el cliente y reenvía `/api` a Express, de modo que el
 navegador siempre ve una sola dirección. En producción hay un solo proceso: Express sirve el cliente

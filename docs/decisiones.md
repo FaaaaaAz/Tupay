@@ -650,6 +650,73 @@ Se rompió cada regla a propósito, de a una, y se volvió a dejar como estaba:
 | No hay espera entre emotes | "la carita se va a los 5 segundos, y recién a los 15 se puede lanzar otra" |
 | El rival premia el autogol como un gol | "la puntuación prefiere el gol, castiga el autogol y dejar la pelota cerca del propio arco" |
 
+## Decisiones de la Fase 9: pruebas E2E y robustez
+
+### Las pruebas no necesitaron cambiar la interfaz
+
+**Decisión.** Se revisaron todos los localizadores y se mantuvieron: roles y nombres visibles primero,
+etiquetas de campos después y `data-testid` solo en la cancha, las tapitas, el marcador y los
+mensajes. Lo que se repetía entre archivos pasó a `e2e/ayudantes.ts`.
+
+**Por qué.** Los localizadores ya cumplían la política desde las fases anteriores, y agregar atributos
+sin necesidad habría sido código que defender sin motivo. Además, como la interfaz no cambió, las
+pruebas nuevas se pudieron verificar contra la versión que ya estaba publicada.
+
+### La semilla entra por el pedido, no por la pantalla
+
+**Decisión.** Las pruebas agregan `semilla` y `duracionRealSegundos` al `POST /api/partidas` con
+`page.route`. Todo lo demás (modo, jugadores, estadio, meta, perro) se elige en la pantalla, como una
+persona.
+
+**Por qué.** Sin semilla, el saque es al azar y no se puede saber qué tapita tirar. Poner un campo de
+semilla en la configuración le mostraría al jugador una opción que solo sirve para probar.
+
+**Alternativa descartada.** Crear la partida por la API y abrirla en la pantalla. La aplicación no
+tiene forma de abrir una partida por su id, y habría que agregarla solo para las pruebas.
+
+### El gol de las pruebas se buscó con la física
+
+**Decisión.** Con la semilla 12345, `visitante-4` tira con toda la fuerza en la dirección
+`(-0,9359; 0,3523)` y hace gol. `scripts/buscar-tiro-de-gol.ts` probó ángulos cada 0,002 radianes
+con la misma simulación del servidor y eligió el centro de la ventana más ancha: el gol entra aunque
+la dirección se desvíe hasta 0,021 radianes.
+
+**Por qué.** La prueba de finalización necesita un gol que entre siempre. Un píxel de error del mouse
+son unos 0,004 radianes, cinco veces menos que el margen. Y con toda la fuerza se arrastra de más: pasado
+el máximo, el largo del arrastre ya no cambia nada.
+
+**Alternativa descartada.** Tirar hasta que entre un gol. La prueba tardaría lo que quisiera el azar y
+no se podría explicar qué está comprobando.
+
+### Se comprueba lo que viaja, no solo lo que se ve
+
+**Decisión.** Las pruebas del navegador leen el pedido y la respuesta reales: la de interacción
+comprueba que el tiro enviado tiene la dirección y la fuerza del gesto, y que al final la tapita quedó
+en la posición exacta que devolvió Express; la de validación, que la alerta muestra el mismo texto que
+respondió el servidor.
+
+**Por qué.** Que cambie el turno en pantalla no demuestra que hubo comunicación con el backend: podría
+ser un cambio local. Comparar con la respuesta sí lo demuestra.
+
+### Las pruebas corren también contra la versión publicada
+
+**Decisión.** El trabajo de deploy ejecuta las 25 pruebas E2E contra la URL pública después de
+confirmar que sirve el commit nuevo.
+
+**Por qué.** Lo que se prueba antes del deploy es un servidor local. Recién contra la URL pública se
+comprueba lo que usa una persona: el build de Render, el mismo dominio y puerto, y la latencia real.
+Se agregó dentro del trabajo de deploy para mantener los tres trabajos que pide la consigna.
+
+**Costo aceptado.** El pipeline suma cerca de un minuto. Si una prueba falla contra producción, el
+deploy ya ocurrió: el trabajo queda en rojo como aviso, no como bloqueo.
+
+### Se verificó que las pruebas nuevas no son intermitentes
+
+La suite local se repitió cinco veces seguidas (125 ejecuciones) y la de defensa tres veces en Chrome
+visible contra producción: todas en verde. Una primera ejecución de la defensa falló porque la ventana
+de Chrome se cerró mientras corría; la traza mostraba "Target page, context or browser has been closed",
+y sola volvió a pasar.
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano
@@ -692,6 +759,8 @@ necesitara servicios adicionales.
 | Respuestas de tiro demasiado grandes | El JSON de un tiro pesa cientos de kilobytes | Recortar la cantidad de cuadros y enviar las posiciones en el mismo orden que `partida.tapitas`, sin repetir identificadores. **Medido en la Fase 4:** 29 kB para un tiro que mueve las diez tapitas. |
 | La Liga completa consume todo el tiempo | Avanza el calendario y todavía no hay un partido de Liga suelto jugable | Detenerse en el punto de control de la Fase 7. Liga como partido suelto ya cumple el núcleo obligatorio. **Superado:** la temporada se empezó recién con el núcleo terminado y publicado, reutilizando el motor de partidas sin modificarlo. |
 | Pruebas E2E intermitentes | Una prueba falla una de cada tres veces sin cambios de código | Semilla fija, esperar respuestas reales en vez de tiempos arbitrarios, localizadores por rol accesible. |
+| El gol de las pruebas deja de entrar | Falla la prueba de finalización o la de defensa después de tocar la física o la formación | Volver a correr `scripts/buscar-tiro-de-gol.ts` y actualizar `GOL_DESDE_EL_SAQUE` en `e2e/ayudantes.ts`. |
+| Producción falla después del deploy | El trabajo de deploy queda en rojo en las pruebas contra la URL pública | Abrir el artefacto `reporte-e2e-produccion` y la traza de la prueba que falló. |
 | Pipeline lento | Supera los 6 minutos | Un solo navegador en CI, caché de npm, lint y E2E en paralelo. Volver a medir en la tarea 9.7. |
 | El rival difícil tarda en Render | El turno del servidor en difícil se nota lento en la URL pública | Medido en local: 140 ms. Si en Render se nota, bajar los candidatos de difícil en `RIVAL.dificultades`; las pruebas no dependen del número exacto. |
 | Pruebas unitarias lentas | `npm run test:unit` pasa de unos pocos segundos | Las pruebas del rival simulan partidos completos. Se achicaron a 20 tiros y 10 partidos: toda la suite tarda unos 8 segundos. |
@@ -724,3 +793,6 @@ necesitara servicios adicionales.
 | El rival simple pasó a ser el punto de partida del rival por muestreo | Su tiro de billar sigue siendo bueno como candidato, pero no veía qué iba a pasar después del golpe. |
 | Los emotes se mudaron al marcador | Con dos jugadores cada uno necesita su fila de caritas, y junto a su equipo se entiende de quién es. |
 | La animación no admite posiciones negativas | Una falla intermitente de las pruebas E2E mostró que el primer cuadro podía pedir el cuadro -1. |
+| `juego.spec.ts` se repartió en un archivo por tarea de la Fase 9 | Cada prueba se puede señalar en la defensa por lo que demuestra: inicio, interacción, validación, finalización y recorrido. |
+| Las trazas se guardan en toda prueba que falla, no solo en el reintento | Sin reintentos en local no quedaba ninguna traza, y fue una traza la que explicó la falla de la animación. |
+| El deploy también prueba la URL pública | Probar solo antes del deploy no demuestra que la versión publicada funcione. |

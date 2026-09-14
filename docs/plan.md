@@ -315,13 +315,13 @@ Esta fase solo se inicia si el núcleo (fases 0 a 6) está completo, publicado y
 
 ### Fase 9 — Pruebas E2E y robustez
 
-- [ ] **9.1 Estabilizar localizadores.** Roles accesibles y `data-testid` donde no exista un selector semántico estable. Commit: `test: estabilizar localizadores E2E`.
-- [ ] **9.2 Cubrir el inicio.** Verificar que equipos y estadios provienen del servidor y que se puede crear un partido en cada modo. Commit: `test: comprobar inicio de partido`.
-- [ ] **9.3 Cubrir la interacción principal.** Apuntar, tirar y comprobar que cambian posiciones o turno tras una respuesta real de la API. Commit: `test: comprobar tiro e integración HTTP`.
-- [ ] **9.4 Cubrir una validación.** Forzar una acción inválida (por ejemplo, equipos repetidos) y comprobar que la interfaz muestra el mensaje devuelto por Express. Commit: `test: comprobar acción inválida`.
-- [ ] **9.5 Cubrir la finalización.** Partido determinista y corto (Eliminatoria con `golesParaGanar: 1`) que termina en la pantalla de resultado. Commit: `test: comprobar finalización de partido`.
-- [ ] **9.6 Preparar la prueba de defensa.** Prueba corta (menos de 30 segundos) contra la URL pública que demuestre inicio, comunicación real y una interacción relevante en Chrome visual. Commit: `test: preparar recorrido E2E de defensa`.
-- [ ] **9.7 Comprobar CI y producción, y medir tiempos.** Ejecutar las mismas capacidades en modo headless en GitHub Actions y contra la versión publicada. Volver a medir la duración total del pipeline y optimizar si pasa de 6 minutos. Commit: `test: validar E2E en CI y producción`.
+- [x] **9.1 Estabilizar localizadores.** Roles accesibles y `data-testid` donde no exista un selector semántico estable. *No hizo falta cambiar la interfaz: los pasos comunes quedaron en `e2e/ayudantes.ts`, que también convierte unidades de cancha a píxeles con la matriz del propio SVG.* Commit: `test: estabilizar localizadores E2E`.
+- [x] **9.2 Cubrir el inicio.** Verificar que equipos y estadios provienen del servidor y que se puede crear un partido en cada modo. Commit: `test: comprobar inicio de partido`.
+- [x] **9.3 Cubrir la interacción principal.** Apuntar, tirar y comprobar que cambian posiciones o turno tras una respuesta real de la API. Commit: `test: comprobar tiro e integración HTTP`.
+- [x] **9.4 Cubrir una validación.** Forzar una acción inválida (por ejemplo, equipos repetidos) y comprobar que la interfaz muestra el mensaje devuelto por Express. Commit: `test: comprobar acción inválida`.
+- [x] **9.5 Cubrir la finalización.** Partido determinista y corto (Eliminatoria con `golesParaGanar: 1`) que termina en la pantalla de resultado. *El tiro de gol lo encontró `scripts/buscar-tiro-de-gol.ts` con la física del juego. También se cubre el empate de Liga por tiempo.* Commit: `test: comprobar finalización de partido`.
+- [x] **9.6 Preparar la prueba de defensa.** Prueba corta (menos de 30 segundos) contra la URL pública que demuestre inicio, comunicación real y una interacción relevante en Chrome visual. *`npm run test:e2e:defensa`: tarda unos 6 segundos en Chrome visible contra la URL pública.* Commit: `test: preparar recorrido E2E de defensa`.
+- [ ] **9.7 Comprobar CI y producción, y medir tiempos.** Ejecutar las mismas capacidades en modo headless en GitHub Actions y contra la versión publicada. Volver a medir la duración total del pipeline y optimizar si pasa de 6 minutos. *Las 25 pruebas ya pasaron contra la URL pública desde la máquina local, y el trabajo de deploy ahora las corre contra producción. Falta confirmar la primera ejecución de Actions con este cambio y anotar su duración en `docs/investigacion.md`.* Commit: `test: validar E2E en CI y producción`.
 
 **Criterio de salida:** las pruebas demuestran inicio, interacción, backend y validación o finalización, tanto localmente como en CI y producción.
 

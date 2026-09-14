@@ -25,6 +25,7 @@ Fuentes consultadas: documentación oficial de Playwright, secciones *Getting st
 | `npm run test:e2e` | Sin ventana, en Chromium. Es lo que corre GitHub Actions. |
 | `npm run test:e2e:visual` | Con ventana, en el Google Chrome instalado. Es lo de la defensa. |
 | `npm run test:e2e:prod` | Las mismas pruebas contra la aplicación publicada. |
+| `npm run test:e2e:defensa` | Solo el recorrido de defensa, con Chrome visible, contra la aplicación publicada. |
 
 Las dos primeras usan `playwright.config.ts`, que compila la aplicación y la levanta en el puerto
 **4173** antes de probar. Se eligió un puerto distinto al de desarrollo (3000 y 5173) para que las
@@ -49,6 +50,70 @@ URL_PRODUCCION=https://tupay.onrender.com npm run test:e2e:prod
   verde ocultando el resto. Con esta opción, en CI eso falla en vez de pasar desapercibido.
 - **Reporte como artefacto.** El reporte HTML se guarda como artefacto del trabajo de Actions, así se
   puede revisar una prueba fallida sin volver a ejecutarla.
+
+## Pruebas E2E de la Fase 9
+
+### Qué cubre cada archivo
+
+| Archivo | Tarea | Qué demuestra |
+|---|---|---|
+| `inicio.spec.ts` | 9.2 | La configuración muestra exactamente los equipos y estadios que respondió `/api/equipos` y `/api/estadios`, y se crea un partido de Eliminatoria y uno de Liga contra el servidor. |
+| `interaccion.spec.ts` | 9.3 | Arrastrar una tapita manda al servidor la dirección y la fuerza del gesto, y al terminar la animación la tapita queda en la posición que devolvió Express. |
+| `validaciones.spec.ts` | 9.4 | Con dos equipos iguales el servidor responde 400, y la alerta de la pantalla muestra exactamente ese texto. |
+| `finalizacion.spec.ts` | 9.5 | Una Eliminatoria a un gol termina en la pantalla de resultado; una Liga de 3 segundos termina empatada. |
+| `defensa.spec.ts` | 9.6 | Inicio, pedidos reales, un emote y un gol que termina el partido, en unos 6 segundos. |
+| `partidas.spec.ts`, `temporada.spec.ts`, `estadios-y-emotes.spec.ts`, `salud.spec.ts` | Fases anteriores | La API directamente, la temporada, los charcos y los emotes. |
+
+Los pasos que se repiten (abrir el menú, configurar un partido, tirar) viven en `e2e/ayudantes.ts`.
+
+### Cómo se localizan los elementos
+
+Primero el rol y el nombre visible, como lo busca una persona: `getByRole("button", { name: "Jugar" })`.
+Después la etiqueta de un campo: `getByLabel("Estadio")`. Solo donde no hay nada semántico estable
+—la cancha, las tapitas, el marcador, los mensajes— se usa `data-testid`. Nunca clases de CSS.
+
+### Cómo se hace repetible un juego con azar
+
+La pantalla no ofrece elegir la semilla, y no debe: es una opción de prueba. Las pruebas la agregan
+interceptando el pedido `POST /api/partidas` con `page.route` y sumándole `semilla` o
+`duracionRealSegundos` antes de que salga. El pedido sigue llegando al servidor real, que lo valida
+igual que siempre. Funciona también contra producción, porque la intercepción ocurre en el navegador.
+
+### Cómo se tira desde una prueba
+
+Una prueba no puede adivinar en qué píxel quedó una tapita: depende del tamaño de la ventana. La
+función `aPantalla` le pide al propio SVG su matriz de transformación (`getScreenCTM`), la misma que
+usa React para convertir el puntero en unidades de cancha, y con ella calcula dónde presionar y hasta
+dónde arrastrar.
+
+### La defensa, en PowerShell
+
+```powershell
+$env:URL_PRODUCCION = "https://tupay.onrender.com"
+npm run test:e2e:defensa
+```
+
+Conviene abrir la URL unos minutos antes: si el servicio está dormido, la primera carga tarda cerca de
+un minuto y la prueba espera hasta 90 segundos.
+
+### Cómo se diagnostica una prueba que falla
+
+Las dos configuraciones guardan la traza de cada prueba que falla (`trace: "retain-on-failure"`), en
+`test-results/`. Se abre con:
+
+```bash
+npx playwright show-trace test-results/<carpeta-de-la-prueba>/trace.zip
+```
+
+La traza muestra cada paso, los pedidos a la API con su respuesta, la consola del navegador y el DOM en
+cada momento. Así se encontró en la Fase 8 un error de la animación que hacía fallar una prueba una vez
+cada 80 ejecuciones: la consola de la traza mostraba el error exacto de React.
+
+### Las pruebas también corren contra producción en Actions
+
+El trabajo `Deploy a Render`, después de confirmar que la URL pública sirve el commit nuevo, instala
+Chromium y ejecuta `npm run test:e2e:prod`. Así la versión publicada se prueba con las mismas 25
+pruebas que corren antes del deploy, y su reporte queda como artefacto `reporte-e2e-produccion`.
 
 ## Publicación en Render
 
@@ -105,10 +170,19 @@ proyecto necesitara servicios adicionales (una base de datos, un worker), la dec
 
 ## Tiempos medidos
 
+Medidos el 14 de septiembre de 2026, al terminar la Fase 9.
+
 | Medición | Resultado |
 |---|---|
-| Pruebas unitarias de física, reglas, rival y temporada (67 pruebas) | 0,4 s |
-| Pruebas E2E locales (16 pruebas, headless, 4 de ellas jugando en el navegador) | 8,3 s más el tiempo de compilar |
-| Pruebas E2E contra producción (servicio despierto) | 5,9 s |
-| Deploy completo en Render (primer deploy) | 45,1 s |
-| Pipeline completo en GitHub Actions | *pendiente: medir tras la primera ejecución* |
+| Pruebas unitarias del dominio (97 pruebas) | unos 8 s en local; 23 s en Actions |
+| Pruebas E2E locales (25 pruebas, headless) | 10,4 s, compilación incluida |
+| Las mismas 25, repetidas 5 veces seguidas | 125 de 125 en verde, 32,6 s |
+| Pruebas E2E contra producción (servicio despierto) | 25 de 25 en verde, entre 16 y 18,6 s |
+| Recorrido de defensa en Chrome visible contra producción | entre 5,7 y 6,2 s (tres ejecuciones seguidas) |
+| Deploy en Render, hasta que la URL informa el commit | 52 s |
+| Pipeline completo en GitHub Actions (último antes de la Fase 9) | 142 s: lint 18 s, pruebas 81 s, deploy 55 s |
+| Pipeline completo con las pruebas contra producción | *pendiente: medir en la primera ejecución de Actions de la Fase 9* |
+
+Las pruebas contra producción suman al trabajo de deploy la instalación de dependencias y de Chromium
+(unos 30 s en las otras ejecuciones) y las pruebas (unos 20 s). La estimación ronda los 4 minutos,
+dentro de la meta de 6.
