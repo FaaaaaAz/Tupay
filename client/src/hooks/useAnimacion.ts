@@ -29,7 +29,9 @@ export function useAnimacion(
     const inicio = performance.now();
 
     let pedido = requestAnimationFrame(function avanzar(ahora) {
-      const posicion = ((ahora - inicio) / 1000) * cuadrosPorSegundo;
+      // El navegador le pasa a cada cuadro el instante en que empezó a dibujarlo, que puede ser
+      // un poco anterior a `inicio`. Sin el mínimo, la posición daba negativa y no había cuadro -1.
+      const posicion = Math.max(0, ((ahora - inicio) / 1000) * cuadrosPorSegundo);
       if (posicion >= recorrido.length - 1) {
         alTerminarRef.current();
         return;
