@@ -7,6 +7,7 @@ import type {
   Modo,
   OpcionesDePrueba,
   PeticionCrearPartida,
+  PeticionEmote,
   PeticionTiro,
   TipoJugador,
 } from "../../../compartido/partida.js";
@@ -15,7 +16,7 @@ import type {
   PeticionCrearTemporada,
   PeticionJugarPartidoDeTemporada,
 } from "../../../compartido/temporada.js";
-import { esIdEquipo, esIdEstadio } from "../dominio/catalogo.js";
+import { esIdEmote, esIdEquipo, esIdEstadio } from "../dominio/catalogo.js";
 import { ErrorDeJuego } from "../dominio/errores.js";
 import { MENSAJES } from "../dominio/mensajes.js";
 
@@ -64,6 +65,8 @@ function leerOpcionesDePrueba(cuerpo: Record<string, unknown>, mensaje: string):
     duracionRealSegundos: opcional(cuerpo.duracionRealSegundos, esNumero, mensaje),
     limiteTurnoSegundos: opcional(cuerpo.limiteTurnoSegundos, esNumero, mensaje),
     probabilidadPerro: opcional(cuerpo.probabilidadPerro, esNumero, mensaje),
+    duracionEmoteSegundos: opcional(cuerpo.duracionEmoteSegundos, esNumero, mensaje),
+    esperaEmoteSegundos: opcional(cuerpo.esperaEmoteSegundos, esNumero, mensaje),
   };
 }
 
@@ -101,6 +104,16 @@ export function leerPeticionTiro(cuerpo: unknown): PeticionTiro {
     fuerza,
     tiroDePoder: opcional(tiroDePoder, esBooleano, mensaje),
   };
+}
+
+export function leerPeticionEmote(cuerpo: unknown): PeticionEmote {
+  const mensaje = MENSAJES.emoteInvalido;
+  if (!esObjeto(cuerpo)) throw new ErrorDeJuego(mensaje);
+
+  const { lado, emote } = cuerpo;
+  if (!esLado(lado) || !esIdEmote(emote)) throw new ErrorDeJuego(mensaje);
+
+  return { lado, emote };
 }
 
 export function leerPeticionCrearTemporada(cuerpo: unknown): PeticionCrearTemporada {

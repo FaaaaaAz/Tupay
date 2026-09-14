@@ -1,12 +1,14 @@
 import type {
   Partida,
   PeticionCrearPartida,
+  PeticionEmote,
   PeticionTiro,
   RespuestaTiro,
 } from "../../../compartido/partida.js";
 import { ErrorDeJuego } from "../dominio/errores.js";
 import { CUADROS_POR_SEGUNDO } from "../dominio/fisica/configuracionFisica.js";
 import { MENSAJES } from "../dominio/mensajes.js";
+import { lanzarEmote } from "../dominio/reglas/emotes.js";
 import { crearRegistro, type RegistroPartida } from "../dominio/reglas/partida.js";
 import { actualizarTiempo } from "../dominio/reglas/tiempo.js";
 import {
@@ -61,6 +63,15 @@ export class ServicioPartidas {
 
   turnoRival(id: string): RespuestaTiro {
     return this.jugar(id, (registro, momento) => jugarTurnoDelRival(registro, momento));
+  }
+
+  lanzarEmote(id: string, peticion: PeticionEmote): Partida {
+    const registro = this.buscar(id);
+    const momento = this.dependencias.ahora();
+    lanzarEmote(registro, peticion, momento);
+
+    this.dependencias.repositorio.guardar(registro);
+    return aPartidaPublica(registro, momento);
   }
 
   private jugar(id: string, jugada: Jugada): RespuestaTiro {

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import type { ServicioPartidas } from "../servicios/servicioPartidas.js";
-import { leerPeticionCrearPartida, leerPeticionTiro } from "./lecturaPeticiones.js";
+import { leerPeticionCrearPartida, leerPeticionEmote, leerPeticionTiro } from "./lecturaPeticiones.js";
 
 /** Rutas delgadas: leen la petición, llaman al servicio y responden. Los errores los atiende `manejadorDeErrores`. */
 export function crearRutaPartidas(servicio: ServicioPartidas): Router {
@@ -20,6 +20,10 @@ export function crearRutaPartidas(servicio: ServicioPartidas): Router {
 
   ruta.post("/:id/turno-rival", (peticion, respuesta) => {
     respuesta.json(servicio.turnoRival(peticion.params.id));
+  });
+
+  ruta.post("/:id/emotes", (peticion, respuesta) => {
+    respuesta.json(servicio.lanzarEmote(peticion.params.id, leerPeticionEmote(peticion.body)));
   });
 
   return ruta;
