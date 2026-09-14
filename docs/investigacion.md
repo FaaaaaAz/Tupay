@@ -181,8 +181,18 @@ Medidos el 14 de septiembre de 2026, al terminar la Fase 9.
 | Recorrido de defensa en Chrome visible contra producción | entre 5,7 y 6,2 s (tres ejecuciones seguidas) |
 | Deploy en Render, hasta que la URL informa el commit | 52 s |
 | Pipeline completo en GitHub Actions (último antes de la Fase 9) | 142 s: lint 18 s, pruebas 81 s, deploy 55 s |
-| Pipeline completo con las pruebas contra producción | *pendiente: medir en la primera ejecución de Actions de la Fase 9* |
+| Pipeline completo con las pruebas contra producción (commit `582d561`) | 215 s: lint 24 s, pruebas 94 s, deploy 113 s |
 
-Las pruebas contra producción suman al trabajo de deploy la instalación de dependencias y de Chromium
-(unos 30 s en las otras ejecuciones) y las pruebas (unos 20 s). La estimación ronda los 4 minutos,
-dentro de la meta de 6.
+En esa ejecución, el trabajo de deploy tardó 51 s en ver publicado el commit, 22 s en instalar
+Chromium y 27 s en correr las 25 pruebas contra la URL pública. El pipeline completo quedó en 3,6
+minutos, dentro de la meta de 6.
+
+### Cuando Render no publica el commit
+
+En la ejecución siguiente (commit `f3d92bf`, los escudos), Render aceptó el Deploy Hook pero la URL
+siguió informando el commit anterior durante los 40 intentos, y el trabajo de deploy quedó en rojo.
+Ese mismo commit, exportado con `git archive` a una carpeta limpia, compiló sin errores con
+`npm ci --include=dev && npm run build`, y todas las rutas de las imágenes coincidían exactamente con
+los nombres versionados. El fallo estaba del lado de Render, y se diagnostica en su panel: la lista de
+deploys del servicio y el log del que falló. Es justo el caso para el que existe la comprobación de la
+versión: sin ella, el pipeline habría quedado en verde con la versión vieja publicada.
