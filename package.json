@@ -22,7 +22,8 @@
     "test:unit": "tsx --test \"server/src/**/*.test.ts\"",
     "test:e2e":"playwright test --project=chromium",
     "test:e2e:visual": "playwright test --project=chrome",
-    "test:e2e:prod": "playwright test --config playwright.prod.config.ts --project=chromium"
+    "test:e2e:prod": "playwright test --config playwright.prod.config.ts --project=chromium",
+    "test:e2e:defensa": "playwright test --config playwright.prod.config.ts --project=chrome --grep @defensa"
   },
   "dependencies": {
     "express": "^5.2.1",
