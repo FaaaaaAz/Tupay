@@ -42,7 +42,7 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Ejecutar las pruebas unitarias de la física
+      - name: Ejecutar las pruebas unitarias del dominio
         run: npm run test:unit
 
       - name: Instalar el navegador de Playwright
@@ -86,3 +86,30 @@ jobs:
           done
           echo "La aplicación publicada nunca informó el commit $esperado."
           exit 1
+
+      # Las mismas pruebas E2E, ahora contra la versión que acaba de quedar publicada.
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Instalar el navegador de Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Ejecutar las pruebas E2E contra producción
+        run: npm run test:e2e:prod
+        env:
+          URL_PRODUCCION: ${{ vars.URL_PRODUCCION }}
+
+      - name: Guardar el reporte de producción
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-e2e-produccion
+          path: playwright-report/
+          retention-days: 7
