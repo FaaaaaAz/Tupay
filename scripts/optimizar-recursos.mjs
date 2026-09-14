@@ -2,7 +2,8 @@
 // client/src/recursos/. Se ejecuta a mano, muy de vez en cuando:
 //
 //   npm install --no-save sharp
-//   node scripts/optimizar-recursos.mjs
+//   node scripts/optimizar-recursos.mjs            (todos los grupos)
+//   node scripts/optimizar-recursos.mjs escudos    (solo los grupos nombrados)
 //
 // sharp no se guarda como dependencia del proyecto: solo hace falta para
 // regenerar los recursos, no para compilar ni para jugar.
@@ -85,28 +86,58 @@ async function normalizarEmote(origen, destino, lado) {
   await guardar(imagen, destino, 92);
 }
 
-console.log("Tapitas de cada equipo");
-for (const equipo of equipos) {
-  await ajustar(`${ORIGEN}/players/${equipo}.png`, `${DESTINO}/equipos/${equipo}.webp`, 256, 256);
+/**
+ * Recorta el margen transparente del escudo y lo encaja en un cuadrado: así los diez ocupan
+ * todo el espacio que les da la pantalla, sin que uno se vea más chico que otro.
+ */
+async function normalizarEscudo(origen, destino, lado) {
+  const escudo = await sharp(origen).trim({ threshold: 8 }).toBuffer();
+  const imagen = sharp(escudo).resize(lado, lado, { fit: "contain", background: TRANSPARENTE });
+  await guardar(imagen, destino, 90);
 }
 
-console.log("\nEstadios");
-for (const [archivo, nombre] of Object.entries(estadios)) {
-  await ajustar(`${ORIGEN}/stadium/${archivo}.png`, `${DESTINO}/estadios/${nombre}.webp`, 1672, 941, 82);
+const GRUPOS = {
+  async tapitas() {
+    for (const equipo of equipos) {
+      await ajustar(`${ORIGEN}/players/${equipo}.png`, `${DESTINO}/equipos/${equipo}.webp`, 256, 256);
+    }
+  },
+  async escudos() {
+    for (const equipo of equipos) {
+      await normalizarEscudo(`${ORIGEN}/teams/${equipo}.png`, `${DESTINO}/escudos/${equipo}.webp`, 256);
+    }
+  },
+  async estadios() {
+    for (const [archivo, nombre] of Object.entries(estadios)) {
+      await ajustar(`${ORIGEN}/stadium/${archivo}.png`, `${DESTINO}/estadios/${nombre}.webp`, 1672, 941, 82);
+    }
+  },
+  async pantallas() {
+    await ajustar(`${ORIGEN}/UI/Start.png`, `${DESTINO}/pantallas/inicio.webp`, 1672, 941, 82);
+    await ajustar(`${ORIGEN}/UI/menuPrincipal.png`, `${DESTINO}/pantallas/menu.webp`, 1672, 941, 82);
+  },
+  async juego() {
+    await ajustar(`${ORIGEN}/items/pelota.png`, `${DESTINO}/juego/pelota.webp`, 160, 160);
+    await ajustar(`${ORIGEN}/items/perro.png`, `${DESTINO}/juego/perro.webp`, 256, 256);
+    await ajustar(`${ORIGEN}/items/arco.png`, `${DESTINO}/juego/arco.webp`, 480, 1136);
+    await ajustar(`${ORIGEN}/items/charcoDeAgua.png`, `${DESTINO}/juego/charcoDeAgua.webp`, 512, 341);
+    await ajustar(`${ORIGEN}/items/charcoDeNieve.png`, `${DESTINO}/juego/charcoDeNieve.webp`, 512, 341);
+  },
+  async emotes() {
+    for (const emote of emotes) {
+      await normalizarEmote(`${ORIGEN}/emotes/${emote}.png`, `${DESTINO}/emotes/${emote}.webp`, 256);
+    }
+  },
+};
+
+const pedidos = process.argv.slice(2);
+const desconocidos = pedidos.filter((nombre) => !Object.hasOwn(GRUPOS, nombre));
+if (desconocidos.length > 0) {
+  console.error(`Grupos desconocidos: ${desconocidos.join(", ")}. Existen: ${Object.keys(GRUPOS).join(", ")}.`);
+  process.exit(1);
 }
 
-console.log("\nPantallas");
-await ajustar(`${ORIGEN}/UI/Start.png`, `${DESTINO}/pantallas/inicio.webp`, 1672, 941, 82);
-await ajustar(`${ORIGEN}/UI/menuPrincipal.png`, `${DESTINO}/pantallas/menu.webp`, 1672, 941, 82);
-
-console.log("\nElementos de la cancha");
-await ajustar(`${ORIGEN}/items/pelota.png`, `${DESTINO}/juego/pelota.webp`, 160, 160);
-await ajustar(`${ORIGEN}/items/perro.png`, `${DESTINO}/juego/perro.webp`, 256, 256);
-await ajustar(`${ORIGEN}/items/arco.png`, `${DESTINO}/juego/arco.webp`, 480, 1136);
-await ajustar(`${ORIGEN}/items/charcoDeAgua.png`, `${DESTINO}/juego/charcoDeAgua.webp`, 512, 341);
-await ajustar(`${ORIGEN}/items/charcoDeNieve.png`, `${DESTINO}/juego/charcoDeNieve.webp`, 512, 341);
-
-console.log("\nEmotes");
-for (const emote of emotes) {
-  await normalizarEmote(`${ORIGEN}/emotes/${emote}.png`, `${DESTINO}/emotes/${emote}.webp`, 256);
+for (const nombre of pedidos.length > 0 ? pedidos : Object.keys(GRUPOS)) {
+  console.log(`\n${nombre}`);
+  await GRUPOS[nombre]();
 }
