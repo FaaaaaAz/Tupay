@@ -229,7 +229,7 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
             onClick={pausar}>
             <span aria-hidden="true">Ⅱ </span>Pausar
           </button>
-          <button type="button" className="boton boton--enlace" disabled={!juego.puedePausar} onClick={salir}>Salir</button>
+          <button type="button" className="boton boton--enlace" disabled={!juego.puedePausar} onClick={salir}> Salir de la partida</button>
         </div>
       </footer>
 
