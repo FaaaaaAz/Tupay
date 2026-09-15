@@ -66,9 +66,15 @@ test("menú, configuración, temporada y resultado conservan el diseño en tres 
     await page.setViewportSize({ width, height });
     await abrirMenu(page);
     await expect(page.getByRole("button", { name: /^Cómo se juega/ })).toBeInViewport({ ratio: 1 });
+    // Cada tarjeta muestra su ilustración descargada, no un hueco vacío.
+    for (const ilustracion of await page.locator(".menu__tarjetas img").all()) {
+      await expect.poll(() => ilustracion.evaluate((imagen: HTMLImageElement) => imagen.naturalWidth)).toBeGreaterThan(0);
+    }
+    await expect(page.locator(".menu__tarjetas img")).toHaveCount(4);
     await page.screenshot({ path: info.outputPath(`menu-${width}.jpg`), type: "jpeg", quality: 85, animations: "disabled" });
     await elegirEnElMenu(page, "Eliminatoria");
     await expect(page.getByRole("button", { name: "Jugar", exact: true })).toBeInViewport({ ratio: 1 });
+    await expect(page.getByRole("main")).toHaveCSS("background-image", /paneles/);
     await page.screenshot({ path: info.outputPath(`configuracion-${width}.jpg`), type: "jpeg", quality: 85, animations: "disabled" });
     await page.getByRole("button", { name: "← Volver" }).click();
     await elegirEnElMenu(page, "Temporada");
