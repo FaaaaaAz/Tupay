@@ -97,12 +97,12 @@ async function normalizarEscudo(origen, destino, lado) {
 }
 
 /**
- * Recorta el margen transparente de la ilustración de una tarjeta del menú y la reduce sin
- * rellenarla: el CSS la centra en su hueco, así que cada una ocupa todo el espacio que le toca.
+ * Recorta el margen transparente de una ilustración de la interfaz y la reduce sin rellenarla:
+ * el CSS la centra en su hueco, así que ocupa todo el espacio que le toca.
  */
-async function normalizarTarjeta(origen, destino) {
+async function recortarIlustracion(origen, destino, ancho, alto) {
   const dibujo = await sharp(origen).trim({ threshold: 8 }).toBuffer();
-  const imagen = sharp(dibujo).resize(560, 420, { fit: "inside", withoutEnlargement: true });
+  const imagen = sharp(dibujo).resize(ancho, alto, { fit: "inside", withoutEnlargement: true });
   await guardar(imagen, destino, 88);
 }
 
@@ -138,8 +138,11 @@ const GRUPOS = {
   },
   async tarjetas() {
     for (const [archivo, nombre] of Object.entries(tarjetas)) {
-      await normalizarTarjeta(`${ORIGEN}/UI/${archivo}.png`, `${DESTINO}/tarjetas/${nombre}.webp`);
+      await recortarIlustracion(`${ORIGEN}/UI/${archivo}.png`, `${DESTINO}/tarjetas/${nombre}.webp`, 560, 420);
     }
+  },
+  async pausa() {
+    await recortarIlustracion(`${ORIGEN}/UI/pausa.png`, `${DESTINO}/pantallas/pausa.webp`, 360, 300);
   },
   async juego() {
     await ajustar(`${ORIGEN}/items/pelota.png`, `${DESTINO}/juego/pelota.webp`, 160, 160);

@@ -16,7 +16,8 @@ export function precargarImagen(url: string): Promise<void> {
 }
 
 export async function precargarPartida(peticion: PeticionCrearPartida): Promise<void> {
-  const urls = [IMAGENES.pelota, IMAGENES.arco, IMAGEN_DE_EQUIPO[peticion.local.equipo], IMAGEN_DE_EQUIPO[peticion.visitante.equipo]];
+  // El árbitro de los modales también: la pausa no puede abrirse con un hueco vacío.
+  const urls = [IMAGENES.pelota, IMAGENES.arco, IMAGENES.pausa, IMAGEN_DE_EQUIPO[peticion.local.equipo], IMAGEN_DE_EQUIPO[peticion.visitante.equipo]];
   if (peticion.estadio) urls.push(IMAGEN_DE_ESTADIO[peticion.estadio]);
   if (peticion.perroActivo !== false) urls.push(IMAGENES.perro);
   urls.push(...Object.values(IMAGEN_DE_CHARCO));

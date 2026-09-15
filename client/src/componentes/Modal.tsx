@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
+import { IMAGENES } from "../recursos/indice";
 
 interface Props {
   titulo: string;
@@ -40,7 +41,7 @@ export function Modal({ titulo, detalle, children, alCancelar, ocupado = false }
         else if (!evento.shiftKey && document.activeElement === ultimo) { evento.preventDefault(); primero.focus(); }
       }}
       onCancel={(evento) => { evento.preventDefault(); if (!ocupado) alCancelar(); }}>
-      <div className="modal__insignia" aria-hidden="true">Ⅱ</div>
+      <img className="modal__ilustracion" src={IMAGENES.pausa} alt="" />
       <p className="modal__etiqueta">Tupay · Tiempo fuera</p>
       <h2 id={`${id}-titulo`}>{titulo}</h2>
       <p id={`${id}-detalle`} className="modal__detalle">{detalle}</p>
