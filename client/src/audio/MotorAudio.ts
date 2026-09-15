@@ -4,6 +4,7 @@ export interface RecursoAudio {
   canal: CanalAudio;
   ganancia: number;
   intervaloMs: number;
+  bucle?: boolean;
 }
 export interface PreferenciasAudio { silenciado: boolean; musica: number; efectos: number }
 interface EstadoAudio {
@@ -22,7 +23,8 @@ export class MotorAudio {
   private buffers = new Map<string, Promise<AudioBuffer>>();
   private oyentes = new Set<() => void>();
   private ultimos = new Map<string, number>();
-  private activos = new Map<AudioBufferSourceNode, CanalAudio>();
+  private activos = new Map<AudioBufferSourceNode, { id: string; canal: CanalAudio }>();
+  private versiones = new Map<string, number>();
   private generacionEfectos = 0;
   private generacionMusica = 0;
   private musica: { id: string; nodo: AudioBufferSourceNode; inicio: number; offset: number } | null = null;
@@ -109,6 +111,12 @@ export class MotorAudio {
     return carga;
   }
 
+  /** Precarga acotada después del gesto inicial; nunca retrasa una llamada al servidor. */
+  async preparar(ids: readonly string[]) {
+    if (!this.contexto || this.estado.preferencias.silenciado) return;
+    await Promise.allSettled(ids.map((id) => this.cargar(id)));
+  }
+
   private puedeSonar(canal: CanalAudio): boolean {
     const p = this.estado.preferencias;
     return this.contexto?.state === "running" && !p.silenciado && !this.oculto &&
@@ -116,23 +124,25 @@ export class MotorAudio {
   }
 
   /** No encola efectos viejos: descarta cargas lentas, duplicados y ráfagas. */
-  async efecto(id: string): Promise<boolean> {
+  async efecto(id: string, canalAlternativo?: "reacciones"): Promise<boolean> {
     const recurso = this.recursos[id];
-    if (!recurso || recurso.canal === "musica" || !this.puedeSonar(recurso.canal)) return false;
+    const canal = canalAlternativo ?? recurso?.canal;
+    if (!recurso || !canal || canal === "musica" || !this.puedeSonar(canal)) return false;
     const ahora = performance.now();
     if (ahora - (this.ultimos.get(id) ?? -Infinity) < recurso.intervaloMs) return false;
     this.ultimos.set(id, ahora);
     const generacion = this.generacionEfectos;
+    const version = this.versiones.get(id);
     try {
       const buffer = await this.cargar(id);
-      if (generacion !== this.generacionEfectos || !this.puedeSonar(recurso.canal) || performance.now() - ahora > 350) return false;
-      if (recurso.canal === "reacciones" && [...this.activos.values()].some((canal) => canal === "efectos" || canal === "reacciones")) return false;
-      if (recurso.canal === "efectos") {
-        for (const [nodo, canal] of this.activos) if (canal === "reacciones") { nodo.stop(); this.activos.delete(nodo); }
+      if (generacion !== this.generacionEfectos || version !== this.versiones.get(id) || !this.puedeSonar(canal) || performance.now() - ahora > 350) return false;
+      if (canal === "reacciones" && [...this.activos.values()].some((activo) => activo.canal === "efectos" || activo.canal === "reacciones")) return false;
+      if (canal === "efectos") {
+        for (const [nodo, activo] of this.activos) if (activo.canal === "reacciones") { nodo.stop(); this.activos.delete(nodo); }
       }
       if (this.activos.size >= 4) return false;
-      const nodo = this.crearFuente(buffer, recurso);
-      this.activos.set(nodo, recurso.canal);
+      const nodo = this.crearFuente(buffer, { ...recurso, canal, ganancia: canalAlternativo ? Math.min(0.25, recurso.ganancia) : recurso.ganancia });
+      this.activos.set(nodo, { id, canal });
       nodo.onended = () => { this.activos.delete(nodo); nodo.disconnect(); };
       nodo.start();
       return true;
@@ -173,7 +183,7 @@ export class MotorAudio {
       const buffer = await this.cargar(id);
       if (generacion !== this.generacionMusica || !this.puedeSonar("musica") || this.musicaDeseada !== id) return;
       const nodo = this.crearFuente(buffer, this.recursos[id]!);
-      nodo.loop = id === "menu" || id === "partido";
+      nodo.loop = this.recursos[id]!.bucle ?? false;
       const offset = this.offsetMusica % buffer.duration;
       this.musica = { id, nodo, inicio: this.contexto!.currentTime, offset };
       nodo.onended = () => {
@@ -193,7 +203,12 @@ export class MotorAudio {
     nodo.stop();
   }
 
-  private detenerEfectos() {
+  detenerEfecto(id: string) {
+    this.versiones.set(id, (this.versiones.get(id) ?? 0) + 1);
+    for (const [nodo, activo] of this.activos) if (activo.id === id) { nodo.stop(); this.activos.delete(nodo); }
+  }
+
+  detenerEfectos() {
     this.generacionEfectos++;
     for (const nodo of this.activos.keys()) nodo.stop();
     this.activos.clear();

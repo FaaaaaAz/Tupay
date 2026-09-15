@@ -9,7 +9,8 @@
     "canal": "musica",
     "ganancia": 0.5,
     "intervaloMs": 0,
-    "estado": "integrado en 10.7"
+    "estado": "integrado",
+    "bucle": true
   },
   {
     "id": "partido",
@@ -21,7 +22,8 @@
     "canal": "musica",
     "ganancia": 0.35,
     "intervaloMs": 0,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado",
+    "bucle": true
   },
   {
     "id": "victoria",
@@ -33,7 +35,7 @@
     "canal": "musica",
     "ganancia": 0.5,
     "intervaloMs": 1000,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
   },
   {
     "id": "derrota",
@@ -45,7 +47,7 @@
     "canal": "musica",
     "ganancia": 0.5,
     "intervaloMs": 1000,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
   },
   {
     "id": "tiro",
@@ -57,7 +59,7 @@
     "canal": "efectos",
     "ganancia": 0.65,
     "intervaloMs": 100,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
   },
   {
     "id": "choque",
@@ -69,7 +71,7 @@
     "canal": "efectos",
     "ganancia": 0.4,
     "intervaloMs": 120,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "reservado: no existe evento de contacto"
   },
   {
     "id": "rebote",
@@ -81,7 +83,7 @@
     "canal": "efectos",
     "ganancia": 0.4,
     "intervaloMs": 120,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "reservado: no existe evento de contacto"
   },
   {
     "id": "poste",
@@ -93,7 +95,7 @@
     "canal": "efectos",
     "ganancia": 0.35,
     "intervaloMs": 150,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "reservado: no existe evento de contacto"
   },
   {
     "id": "gol",
@@ -105,7 +107,7 @@
     "canal": "efectos",
     "ganancia": 0.65,
     "intervaloMs": 1200,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
   },
   {
     "id": "clic",
@@ -117,7 +119,7 @@
     "canal": "interfaz",
     "ganancia": 0.4,
     "intervaloMs": 90,
-    "estado": "integrado en 10.7"
+    "estado": "integrado"
   },
   {
     "id": "seleccion",
@@ -129,7 +131,7 @@
     "canal": "interfaz",
     "ganancia": 0.4,
     "intervaloMs": 100,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
   },
   {
     "id": "confirmacion",
@@ -141,7 +143,7 @@
     "canal": "interfaz",
     "ganancia": 0.4,
     "intervaloMs": 250,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
   },
   {
     "id": "error",
@@ -153,7 +155,7 @@
     "canal": "interfaz",
     "ganancia": 0.4,
     "intervaloMs": 500,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
   },
   {
     "id": "transicion",
@@ -165,7 +167,7 @@
     "canal": "interfaz",
     "ganancia": 0.35,
     "intervaloMs": 250,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
   },
   {
     "id": "inicio",
@@ -177,7 +179,7 @@
     "canal": "efectos",
     "ganancia": 0.4,
     "intervaloMs": 1000,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
   },
   {
     "id": "fin",
@@ -189,7 +191,7 @@
     "canal": "efectos",
     "ganancia": 0.4,
     "intervaloMs": 1000,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
   },
   {
     "id": "poder",
@@ -201,7 +203,7 @@
     "canal": "efectos",
     "ganancia": 0.45,
     "intervaloMs": 500,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
   },
   {
     "id": "feliz",
@@ -213,7 +215,7 @@
     "canal": "reacciones",
     "ganancia": 0.25,
     "intervaloMs": 1500,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
   },
   {
     "id": "triste",
@@ -225,7 +227,7 @@
     "canal": "reacciones",
     "ganancia": 0.25,
     "intervaloMs": 1500,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
   },
   {
     "id": "sorprendido",
@@ -237,7 +239,7 @@
     "canal": "reacciones",
     "ganancia": 0.25,
     "intervaloMs": 1500,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
   },
   {
     "id": "euforico",
@@ -249,6 +251,32 @@
     "canal": "reacciones",
     "ganancia": 0.25,
     "intervaloMs": 1500,
-    "estado": "recurso preparado; conexión pendiente en 10.8"
+    "estado": "integrado"
+  },
+  {
+    "id": "perro",
+    "archivo": "sfx/ambience/ladrido.ogg",
+    "autor": "michael_grinnell",
+    "fuente": "https://freesound.org/people/michael_grinnell/sounds/464400/",
+    "original": "Dog_Bark.wav (vista previa pública OGG)",
+    "descarga": "https://cdn.freesound.org/previews/464/464400_7372230-lq.ogg",
+    "licencia": "CC0-1.0",
+    "canal": "efectos",
+    "ganancia": 0.4,
+    "intervaloMs": 2000,
+    "estado": "integrado"
+  },
+  {
+    "id": "resortera",
+    "archivo": "sfx/gameplay/aim/resortera.ogg",
+    "autor": "renne100",
+    "fuente": "https://freesound.org/people/renne100/sounds/353033/",
+    "original": "Slingshot (vista previa pública OGG)",
+    "descarga": "https://cdn.freesound.org/previews/353/353033_4350755-lq.ogg",
+    "licencia": "CC0-1.0",
+    "canal": "efectos",
+    "ganancia": 0.25,
+    "intervaloMs": 500,
+    "estado": "integrado"
   }
 ]

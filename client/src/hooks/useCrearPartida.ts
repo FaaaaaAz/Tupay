@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import type { Partida, PeticionCrearPartida } from "../../../compartido/partida.js";
 import { crearPartida } from "../api/partidas";
 import { precargarPartida } from "../recursos/precargar";
+import { audio } from "../audio/audio";
 
 /** Crea una partida en Express y deja listo el mensaje de error si la rechaza. */
 export function useCrearPartida() {
@@ -18,6 +19,7 @@ export function useCrearPartida() {
       await precargarPartida(peticion);
       return await crearPartida(peticion);
     } catch (causa) {
+      void audio.efecto("error");
       setError(causa instanceof Error ? causa.message : "No se pudo crear la partida");
       return null;
     } finally {

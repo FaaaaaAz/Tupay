@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import type { PeticionCrearTemporada, Temporada } from "../../../compartido/temporada.js";
 import { crearTemporada } from "../api/temporadas";
+import { audio } from "../audio/audio";
 
 export function useCrearTemporada() {
   const ocupado = useRef(false);
@@ -15,6 +16,7 @@ export function useCrearTemporada() {
     try {
       return await crearTemporada(peticion);
     } catch (causa) {
+      void audio.efecto("error");
       setError(causa instanceof Error ? causa.message : "No se pudo crear la temporada");
       return null;
     } finally {

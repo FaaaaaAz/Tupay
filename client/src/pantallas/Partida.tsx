@@ -1,4 +1,5 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { audio } from "../audio/audio";
 import type { Equipo } from "../../../compartido/catalogo.js";
 import type {
   Partida as DatosPartida,
@@ -41,6 +42,17 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
   const ladoDelTurno = partida.turno.lado;
   const jugadorDelTurno = partida[ladoDelTurno];
   const terminada = partida.estado === "finalizada" && !juego.animando;
+  const finSonado = useRef(false);
+  useEffect(() => {
+    audio.pausar(juego.pausada || juego.cambiandoPausa || juego.perdida || modal !== null);
+  }, [juego.pausada, juego.cambiandoPausa, juego.perdida, modal]);
+  useEffect(() => {
+    if (!terminada || finSonado.current) return;
+    finSonado.current = true;
+    audio.reproducirMusica(null);
+    // Si el último tiro fue gol, su celebración ya explica el final; no apilar otro efecto.
+    if (!juego.eventos.some((evento) => evento.tipo === "gol")) void audio.efecto("fin");
+  }, [terminada, juego.eventos]);
 
   useEffect(() => {
     if (!terminada || modal || juego.pausada || juego.cambiandoPausa) return;
@@ -177,7 +189,10 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
           aria-pressed={poderVigente}
           aria-label={`Tiro de poder (${jugadorDelTurno.tirosDePoder})`}
           disabled={!juego.puedeTirar || jugadorDelTurno.tirosDePoder === 0}
-          onClick={() => { setTurnoDelPoder(partida.turno); setTiroDePoder(!poderVigente); }}
+          onClick={() => {
+            setTurnoDelPoder(partida.turno); setTiroDePoder(!poderVigente);
+            void audio.efecto(poderVigente ? "seleccion" : "poder");
+          }}
         >
           Tiro de poder ({jugadorDelTurno.tirosDePoder})
           {poderVigente && <span className="poder-activado" aria-hidden="true">Activado · +50 %</span>}

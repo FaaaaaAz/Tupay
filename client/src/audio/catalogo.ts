@@ -3,7 +3,7 @@ import type { RecursoAudio } from "./MotorAudio";
 
 // Vite resuelve las URLs con hash; importar una URL no descarga ni decodifica el audio.
 const archivos = import.meta.glob<string>("../recursos/audio/**/*.ogg", {
-  eager: true, query: "?url", import: "default",
+  eager: true, query: "?url&no-inline", import: "default",
 });
 
 export const SONIDOS: Record<string, RecursoAudio> = Object.fromEntries(recursos.map((recurso) => {

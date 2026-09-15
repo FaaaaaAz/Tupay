@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, test } from "node:test";
 import assert from "node:assert/strict";
 import { MotorAudio, type RecursoAudio } from "./MotorAudio";
+import { SONIDO_DE_EMOTE, sonidoDelResultado } from "./sonidosDelJuego";
+import type { Partida } from "../../../compartido/partida.js";
 
 class FuenteFalsa {
   loop = false;
@@ -25,7 +27,7 @@ class ContextoFalso {
   async decodeAudioData() { return { duration: 30 }; }
 }
 const recursos: Record<string, RecursoAudio> = {
-  menu: { url: "/menu.ogg", canal: "musica", ganancia: 0.5, intervaloMs: 0 },
+  menu: { url: "/menu.ogg", canal: "musica", ganancia: 0.5, intervaloMs: 0, bucle: true },
   partido: { url: "/partido.ogg", canal: "musica", ganancia: 0.5, intervaloMs: 0 },
   clic: { url: "/clic.ogg", canal: "interfaz", ganancia: 0.4, intervaloMs: 100 },
   tiro: { url: "/tiro.ogg", canal: "efectos", ganancia: 0.6, intervaloMs: 100 },
@@ -65,6 +67,7 @@ test("no crea contexto ni descarga antes del gesto; cachea y evita música dupli
   motor.reproducirMusica("menu"); await motor.desbloquear(); await esperar();
   assert.equal(contextos.length, 1);
   assert.equal(fuentes.length, 1);
+  assert.equal(fuentes[0]!.loop, true);
   assert.deepEqual(descargas, ["/menu.ogg"]);
   motor.reproducirMusica("partido"); await esperar();
   assert.equal(fuentes[0]!.parada, true);
@@ -132,4 +135,48 @@ test("fallos de descarga o almacenamiento no impiden continuar y se puede reinte
   Object.defineProperty(globalThis, "localStorage", { configurable: true, get() { throw new Error("Bloqueado"); } });
   assert.doesNotThrow(() => motor.configurar({ silenciado: true }));
   assert.doesNotThrow(() => new MotorAudio(recursos));
+});
+
+test("cancelar una carga de apuntado no detiene música ni deja sonar el efecto tarde", async () => {
+  const motor = new MotorAudio(recursos);
+  await motor.desbloquear(); motor.reproducirMusica("menu"); await esperar();
+  let liberar!: (respuesta: Response) => void;
+  globalThis.fetch = () => new Promise((resolve) => { liberar = resolve; });
+  const efecto = motor.efecto("tiro"); motor.detenerEfecto("tiro");
+  liberar(new Response(new ArrayBuffer(1)));
+  assert.equal(await efecto, false);
+  assert.equal(fuentes.length, 1);
+  assert.equal(fuentes[0]!.parada, false);
+});
+
+test("ocultar la pestaña conserva música pero no una cola de efectos", async () => {
+  const motor = new MotorAudio(recursos);
+  await motor.desbloquear(); motor.reproducirMusica("menu"); await esperar();
+  contextos[0]!.currentTime = 7;
+  motor.ocultar(true);
+  assert.equal(await motor.efecto("clic"), false);
+  motor.ocultar(false); await esperar();
+  assert.equal(fuentes.at(-1)!.offset, 7);
+  assert.equal(fuentes.filter((fuente) => !fuente.parada).length, 1);
+});
+
+test("reutilizar un tono como reacción respeta su canal, prioridad y pausa", async () => {
+  const motor = new MotorAudio(recursos);
+  await motor.desbloquear();
+  motor.pausar(true);
+  assert.equal(await motor.efecto("clic", "reacciones"), false);
+  motor.pausar(false);
+  assert.equal(await motor.efecto("tiro"), true);
+  assert.equal(await motor.efecto("clic", "reacciones"), false);
+});
+
+test("el resultado distingue derrota contra servidor, victoria compartida y empate", () => {
+  const partida = { local: { tipo: "humano" }, visitante: { tipo: "servidor" }, resultado: { ganador: "visitante" } } as Partida;
+  assert.equal(sonidoDelResultado(partida), "derrota");
+  partida.visitante.tipo = "humano";
+  assert.equal(sonidoDelResultado(partida), "victoria");
+  partida.resultado!.ganador = null;
+  assert.equal(sonidoDelResultado(partida), null);
+  assert.equal(SONIDO_DE_EMOTE.dormido, null);
+  assert.equal(SONIDO_DE_EMOTE.enojadoSerio, "confirmacion");
 });

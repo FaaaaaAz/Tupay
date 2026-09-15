@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import type { IdEmote } from "../../../compartido/catalogo.js";
+import { audio } from "../audio/audio";
 import type { Vector } from "../../../compartido/geometria.js";
 import type { Cuadro, Lado, Partida, Tapita } from "../../../compartido/partida.js";
 import type { TiroDesdeLaCancha } from "../hooks/usePartida";
@@ -46,13 +47,14 @@ export function Cancha({ partida, cuadro, rotacionPelota, puedeApuntar, tiroDePo
   const grupo = useRef<SVGGElement>(null);
   const [apuntado, setApuntado] = useState<Apuntado | null>(null);
   const gesto = useRef<Apuntado | null>(null);
-  function cancelar() { gesto.current = null; setApuntado(null); }
+  const cargaSonada = useRef(false);
+  function cancelar() { gesto.current = null; cargaSonada.current = false; audio.detenerEfecto("resortera"); setApuntado(null); }
   useEffect(() => {
     cancelar();
   }, [puedeApuntar, partida.turno]);
   useEffect(() => {
     window.addEventListener("blur", cancelar);
-    return () => window.removeEventListener("blur", cancelar);
+    return () => { window.removeEventListener("blur", cancelar); audio.detenerEfecto("resortera"); };
   }, []);
 
   const quieta = cuadro === null && partida.estado === "enJuego";
@@ -77,13 +79,21 @@ export function Cancha({ partida, cuadro, rotacionPelota, puedeApuntar, tiroDePo
     if (!puntero) return;
     evento.currentTarget.ownerSVGElement?.setPointerCapture(evento.pointerId);
     gesto.current = { tapita, puntero, pointerId: evento.pointerId };
+    void audio.desbloquear();
+    void audio.efecto("seleccion");
     setApuntado(gesto.current);
   }
 
   function seguirApuntando(evento: PointerEvent<SVGSVGElement>) {
     if (!gesto.current || evento.pointerId !== gesto.current.pointerId) return;
     const puntero = enUnidadesDeCancha(evento);
-    if (puntero) { gesto.current = { ...gesto.current, puntero }; setApuntado(gesto.current); }
+    if (puntero) {
+      gesto.current = { ...gesto.current, puntero }; setApuntado(gesto.current);
+      if (!cargaSonada.current && calcularTiro(gesto.current)) {
+        cargaSonada.current = true;
+        void audio.efecto("resortera");
+      }
+    }
   }
 
   function soltar(evento: PointerEvent<SVGSVGElement>) {

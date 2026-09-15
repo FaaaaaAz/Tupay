@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { audio } from "./audio/audio";
+import { SONIDOS_DE_PARTIDA, sonidoDelResultado } from "./audio/sonidosDelJuego";
 import type { Modo, Partida as DatosPartida, PeticionCrearPartida } from "../../compartido/partida.js";
 import { useCatalogo } from "./hooks/useCatalogo";
 import { Configuracion } from "./pantallas/Configuracion";
@@ -29,7 +30,15 @@ export function App() {
   const [pantalla, cambiarPantalla] = useState<Pantalla>({ tipo: "portada" });
   // La música sigue una navegación real, no el montaje ni los renders de React.
   const setPantalla = (siguiente: Pantalla) => {
-    audio.reproducirMusica(["menu", "configuracion", "configurarTemporada", "temporada", "instrucciones"].includes(siguiente.tipo) ? "menu" : null);
+    audio.detenerEfectos();
+    const musica = siguiente.tipo === "partida" ? "partido"
+      : siguiente.tipo === "resultado" ? sonidoDelResultado(siguiente.partida)
+      : siguiente.tipo === "portada" ? null : "menu";
+    audio.reproducirMusica(musica);
+    audio.pausar(false);
+    if (["configuracion", "configurarTemporada", "temporada", "partida"].includes(siguiente.tipo)) void audio.preparar(SONIDOS_DE_PARTIDA);
+    if (siguiente.tipo === "partida") void audio.efecto("inicio");
+    else if (siguiente.tipo !== "resultado") void audio.efecto("transicion");
     cambiarPantalla(siguiente);
   };
   useEffect(() => {
@@ -44,7 +53,10 @@ export function App() {
 
   switch (pantalla.tipo) {
     case "portada":
-      return <Portada alIniciar={() => { void audio.desbloquear(); irAlMenu(); }} />;
+      return <Portada alIniciar={() => {
+        void audio.desbloquear().then(() => audio.preparar(["clic", "transicion", "confirmacion", "error"]));
+        irAlMenu();
+      }} />;
     case "menu":
       return (
         <Menu

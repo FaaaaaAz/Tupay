@@ -18,6 +18,8 @@ import {
   abandonarPartida,
 } from "../api/partidas";
 import { useAnimacion } from "./useAnimacion";
+import { audio } from "../audio/audio";
+import { SONIDO_DE_EMOTE } from "../audio/sonidosDelJuego";
 
 /** Pausa antes de que tire el servidor, para que se note de quién es el turno. */
 const PAUSA_DEL_RIVAL_MS = 800;
@@ -53,6 +55,9 @@ function relojDeEmote(jugador: Jugador, recibido: number): RelojDeEmote {
  */
 export function usePartida(inicial: Partida) {
   const ocupado = useRef(false);
+  const vigente = useRef(true);
+  const perroSonado = useRef(false);
+  useEffect(() => { vigente.current = true; return () => { vigente.current = false; }; }, []);
   const emoteOcupado = useRef(false);
   const [pausada, setPausada] = useState(inicial.pausada);
   const [cambiandoPausa, setCambiandoPausa] = useState(false);
@@ -82,6 +87,7 @@ export function usePartida(inicial: Partida) {
   }, []);
 
   const informarError = useCallback((causa: unknown) => {
+    if (vigente.current) void audio.efecto("error");
     if (causa instanceof ErrorDeApi && causa.estado === 404) setPerdida(true);
     setError(causa instanceof Error ? causa.message : "Algo salió mal");
   }, []);
@@ -108,7 +114,10 @@ export function usePartida(inicial: Partida) {
       setError(null);
       setEventos([]);
       try {
-        setJugada({ respuesta: await pedirJugada(), recibidaEn: Date.now() });
+        const respuesta = await pedirJugada();
+        perroSonado.current = false;
+        if (vigente.current) void audio.efecto("tiro");
+        setJugada({ respuesta, recibidaEn: Date.now() });
       } catch (causa) {
         informarError(causa);
         // Un turno vencido o una partida terminada se entienden mejor con el estado al día.
@@ -124,6 +133,7 @@ export function usePartida(inicial: Partida) {
 
   const terminarAnimacion = useCallback(() => {
     if (!jugada) return;
+    if (vigente.current && jugada.respuesta.eventos.some((evento) => evento.tipo === "gol")) void audio.efecto("gol");
     aplicar(jugada.respuesta.partida, jugada.recibidaEn);
     setEventos(jugada.respuesta.eventos);
     setJugada(null);
@@ -136,6 +146,14 @@ export function usePartida(inicial: Partida) {
     pausada || cambiandoPausa || perdida,
     partida.cancha.radioPelota,
   );
+
+  const perroVisible = Boolean(cuadro?.perro);
+  useEffect(() => {
+    if (perroVisible && !perroSonado.current && !pausada && !cambiandoPausa && !perdida) {
+      perroSonado.current = true;
+      void audio.efecto("perro");
+    }
+  }, [perroVisible, pausada, cambiandoPausa, perdida]);
 
   const libre = partida.estado === "enJuego" && !perdida && !jugada && !esperando && !pausada && !cambiandoPausa;
   const leTocaAlServidor = partida[partida.turno.lado].tipo === "servidor";
@@ -156,6 +174,8 @@ export function usePartida(inicial: Partida) {
       setEnviandoEmote(true);
       try {
         const actualizada = await pedirEmote(partida.id, { lado, emote });
+        const sonido = SONIDO_DE_EMOTE[emote];
+        if (vigente.current && sonido) void audio.efecto(sonido, "reacciones");
         const recibida = Date.now();
         setRelojesDeEmote((anteriores) => ({ ...anteriores, [lado]: relojDeEmote(actualizada[lado], recibida) }));
       } catch (causa) {
@@ -175,6 +195,7 @@ export function usePartida(inicial: Partida) {
     setError(null);
     try {
       const nueva = await pedirPausa(partida.id, valor);
+      if (vigente.current) void audio.efecto(valor ? "transicion" : "confirmacion");
       const recibida = Date.now();
       setPausada(nueva.pausada);
       setAhora(recibida);

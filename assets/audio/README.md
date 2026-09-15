@@ -1,128 +1,135 @@
 # Audio de Tupay
 
-## Alcance y procedencia
+## Estado al cierre de la fase 10
 
-Selección inicial descargada el 15-09-2026: **21 archivos Ogg Vorbis, 1,62 MB en total**.
-No hay público, cánticos, aplausos ni hinchada. Tampoco se generaron sonidos artificiales
-para rellenar categorías vacías. Los tonos digitales son recursos reales de Kenney, no voces.
+**23 archivos Ogg Vorbis, 1.639.221 bytes (1,64 MB).** No hay hinchada, cánticos, aplausos
+ni ambiente de público. No se generaron audios falsos para rellenar categorías.
 
-Todos los archivos seleccionados están publicados con
-[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/), que permite copiar, adaptar y distribuir,
-también en proyectos comerciales. Se registran los autores aunque la atribución no sea obligatoria.
-Las licencias incluidas en los cinco paquetes de Kenney se conservan en `licencias/`.
-Para las dos pistas de OpenGameArt, sus páginas originales enlazadas en la tabla identifican
-al autor y CC0; la página de Ansimuz además autoriza expresamente el uso comercial.
+`catalogo.json` centraliza rutas, autores, licencia, estado, canales, ganancias, intervalos
+y la propiedad `bucle`. Las URLs de Vite tienen hash y `no-inline`: importar el catálogo
+no incorpora los bytes del sonido al JavaScript ni los descarga al cargar la portada.
 
-`catalogo.json` es el inventario único de rutas, procedencia, licencia, estado, canal, ganancia
-individual y tiempo mínimo entre repeticiones. Los nombres originales permiten localizar cada
-selección dentro del paquete del autor. No se incorporaron los paquetes completos al repositorio.
+## Inventario y licencias
 
-## Inventario
+Todos los recursos elegidos están publicados bajo
+[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/), que permite reutilización y
+adaptación incluso comercial. Se conserva la autoría aunque atribuir no sea obligatorio.
+Las cinco licencias incluidas en los paquetes de Kenney están en `licencias/`.
+Las páginas de Ansimuz y MatiasVME enlazadas debajo identifican autor y licencia.
+La procedencia exacta de los dos recursos nuevos se registra en [licencias/freesound.md](licencias/freesound.md).
 
-Las rutas son relativas a esta carpeta y conservan las categorías solicitadas. «Preparado»
-significa descargado y registrado, **no conectado a una jugada**. Los nombres de victoria,
-derrota y emociones describen el uso propuesto; queda pendiente la aprobación auditiva del autor
-para ese contexto. Se comprobó decodificación y señal, no se afirma una escucha subjetiva.
+«Integrado» significa conectado al flujo real. «Reservado» significa que el archivo existe,
+pero **no se reproduce**: no se inventaron eventos de contacto en la simulación.
+Los nombres de victoria, derrota y emociones describen su uso en Tupay, no títulos del autor.
 
 | Archivo y categoría | Archivo original | Autor y página original | Licencia | Estado |
 |---|---|---|---|---|
-| `music/menu/exploracion.ogg` | `exploration.ogg` | [ansimuz](https://opengameart.org/content/chiptune-exploration) | CC0-1.0 | integrado en 10.7 |
-| `music/gameplay/competicion.ogg` | `Crazy_0.ogg` | [MatiasVME](https://opengameart.org/content/chiptune-loop-crazy) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `music/results/victoria-arcade.ogg` | `8-Bit jingles/jingles_NES00.ogg` | [Kenney](https://kenney.nl/assets/music-jingles) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `music/results/resultado-negativo.ogg` | `8-Bit jingles/jingles_NES10.ogg` | [Kenney](https://kenney.nl/assets/music-jingles) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/gameplay/kick/impulso-tapita.ogg` | `chip-lay-1.ogg` | [Kenney](https://kenney.nl/assets/casino-audio) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/gameplay/collision/choque-tapitas.ogg` | `chips-collide-1.ogg` | [Kenney](https://kenney.nl/assets/casino-audio) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/gameplay/bounce/rebote-pared.ogg` | `impactWood_light_000.ogg` | [Kenney](https://kenney.nl/assets/impact-sounds) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/gameplay/bounce/golpe-poste.ogg` | `impactMetal_light_000.ogg` | [Kenney](https://kenney.nl/assets/impact-sounds) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/gameplay/goal/gol-arcade.ogg` | `powerUp8.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/ui/click/clic.ogg` | `click_001.ogg` | [Kenney](https://kenney.nl/assets/interface-sounds) | CC0-1.0 | integrado en 10.7 |
-| `sfx/ui/selection/seleccion.ogg` | `select_001.ogg` | [Kenney](https://kenney.nl/assets/interface-sounds) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/ui/confirmation/confirmacion.ogg` | `confirmation_001.ogg` | [Kenney](https://kenney.nl/assets/interface-sounds) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/ui/error/error.ogg` | `error_004.ogg` | [Kenney](https://kenney.nl/assets/interface-sounds) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/transitions/transicion.ogg` | `back_001.ogg` | [Kenney](https://kenney.nl/assets/interface-sounds) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/transitions/inicio-partido.ogg` | `threeTone1.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/transitions/fin-partido.ogg` | `lowThreeTone.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/gameplay/power-up/poder.ogg` | `powerUp1.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/reactions/happy/alegria.ogg` | `highUp.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/reactions/sad/decepcion.ogg` | `lowDown.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/reactions/surprised/sorpresa.ogg` | `pepSound1.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
-| `sfx/reactions/euphoric/euforia.ogg` | `powerUp2.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | recurso preparado; conexión pendiente en 10.8 |
+| `music/menu/exploracion.ogg` | `exploration.ogg` | [ansimuz](https://opengameart.org/content/chiptune-exploration) | CC0-1.0 | integrado |
+| `music/gameplay/competicion.ogg` | `Crazy_0.ogg` | [MatiasVME](https://opengameart.org/content/chiptune-loop-crazy) | CC0-1.0 | integrado |
+| `music/results/victoria-arcade.ogg` | `8-Bit jingles/jingles_NES00.ogg` | [Kenney](https://kenney.nl/assets/music-jingles) | CC0-1.0 | integrado |
+| `music/results/resultado-negativo.ogg` | `8-Bit jingles/jingles_NES10.ogg` | [Kenney](https://kenney.nl/assets/music-jingles) | CC0-1.0 | integrado |
+| `sfx/gameplay/kick/impulso-tapita.ogg` | `chip-lay-1.ogg` | [Kenney](https://kenney.nl/assets/casino-audio) | CC0-1.0 | integrado |
+| `sfx/gameplay/collision/choque-tapitas.ogg` | `chips-collide-1.ogg` | [Kenney](https://kenney.nl/assets/casino-audio) | CC0-1.0 | reservado: no existe evento de contacto |
+| `sfx/gameplay/bounce/rebote-pared.ogg` | `impactWood_light_000.ogg` | [Kenney](https://kenney.nl/assets/impact-sounds) | CC0-1.0 | reservado: no existe evento de contacto |
+| `sfx/gameplay/bounce/golpe-poste.ogg` | `impactMetal_light_000.ogg` | [Kenney](https://kenney.nl/assets/impact-sounds) | CC0-1.0 | reservado: no existe evento de contacto |
+| `sfx/gameplay/goal/gol-arcade.ogg` | `powerUp8.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | integrado |
+| `sfx/ui/click/clic.ogg` | `click_001.ogg` | [Kenney](https://kenney.nl/assets/interface-sounds) | CC0-1.0 | integrado |
+| `sfx/ui/selection/seleccion.ogg` | `select_001.ogg` | [Kenney](https://kenney.nl/assets/interface-sounds) | CC0-1.0 | integrado |
+| `sfx/ui/confirmation/confirmacion.ogg` | `confirmation_001.ogg` | [Kenney](https://kenney.nl/assets/interface-sounds) | CC0-1.0 | integrado |
+| `sfx/ui/error/error.ogg` | `error_004.ogg` | [Kenney](https://kenney.nl/assets/interface-sounds) | CC0-1.0 | integrado |
+| `sfx/transitions/transicion.ogg` | `back_001.ogg` | [Kenney](https://kenney.nl/assets/interface-sounds) | CC0-1.0 | integrado |
+| `sfx/transitions/inicio-partido.ogg` | `threeTone1.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | integrado |
+| `sfx/transitions/fin-partido.ogg` | `lowThreeTone.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | integrado |
+| `sfx/gameplay/power-up/poder.ogg` | `powerUp1.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | integrado |
+| `sfx/reactions/happy/alegria.ogg` | `highUp.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | integrado |
+| `sfx/reactions/sad/decepcion.ogg` | `lowDown.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | integrado |
+| `sfx/reactions/surprised/sorpresa.ogg` | `pepSound1.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | integrado |
+| `sfx/reactions/euphoric/euforia.ogg` | `powerUp2.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | integrado |
+| `sfx/ambience/ladrido.ogg` | `Dog_Bark.wav (vista previa pública OGG)` | [michael_grinnell](https://freesound.org/people/michael_grinnell/sounds/464400/) | CC0-1.0 | integrado |
+| `sfx/gameplay/aim/resortera.ogg` | `Slingshot (vista previa pública OGG)` | [renne100](https://freesound.org/people/renne100/sounds/353033/) | CC0-1.0 | integrado |
 
-## Originales y versiones publicadas
+## Archivos descargados y versiones web
 
-- `assets/audio/`: originales OGG seleccionados, sin transcodificación ni recortes.
-- `client/src/recursos/audio/`: mismos OGG y estructura, preparados para Vite. Esta copia sigue
-  la convención del proyecto para originales y recursos web; no se duplica un sonido por botón.
-- Ya eran archivos comprimidos compatibles con el navegador probado; no se recomprimieron.
-  Se escogió el OGG de Ansimuz, no el WAV ni MP3 alternativos del mismo paquete.
-- Vite genera URLs con hash y Express aprovecha la caché `immutable` existente.
-  El catálogo importa URLs: los bytes solo se solicitan cuando se necesitan.
-- Los bucles usan un `AudioBufferSourceNode` con `loop`, sin reiniciar un elemento multimedia
-  desde JavaScript al terminar. Los posibles cortes musicales de los originales deben revisarse
-  al escuchar varios ciclos. Se descartó Happy Adventure como selección inicial por las
-  advertencias de silencio de su MP3 en la [página original](https://opengameart.org/content/happy-adventure-loop).
+- `assets/audio/` conserva exactamente los OGG descargados; `client/src/recursos/audio/`
+  conserva las copias publicadas con la misma ruta relativa. Es la separación habitual del proyecto.
+- Los dos audios de Freesound son sus **vistas previas públicas OGG**, no los WAV/MP3 originales
+  que requieren sesión. Se descargaron desde los enlaces públicos expuestos por la página;
+  no se inició sesión ni se eludió el control de acceso.
+- No se hizo transcodificación, recorte ni síntesis. La copia web conserva los bytes de descarga.
+  Las ganancias se ajustan en el motor, sin modificar los archivos.
+- Los tonos digitales de reacciones son efectos de Kenney, no voces humanas realistas.
+- No se duplican archivos por botón. Seria y enojada reutilizan confirmación/error, en el
+  canal de reacciones y con ganancia limitada a 0,25.
 
-## Categorías pendientes o sin recurso
+## Cuándo suena cada cosa
 
-| Categoría / acción | Estado y motivo |
-|---|---|
-| `sfx/ambience/`: perro | No descargado: [Dog_Bark.wav de michael_grinnell](https://freesound.org/people/michael_grinnell/sounds/464400/), CC0, 0,631 s. El original requiere iniciar sesión en Freesound. Conectar una vez cuando el perro aparezca en los cuadros confirmados, nunca en bucle. |
-| `sfx/reactions/sleepy/`: dormida | No descargado: [Fast Snore de bsmacbride](https://freesound.org/people/bsmacbride/sounds/108519/), CC0, 5 s; requiere sesión y un recorte/revisión para no resultar largo. |
-| `sfx/reactions/angry/`: enojada | Sin selección final. [Grognement de davidou](https://freesound.org/people/davidou/sounds/88462/), CC0, 3,589 s, es un candidato: revisar que no parezca una voz realista y acortarlo antes de incorporar. |
-| `sfx/reactions/serious/`: enojadoSerio | Preparada sin voz. Se puede reutilizar confirmación con la prioridad de reacciones en 10.8, sin duplicar archivo. |
-| Resortera al apuntar | Recurso pendiente; no sustituido por un disparo de arma. |
-| Silbato | No seleccionado. Ya hay una señal digital de inicio como alternativa, todavía sin conectar. |
-| Fallar un gol | Opcional no implementado: no existe un evento confirmado que distinga intento fallido de un tiro normal. |
-| Cuenta regresiva | Recurso/conexión pendiente; usar umbrales del reloj, no cada render. |
+- **Iniciar:** desbloquea Web Audio. Solo entonces se solicita música de menú y se preparan
+  efectos cortos de interfaz. Abrir la portada por sí solo no reproduce ni descarga audio.
+- **Navegación:** transición breve al cambiar de pantalla; menú, configuración, instrucciones
+  y temporada comparten música sin reiniciarla. Entrar en configuración prepara los sonidos
+  de la partida sin esperar a que terminen ni bloquear peticiones de Express.
+- **Partida creada / revancha:** señal de inicio y una sola música de competición.
+- **Selección y apuntado:** selección al empezar un gesto válido; resortera una sola vez al
+  superar el arrastre mínimo, no en cada movimiento. Cancelar o soltar detiene el efecto y
+  también invalida su carga pendiente.
+- **Tiro:** golpe de ficha al recibir la respuesta aceptada de Express, tanto humano como rival.
+  Un tiro rechazado reproduce error, no impacto.
+- **Poder:** señal al activar el botón; desactivarlo usa selección. No consume un tiro adicional.
+- **Gol:** evento confirmado al terminar la animación, una sola vez.
+- **Perro:** un ladrido cuando aparece en los cuadros confirmados; reanudar no repite el ladrido.
+- **Emote:** solo después de aceptarlo Express. Feliz, eufórica, triste, sorpresa, enojada y seria
+  tienen tono. Dormida conserva su animación sin voz.
+- **Pausa:** música detenida, posición conservada y efectos interrumpidos; los controles de
+  interfaz siguen habilitados. Reanudar continúa la pista sin repetir tiros, goles o perro.
+  Una pausa aún sin confirmar o con error también mantiene el audio del juego detenido.
+- **Final:** si no hubo gol final, señal breve de fin. Se detiene la música de competición.
+  En resultado, una victoria humana usa el jingle de victoria; ganar el servidor usa derrota.
+  Con dos personas se celebra al ganador sin elegir arbitrariamente un «usuario perdedor».
+  El empate no usa jingle de victoria ni derrota. Los jingles no se repiten en bucle.
+- **Salida:** cancela efectos y cargas pendientes antes de cambiar a la música correspondiente.
 
-Las carpetas sin audio contienen un README real, no archivos de sonido vacíos.
+## Volúmenes, límites y fallos
 
-## Qué funciona en 10.7
+«Sonido» en menú y pausa guarda silencio, volumen de música y volumen de efectos/interfaz
+en `localStorage['tupay.audio.v1']`. Valores iniciales: música 25 % y efectos 60 %, además
+de las ganancias individuales. Sin almacenamiento funciona en memoria.
 
-- Pulsar **Iniciar** desbloquea Web Audio y solicita la música del menú. No se reproduce nada
-  por cargar la portada ni por montar un componente.
-- La música continúa sin superponerse al navegar a instrucciones/configuración/temporada.
-  Se detiene al volver a portada, entrar al partido o mostrar el resultado. La música de partido
-  y las señales de resultado están preparadas para **10.8**, no se reproducen todavía.
-- «Sonido» en el menú y en el modal de pausa ofrece silencio, volumen de música, volumen de
-  efectos/interfaz y «Probar efecto». Este último reproduce el clic real; no se sonorizan todos
-  los botones todavía.
-- `localStorage['tupay.audio.v1']` guarda preferencias validadas. Sin almacenamiento funciona
-  en memoria. Predeterminados: música 25 %, efectos 60 %, además de la ganancia de cada recurso.
-- Una única instancia de `MotorAudio` centraliza carga, decodificación, música y canales.
-  La música no se duplica al renderizar ni al repetir la misma solicitud.
-- Máximo cuatro efectos simultáneos, intervalo por recurso y descarte de eventos cuya carga
-  llega más de 350 ms tarde. El primer efecto puede omitirse con una conexión lenta: nunca
-  se reproduce tarde una cola de acciones viejas.
-- Las reacciones tienen menor ganancia, solo una a la vez y ceden ante efectos de gameplay.
-- Silenciar o salir cancela reproducciones pendientes. Ocultar la pestaña detiene sonidos y
-  conserva la posición de música; al volver se reanuda solo si el contexto sigue autorizado.
-- Una descarga o decodificación fallida muestra un aviso en los controles y permite seguir
-  jugando. Nunca debe bloquearse una solicitud de la API por esperar al audio.
+Un solo `AudioContext`, descargas y buffers compartidos, máximo cuatro efectos simultáneos.
+Cada recurso tiene intervalo mínimo. Se descartan efectos que tardan más de 350 ms en
+estar listos: una conexión lenta puede omitir el primer sonido, nunca retrasar una jugada.
+Las reacciones no se acumulan y ceden ante gameplay; los tonos reutilizados respetan esa
+misma prioridad. Ocultar la pestaña detiene sonidos y conserva la posición de la música.
 
-## Conexión prevista en 10.8
+Silencio también evita la precarga. Los errores de descarga, decodificación o disponibilidad
+de Web Audio no impiden jugar. Los avisos se muestran en los controles sin promesas rechazadas
+sin manejar.
 
-El controlador no inventa eventos de Express ni deduce goles desde píxeles:
+## Opcionales que no se incorporaron
 
-- `audio.efecto(id)`: usar en una acción concreta o evento confirmado una sola vez.
-- `audio.reproducirMusica('partido')`: al crear o retomar realmente un partido; no en cada render.
-- `audio.pausar(true/false)`: al cambiar el estado real de pausa, conservando posición musical.
-  Los sonidos de interfaz se permiten en pausa; gameplay y reacciones no.
-- `audio.detenerTodo()`: salir/cambiar de sesión; cancela también cargas pendientes.
-- Choques y rebotes necesitan una señal fiable: los eventos actuales no los incluyen.
-  No inferir múltiples colisiones en cada cuadro sin deduplicación.
-- En dos jugadores, no asumir quién es «el usuario perdedor». Definir antes el criterio del
-  jingle de resultado. Las reacciones se conectarán al emote aceptado, con prioridad inferior
-  al tiro/gol y sin voces continuas.
+- **Dormida:** sigue sin voz. [Fast Snore de bsmacbride](https://freesound.org/people/bsmacbride/sounds/108519/)
+  es un candidato CC0 de 5 s, pendiente de selección/recorte; no es necesario para jugar.
+- **Gruñido:** enojada usa un tono, no requiere otra voz. El candidato
+  [Grognement de davidou](https://freesound.org/people/davidou/sounds/88462/) no se descargó.
+- **Colisiones, pared y poste:** archivos reservados, sin conexión porque la API no informa contactos.
+- **Gol fallado:** no existe un evento que distinga un intento de gol de cualquier tiro.
+- **Silbato y cuenta regresiva:** no se añadieron. La señal digital cubre el inicio/final.
 
-## Agregar o reemplazar un sonido
+## Verificación y límites de la revisión
 
-1. Confirmar licencia del archivo concreto y procedencia; conservar su licencia/evidencia.
-2. Guardar el original en su categoría, con nombre descriptivo en minúsculas y sin espacios.
-3. Si se convierte, conservar el original y documentar herramienta, parámetros y versión.
-4. Copiar la versión OGG a la misma ruta relativa bajo `client/src/recursos/audio/`.
-5. Añadir una entrada única a `catalogo.json` y esta tabla. No duplicar archivos para reutilizarlos.
-6. Ajustar ganancia/intervalo, verificar la reproducción y escuchar su mezcla antes de conectar.
-7. Ejecutar `npm run lint`, `npm run typecheck`, `npm run test:unit` y
-   `npm run test:e2e -- e2e/audio.spec.ts`. Actualizar el conteo esperado si cambia el inventario.
+Al cierre: lint, tipos, build local, **113 unitarias y 53 E2E** aprobados. Chromium decodificó
+los 23 OGG y comprobó duración/señal no nulas. Se probaron eventos una sola vez, pausa,
+reanudación, cancelación, silenciamiento, errores, recursos ausentes y movimiento reducido.
+Las métricas locales están en [docs/evidencias/fase-10-auditoria.md](../../docs/evidencias/fase-10-auditoria.md).
 
+La revisión técnica no reemplaza escuchar varios ciclos y valorar el carácter de cada jingle
+o reacción. Esa aprobación subjetiva de la mezcla sigue correspondiendo al autor.
+
+## Agregar o reemplazar recursos
+
+1. Verificar licencia del archivo concreto y conservar autor, página, nombre original y enlace de descarga.
+2. Guardar el original en la categoría adecuada, con nombre descriptivo en minúsculas y sin espacios.
+3. Si se convierte, registrar herramienta/parámetros y conservar el original.
+4. Copiar el OGG web a la misma ruta relativa en `client/src/recursos/audio/`.
+5. Actualizar `catalogo.json` y esta tabla; reutilizar IDs sin duplicar archivos.
+6. Para bucles declarar `bucle: true`; ajustar ganancia e intervalo. Nunca disparar desde cada render.
+7. Ejecutar lint, tipos, unitarias y E2E. Actualizar el conteo del inventario en la prueba si cambia.

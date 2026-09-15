@@ -1,4 +1,4 @@
 # Ambiente discreto
 
-Sin hinchada ni público. El ladrido está identificado pero pendiente de descarga autorizada;
-véase el inventario y el enlace en ../../README.md. No hay audio ficticio en esta carpeta.
+Sin hinchada ni público. ladrido.ogg es la vista previa pública CC0 de Dog_Bark.wav;
+véanse ../../README.md y ../../licencias/freesound.md. Suena una vez al aparecer el perro.
