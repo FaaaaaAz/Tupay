@@ -266,7 +266,7 @@ el juego están en `client/src/recursos/` y las imágenes pesan 2,8 MB en total,
 | `equipos/` | las 10 tapitas: las fichas de la cancha | 256 × 256 |
 | `escudos/` | los 10 escudos: identifican a cada equipo fuera de la cancha | 256 × 256 |
 | `estadios/` | los 6 estadios | 1672 × 941 |
-| `pantallas/` | portada y menú; fondo de los paneles | 1672 × 941; 1811 × 868 |
+| `pantallas/` | portada y menú; fondo de los paneles; árbitro de los modales | 1672 × 941; 1811 × 868; 360 × 284 |
 | `tarjetas/` | las 4 ilustraciones de las tarjetas del menú, recortadas a su dibujo | hasta 560 × 420 |
 | `juego/` | pelota, perro, arco, charcos de agua y de nieve | según elemento |
 | `emotes/` | las 7 caritas | 256 × 256 |

@@ -89,7 +89,8 @@ Los nombres de victoria, derrota y emociones describen su uso en Tupay, no títu
 - **Emote:** solo después de aceptarlo Express. Feliz, eufórica, triste, sorpresa, enojada y seria
   tienen tono. Dormida conserva su animación sin voz.
 - **Pausa:** música detenida, posición conservada y efectos interrumpidos; los controles de
-  interfaz siguen habilitados. Reanudar continúa la pista sin repetir tiros, goles o perro.
+  interfaz siguen habilitados. Pausar con el botón o con `Esc` toca el silbato de árbitro
+  (`pitido.mp3`, el mismo del inicio) por el canal de interfaz, así la pausa no lo corta. Reanudar continúa la pista sin repetir tiros, goles o perro.
   Una pausa aún sin confirmar o con error también mantiene el audio del juego detenido.
 - **Final:** si no hubo gol final, señal breve de fin. Se detiene la música de competición.
   En resultado suena «ganador» cuando gana una persona, contra el servidor o en dos jugadores;

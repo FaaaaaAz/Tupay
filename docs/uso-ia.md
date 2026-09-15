@@ -88,6 +88,19 @@ manualmente los commits y el push.
   lectura de los paneles sobre el estadio.
 - **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
 
+### Árbitro y silbato en la pausa — 15 de septiembre de 2026
+
+- **Solicitud:** reemplazar el símbolo de pausa de los modales por la ilustración `assets/UI/pausa.png`
+  y hacer sonar el silbato al pausar.
+- **Aporte de la IA:** grupo `pausa` en `scripts/optimizar-recursos.mjs` (1,5 MB a 34 kB), ilustración
+  en `Modal` y en la precarga de la partida. Reutilizó `pitido.mp3` y ajustó `MotorAudio` para que la
+  pausa no cortara el silbato: pausa idempotente y canal `interfaz` como alternativo.
+- **Verificado por el agente:** lint, tipos, unitarias (con una prueba nueva) y E2E (la de audio en
+  juego cuenta un solo silbato por pausa); revisión de la captura del modal de pausa.
+- **Verificación personal del autor:** pendiente. Escuchar el silbato al pausar con el botón y con
+  `Esc`, y juzgar si su duración resulta cómoda.
+- **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
+
 ## Cómo añadir una entrada
 
 En cada cambio asistido se registra, de forma breve:

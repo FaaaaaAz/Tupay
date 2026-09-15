@@ -982,6 +982,32 @@ cuatro ilustraciones se descargan y que la configuración usa el fondo nuevo, en
 Evidencias: [menú](evidencias/fase-10-menu-ilustrado.jpg) y
 [configuración](evidencias/fase-10-configuracion-fondo.jpg).
 
+### Un árbitro con silbato anuncia la pausa
+
+**Decisión.** Los modales de la partida (pausa, salida y partida perdida) muestran la ilustración
+de una tapita árbitro tocando el silbato, en lugar del símbolo «Ⅱ». Pausar con el botón o con `Esc`
+reproduce el silbato de árbitro que ya sonaba al empezar el partido (`pitido.mp3`, id `inicio`).
+
+**Por qué.** El símbolo era genérico y no tenía la línea ilustrada del resto del juego. Se reutilizó
+el silbato existente para no sumar un archivo ni una licencia más, como pide `assets/audio/README.md`.
+
+**Cómo.** El grupo `pausa` de `scripts/optimizar-recursos.mjs` recorta la ilustración y la reduce a
+360 × 284: 34 kB contra 1,5 MB del PNG. Se precarga junto con los recursos de la partida.
+
+Para el sonido hubo que tocar el motor. La pausa corta los efectos y bloquea el canal de efectos, y
+`Partida` la vuelve a aplicar cada vez que cambia su estado (al pedirla a Express y al confirmarla).
+Por eso el silbato se cortaba apenas empezaba. Ahora:
+
+- `pausar(true)` solo corta los efectos al entrar en pausa, no cuando se confirma de nuevo;
+- `efecto` acepta `interfaz` como canal alternativo, el mismo que ya se usaba para los controles de
+  sonido en pausa;
+- `Partida` toca el silbato en el mismo efecto que pausa el audio, justo después, y solo cuando la
+  pausa la pidió una persona. Volver a la pausa desde «Salir» no lo repite.
+
+**Verificación.** Una prueba unitaria comprueba que un efecto suena en pausa por la interfaz y que
+confirmar la pausa no lo corta. La E2E de audio en juego comprueba que pausar suma un solo silbato y
+que después no queda ningún sonido activo.
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano
@@ -1066,3 +1092,4 @@ necesitara servicios adicionales.
 | Equipos y estadio se eligen con carruseles | El `select` escondía el escudo y la imagen del estadio. |
 | El empate suena a aplausos | El resultado empatado era el único sin sonido. |
 | Ilustraciones en las tarjetas del menú y estadio de fondo en los paneles | Los iconos SVG y los patrones CSS se veían genéricos al lado del arte de la portada y el menú. |
+| Un árbitro reemplaza al símbolo de pausa y pausar suena a silbato | El «Ⅱ» era genérico; el silbato existente anuncia la pausa sin sumar archivos de audio. |
