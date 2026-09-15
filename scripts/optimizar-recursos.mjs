@@ -141,6 +141,11 @@ const GRUPOS = {
       await recortarIlustracion(`${ORIGEN}/UI/${archivo}.png`, `${DESTINO}/tarjetas/${nombre}.webp`, 560, 420);
     }
   },
+  /** El título del menú y el fondo del marcador de la partida, recortados a su dibujo. */
+  async interfaz() {
+    await recortarIlustracion(`${ORIGEN}/UI/titulo.png`, `${DESTINO}/pantallas/titulo.webp`, 1200, 420);
+    await recortarIlustracion(`${ORIGEN}/UI/marcador.png`, `${DESTINO}/juego/marcador.webp`, 1920, 200);
+  },
   /** Los árbitros que encabezan los modales de la partida: uno para la pausa y otro para salir. */
   async modales() {
     await recortarIlustracion(`${ORIGEN}/UI/pausa.png`, `${DESTINO}/pantallas/pausa.webp`, 360, 300);

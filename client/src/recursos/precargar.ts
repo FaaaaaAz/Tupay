@@ -17,7 +17,7 @@ export function precargarImagen(url: string): Promise<void> {
 
 export async function precargarPartida(peticion: PeticionCrearPartida): Promise<void> {
   // Los árbitros de los modales también: la pausa y la salida no pueden abrirse con un hueco vacío.
-  const urls = [IMAGENES.pelota, IMAGENES.arco, IMAGENES.pausa, IMAGENES.salir,IMAGEN_DE_EQUIPO[peticion.local.equipo], IMAGEN_DE_EQUIPO[peticion.visitante.equipo]];
+  const urls = [IMAGENES.pelota, IMAGENES.arco, IMAGENES.pausa, IMAGENES.salir, IMAGENES.marcador, IMAGEN_DE_EQUIPO[peticion.local.equipo], IMAGEN_DE_EQUIPO[peticion.visitante.equipo]];
   if (peticion.estadio) urls.push(IMAGEN_DE_ESTADIO[peticion.estadio]);
   if (peticion.perroActivo !== false) urls.push(IMAGENES.perro);
   urls.push(...Object.values(IMAGEN_DE_CHARCO));
