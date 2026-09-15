@@ -1,6 +1,16 @@
 /* Solo controles nuevos: conserva el diseño de pantallas, paneles y cancha. */
 .controles-audio { color: var(--texto-secundario); font-size: 0.85rem; text-align: left; }
-.controles-audio summary { cursor: pointer; padding: 0.5rem; border-radius: var(--radio-control); }
+/* El control se abre desde un ícono redondo: parlante con ondas o con una cruz si está silenciado. */
+.controles-audio summary {
+  display: grid; place-items: center; width: 2.6rem; height: 2.6rem; list-style: none; cursor: pointer;
+  color: var(--dorado); background: #08192cbd; border: 1px solid var(--borde-acento); border-radius: 50%;
+  transition: border-color var(--transicion), background var(--transicion);
+}
+.controles-audio summary::-webkit-details-marker { display: none; }
+.controles-audio summary:hover, .controles-audio[open] summary { border-color: var(--dorado); background: #f2c14e1f; }
+.controles-audio summary svg { width: 1.35rem; height: 1.35rem; }
+.menu > .controles-audio summary { margin-left: auto; }
+.modal .controles-audio summary { margin-inline: auto; }
 .controles-audio__opciones { display: grid; gap: 0.5rem; padding: 0.8rem; }
 .controles-audio input[type="range"] { width: 100%; accent-color: var(--dorado); }
 .menu > .controles-audio { position: absolute; top: 0.75rem; right: 0.75rem; z-index: 3; }

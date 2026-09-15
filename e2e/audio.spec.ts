@@ -20,7 +20,7 @@ test("audio espera Iniciar, mantiene una música, persiste ajustes y permite sil
   await elegirEnElMenu(page, "Cómo se juega");
   await page.getByRole("button", { name: "← Volver" }).click();
   expect(await page.evaluate(() => window.audioPrueba.bucles)).toBe(1);
-  await page.getByText("Sonido · activado", { exact: true }).click();
+  await page.getByLabel("Sonido activado", { exact: true }).click();
   await page.getByRole("slider", { name: "Volumen de música" }).fill("17");
   await page.getByRole("slider", { name: "Volumen de efectos" }).fill("42");
   await page.getByRole("button", { name: "Probar efecto" }).click();
@@ -29,7 +29,7 @@ test("audio espera Iniciar, mantiene una música, persiste ajustes y permite sil
   await expect.poll(() => page.evaluate(() => window.audioPrueba.activos)).toBe(0);
   await page.reload();
   await page.getByRole("button", { name: "Iniciar" }).click();
-  await page.getByText("Sonido · silenciado", { exact: true }).click();
+  await page.getByLabel("Sonido silenciado", { exact: true }).click();
   await expect(page.getByRole("slider", { name: "Volumen de música" })).toHaveValue("17");
   await expect(page.getByRole("slider", { name: "Volumen de efectos" })).toHaveValue("42");
   expect(await page.evaluate(() => window.audioPrueba.iniciados)).toBe(0);
@@ -46,7 +46,7 @@ test("audio de partido se detiene al pausar; controles accesibles sin cambiar el
   const modal = page.getByRole("dialog", { name: "Partido en pausa" });
   await expect(modal.getByRole("button", { name: "Reanudar partido" })).toBeEnabled();
   const antes = await (await request.get(`/api/partidas/${partida.id}`)).json();
-  await modal.getByText("Sonido · activado", { exact: true }).click();
+  await modal.getByLabel("Sonido activado", { exact: true }).click();
   await modal.getByRole("slider", { name: "Volumen de música" }).focus();
   await page.keyboard.press("ArrowLeft");
   await expect(modal.getByRole("slider", { name: "Volumen de música" })).toHaveValue("24");
@@ -105,7 +105,7 @@ test("sin AudioContext ni almacenamiento la aplicación sigue jugable", async ({
   });
   await empezarPartido(page);
   await page.getByRole("button", { name: "Pausar" }).click();
-  await page.getByText("Sonido · activado", { exact: true }).click();
+  await page.getByLabel("Sonido activado", { exact: true }).click();
   await expect(page.getByText("El audio no está disponible. Puedes seguir jugando sin sonido.")).toBeVisible();
   await page.getByRole("button", { name: "Silenciar todo" }).click();
   await page.getByRole("button", { name: "Reanudar partido" }).click();
@@ -118,7 +118,7 @@ test("un audio inválido no bloquea la navegación ni genera promesas rechazadas
   page.on("pageerror", (error) => errores.push(error.message));
   await page.route("**/exploracion-*.ogg", (ruta) => ruta.fulfill({ contentType: "audio/ogg", body: "archivo invalido" }));
   await abrirMenu(page);
-  await page.getByText("Sonido · activado", { exact: true }).click();
+  await page.getByLabel("Sonido activado", { exact: true }).click();
   await expect(page.getByText("No se pudo cargar la música. Puedes continuar sin ella.")).toBeVisible();
   await elegirEnElMenu(page, "Eliminatoria");
   await expect(page.getByRole("button", { name: "Jugar", exact: true })).toBeVisible();
