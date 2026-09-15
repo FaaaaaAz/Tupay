@@ -23,8 +23,11 @@ test("audio espera Iniciar, mantiene una música, persiste ajustes y permite sil
   await page.getByLabel("Sonido activado", { exact: true }).click();
   await page.getByRole("slider", { name: "Volumen de música" }).fill("17");
   await page.getByRole("slider", { name: "Volumen de efectos" }).fill("42");
-  await page.getByRole("button", { name: "Probar efecto" }).click();
+  // Abrir una tarjeta suena a transición: con volumen de efectos, además de la música empieza un efecto.
+  await elegirEnElMenu(page, "Cómo se juega");
   await expect.poll(() => page.evaluate(() => window.audioPrueba.iniciados)).toBeGreaterThan(1);
+  await page.getByRole("button", { name: "← Volver" }).click();
+  await page.getByLabel("Sonido activado", { exact: true }).click();
   await page.getByRole("button", { name: "Silenciar todo" }).click();
   await expect.poll(() => page.evaluate(() => window.audioPrueba.activos)).toBe(0);
   await page.reload();
@@ -50,7 +53,8 @@ test("audio de partido se detiene al pausar; controles accesibles sin cambiar el
   await modal.getByRole("slider", { name: "Volumen de música" }).focus();
   await page.keyboard.press("ArrowLeft");
   await expect(modal.getByRole("slider", { name: "Volumen de música" })).toHaveValue("24");
-  await modal.getByRole("button", { name: "Probar efecto" }).focus();
+  // El volumen de efectos es el último control del modal: Tab vuelve al primero.
+  await modal.getByRole("slider", { name: "Volumen de efectos" }).focus();
   await page.keyboard.press("Tab");
   await expect(modal.getByRole("button", { name: "Reanudar partido" })).toBeFocused();
   for (const [width, height] of [[1280, 720], [1366, 768], [1920, 1080]]) {

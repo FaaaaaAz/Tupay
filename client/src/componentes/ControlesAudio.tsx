@@ -26,10 +26,6 @@ export function ControlesAudio() {
           value={Math.round(preferencias.efectos * 100)} onChange={(evento) => {
             audio.configurar({ efectos: Number(evento.target.value) / 100 }); void audio.desbloquear();
           }} />
-        <button type="button" className="boton boton--enlace" disabled={preferencias.silenciado || preferencias.efectos === 0}
-          onClick={() => { void audio.desbloquear().then((listo) => { if (listo) void audio.efecto("clic"); }); }}>
-          Probar efecto
-        </button>
         {aviso && <p role="status">{aviso}</p>}
       </div>
     </details>
