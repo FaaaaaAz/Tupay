@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-**23 archivos: 15 Ogg Vorbis, 7 MP3 y 1 WAV, 2.150.583 bytes (2,05 MB).**
+**24 archivos: 15 Ogg Vorbis, 8 MP3 y 1 WAV, 2.159.085 bytes (2,06 MB).**
 No hay hinchada, cánticos ni ambiente de público. El único audio sintetizado es el aplauso del
 empate, generado con un script propio (ver más abajo).
 
@@ -17,7 +17,7 @@ Los recursos descargados están publicados bajo
 adaptación incluso comercial. Se conserva la autoría aunque atribuir no sea obligatorio.
 Las licencias de los paquetes de Kenney que siguen en uso están en `licencias/`.
 Los siete sonidos que reemplazaron a los anteriores (choque, patear, pared, poder, pitido, ganador y
-perdedor) los aportó el autor del proyecto: su origen y licencia quedan **pendientes de registrar** en
+perdedor) y el de salir los aportó el autor del proyecto: su origen y licencia quedan **pendientes de registrar** en
 `catalogo.json`, y conviene completarlos antes de difundir el juego fuera del ámbito académico.
 Las páginas de Ansimuz y MatiasVME enlazadas debajo identifican autor y licencia.
 La procedencia exacta de los dos recursos nuevos se registra en [licencias/freesound.md](licencias/freesound.md).
@@ -43,6 +43,7 @@ Los nombres de victoria, derrota y emociones describen su uso en Tupay, no títu
 | `sfx/ui/error/error.ogg` | `error_004.ogg` | [Kenney](https://kenney.nl/assets/interface-sounds) | CC0-1.0 | integrado |
 | `sfx/transitions/transicion.ogg` | `back_001.ogg` | [Kenney](https://kenney.nl/assets/interface-sounds) | CC0-1.0 | integrado |
 | `sfx/transitions/pitido.mp3` | `pitido.mp3` | Aportado por el autor del proyecto (fuente: pendiente de registrar) | Pendiente de registrar | integrado |
+| `sfx/transitions/salir.mp3` | `salir.mp3` | Aportado por el autor del proyecto (fuente: pendiente de registrar) | Pendiente de registrar | integrado |
 | `sfx/transitions/fin-partido.ogg` | `lowThreeTone.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | integrado |
 | `sfx/gameplay/power-up/poder.mp3` | `poder.mp3` | Aportado por el autor del proyecto (fuente: pendiente de registrar) | Pendiente de registrar | integrado |
 | `sfx/reactions/happy/alegria.ogg` | `highUp.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | integrado |
@@ -74,7 +75,10 @@ Los nombres de victoria, derrota y emociones describen su uso en Tupay, no títu
 - **Navegación:** transición breve al cambiar de pantalla; menú, configuración, instrucciones
   y temporada comparten música sin reiniciarla. Entrar en configuración prepara los sonidos
   de la partida sin esperar a que terminen ni bloquear peticiones de Express.
-- **Carruseles:** cada flecha de equipo o estadio suena con el clic de la interfaz.
+- **Carruseles y opciones:** cada flecha de equipo o estadio y cada radio de la configuración
+  (jugadores, dificultad, meta de goles, duración) suena con el clic de la interfaz.
+- **Casilla del perro:** empieza desactivada. Activarla suena al ladrido; desactivarla, a la
+  transición. El ladrido comparte su intervalo mínimo de 2 s con el de la cancha.
 - **Partida creada / revancha:** pitido inicial, como el del árbitro, y una sola música de competición.
 - **Selección y apuntado:** selección al empezar un gesto válido; resortera una sola vez al
   superar el arrastre mínimo, no en cada movimiento. Cancelar o soltar detiene el efecto y
@@ -96,6 +100,8 @@ Los nombres de victoria, derrota y emociones describen su uso en Tupay, no títu
   En resultado suena «ganador» cuando gana una persona, contra el servidor o en dos jugadores;
   «perdedor» solo cuando gana el servidor, así que con dos personas nunca suena. El empate suena a
   aplausos. Ninguno se repite en bucle.
+- **Modal de salir:** al abrirse, desde el botón «Salir» o desde la pausa, suena `salir.mp3` por el
+  canal de interfaz y corta el silbato si todavía sonaba. Volver de «Seguir jugando» a la pausa no suena.
 - **Salida:** cancela efectos y cargas pendientes antes de cambiar a la música correspondiente.
 
 ## Volúmenes, límites y fallos

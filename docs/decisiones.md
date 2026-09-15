@@ -991,7 +991,7 @@ reproduce el silbato de árbitro que ya sonaba al empezar el partido (`pitido.mp
 **Por qué.** El símbolo era genérico y no tenía la línea ilustrada del resto del juego. Se reutilizó
 el silbato existente para no sumar un archivo ni una licencia más, como pide `assets/audio/README.md`.
 
-**Cómo.** El grupo `pausa` de `scripts/optimizar-recursos.mjs` recorta la ilustración y la reduce a
+**Cómo.** El grupo `modales` de `scripts/optimizar-recursos.mjs` recorta la ilustración y la reduce a
 360 × 284: 34 kB contra 1,5 MB del PNG. Se precarga junto con los recursos de la partida.
 
 Para el sonido hubo que tocar el motor. La pausa corta los efectos y bloquea el canal de efectos, y
@@ -1024,6 +1024,35 @@ al borde. En pantallas de menos de 800 px de alto se achicaron el espacio entre 
 títulos y el perro (2,4 rem en lugar de 3,4 rem). Se borraron los estilos de `select` y `.campo`, que
 ya no usaba nadie. La prueba de presentación ahora exige, en los tres tamaños, que Eliminatoria, Liga
 y Configurar temporada no se desplacen verticalmente.
+
+### Cada modal entra con su árbitro y su sonido; elegir una opción suena
+
+**Decisión.** El modal de salir tiene su propio árbitro (una tapita árbitro agarrándose la cabeza) y
+suena con `salir.mp3` al abrirse, sea desde el botón «Salir» o desde la pausa. La pausa y la partida
+perdida conservan el árbitro del silbato. En la configuración, cada radio suena con el mismo clic que
+las flechas de los carruseles. Activar al perro suena a ladrido y desactivarlo, a la transición de
+volver. La casilla del perro ahora empieza desactivada.
+
+**Por qué.** Pausar y salir eran dos modales distintos con la misma cara y solo uno tenía sonido.
+Los radios eran los únicos controles de la configuración que no respondían con sonido. Con el perro
+desactivado al entrar, activarlo es un gesto y el ladrido lo confirma.
+
+**Cómo.**
+
+- `Modal` recibe la ilustración (`ilustracion`) y usa la de la pausa por defecto.
+- `Partida` recuerda qué sonido anuncia el modal que pidió la persona, y lo toca en el mismo efecto
+  que pausa el audio, después de pausarlo. Si se sale desde la pausa, primero corta el silbato.
+  Volver de «Seguir jugando» a la pausa no suena.
+- `salir.mp3` va con canal `interfaz` en el catálogo, así la pausa no lo bloquea, y se precarga con
+  los sonidos de la partida.
+- `GrupoDeOpciones` reemplaza los grupos de radios que se repetían en `Configuracion` y
+  `ConfigurarTemporada`, y `CasillaDelPerro`, la casilla. Las dos pantallas quedaron más cortas.
+- `sonarAlElegir`, en `audio.ts`, reúne lo que ya hacía el carrusel: desbloquear el audio con el
+  gesto y después sonar.
+
+**Verificación.** Una E2E nueva comprueba que salir suena una vez con su árbitro, tanto desde el botón
+como desde la pausa, y que volver a la pausa no repite el sonido. La prueba del perro cuenta el ladrido
+de la configuración y el de la cancha. Espera los 2 s de intervalo mínimo del ladrido entre uno y otro.
 
 ## Decisiones de infraestructura
 
@@ -1111,3 +1140,4 @@ necesitara servicios adicionales.
 | Ilustraciones en las tarjetas del menú y estadio de fondo en los paneles | Los iconos SVG y los patrones CSS se veían genéricos al lado del arte de la portada y el menú. |
 | Un árbitro reemplaza al símbolo de pausa y pausar suena a silbato | El «Ⅱ» era genérico; el silbato existente anuncia la pausa sin sumar archivos de audio. |
 | La duración se elige con radios y las opciones van centradas | El `select` desplegable no seguía el estilo del juego y los grupos alineados a la izquierda quedaban desparejos. |
+| Salir tiene su árbitro y su sonido; las opciones suenan y el perro empieza desactivado | Pausa y salida compartían cara y solo una sonaba; activar al perro con un ladrido le da presencia. |

@@ -115,6 +115,21 @@ manualmente los commits y el push.
   pantalla de uso habitual.
 - **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
 
+### Árbitro y sonido de salir, sonidos de opciones y ladrido del perro — 15 de septiembre de 2026
+
+- **Solicitud:** usar `salir.png` y `salir.mp3` solo en el modal de salir, hacer sonar los radios de
+  la configuración como las flechas de los carruseles, y que activar al perro suene a ladrido, con la
+  casilla desactivada al empezar.
+- **Aporte de la IA:** movió el audio a `assets/audio/sfx/transitions/` con su copia web y entrada de
+  catálogo; grupo `modales` en `scripts/optimizar-recursos.mjs` (1,5 MB a 32 kB); ilustración como
+  prop de `Modal`; sonido de entrada por modal en `Partida`; componentes `GrupoDeOpciones` y
+  `CasillaDelPerro`; función `sonarAlElegir` compartida con el carrusel.
+- **Verificado por el agente:** lint, tipos, unitarias y E2E, con una prueba nueva del modal de salir
+  y la del perro ajustada al ladrido de la configuración.
+- **Verificación personal del autor:** pendiente. Escuchar el sonido de salir, el clic de los radios
+  y el ladrido al activar al perro, y confirmar la licencia de `salir.mp3`.
+- **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
+
 ## Cómo añadir una entrada
 
 En cada cambio asistido se registra, de forma breve:
