@@ -78,7 +78,8 @@ export async function empezarPartido(page: Page, configuracion: ConfiguracionDeP
   if (golesParaGanar) {
     await page.getByRole("group", { name: "Meta de goles" }).getByLabel(String(golesParaGanar), { exact: true }).check();
   }
-  if (!perro) await page.getByLabel("El perro puede meterse a la cancha").uncheck();
+  // La casilla empieza desactivada; marcarla hace ladrar al perro en la configuración.
+  await page.getByLabel("El perro puede meterse a la cancha").setChecked(perro);
 
   const creacion = page.waitForResponse(esPedido("POST", "/api/partidas"));
   await page.getByRole("button", { name: "Jugar" }).click();

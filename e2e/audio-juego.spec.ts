@@ -48,13 +48,39 @@ test("tiro y gol confirmados suenan una vez; pausa conserva música y no repite 
 test("perro ladra cuando entra y no vuelve a ladrar al reanudar", async ({ page }) => {
   await observarAudio(page);
   const partida = await empezarPartido(page, { estadio: "felixCapriles", perro: true, opciones: { semilla: 1, probabilidadPerro: 1 } });
+  // Activar la casilla del perro en la configuración ya ladra una vez.
+  await expect.poll(() => vecesSonido(page, "ladrido")).toBe(1);
+  // El ladrido tiene un intervalo mínimo de 2 s: sin esta espera, el de la cancha podría descartarse.
+  await page.waitForTimeout(2100);
   await tirar(page, tapitaDe(partida, `${partida.turno.lado}-1`), { x: 0, y: 1 }, 0.2);
   await expect(page.getByTestId("perro")).toBeVisible({ timeout: 15000 });
-  await expect.poll(() => vecesSonido(page, "ladrido")).toBe(1);
+  await expect.poll(() => vecesSonido(page, "ladrido")).toBe(2);
   await page.getByRole("button", { name: "Pausar" }).click();
   await page.getByRole("button", { name: "Reanudar partido" }).click();
   await expect(page.getByTestId("perro")).not.toBeVisible({ timeout: 15000 });
-  expect(await vecesSonido(page, "ladrido")).toBe(1);
+  expect(await vecesSonido(page, "ladrido")).toBe(2);
+});
+
+test("salir suena al abrir su modal, con su propio árbitro, y volver a la pausa no lo repite", async ({ page }) => {
+  await observarAudio(page);
+  await empezarPartido(page);
+  await page.getByRole("button", { name: "Salir", exact: true }).click();
+  const salida = page.getByRole("dialog", { name: "¿Abandonar el partido?" });
+  await expect(salida.locator("img")).toHaveAttribute("src", /\/salir-/);
+  await expect.poll(() => vecesSonido(page, "salir")).toBe(1);
+  await salida.getByRole("button", { name: "Seguir jugando" }).click();
+
+  await page.getByRole("button", { name: "Pausar" }).click();
+  const pausa = page.getByRole("dialog", { name: "Partido en pausa" });
+  await expect(pausa.locator("img")).toHaveAttribute("src", /\/pausa-/);
+  await expect(pausa.getByRole("button", { name: "Reanudar partido" })).toBeEnabled();
+  await pausa.getByRole("button", { name: "Salir del partido" }).click();
+  await expect(salida.locator("img")).toHaveAttribute("src", /\/salir-/);
+  await expect.poll(() => vecesSonido(page, "salir")).toBe(2);
+  // «Seguir jugando» devuelve a la pausa desde la que se salió: ese regreso no suena.
+  await salida.getByRole("button", { name: "Seguir jugando" }).click();
+  await expect(pausa.locator("img")).toHaveAttribute("src", /\/pausa-/);
+  expect(await vecesSonido(page, "salir")).toBe(2);
 });
 
 test("resultado reproduce un solo jingle y la revancha cambia a una única música de partido", async ({ page }) => {
