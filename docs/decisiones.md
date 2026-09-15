@@ -1088,6 +1088,47 @@ se ve que corre rápido: 45:00 llega a los 150 s reales, lo que duran 10 turnos 
 accesible, y la de Liga comprueba que el reloj tiene formato `MM:SS` y avanza. Se revisaron capturas del
 menú, la configuración, la temporada, la pausa y la cancha de Liga.
 
+### El perro no da doble turno, los charcos suenan y se quitó «Probar efecto»
+
+**Decisión.**
+
+- **Perro:** después de su aparición, el turno pasa al rival de quien tiró, igual que en cualquier
+  tiro. Esto reemplaza la versión anterior, que le daba el turno al equipo del arco más cercano a la
+  pelota.
+- **Charcos:** cuando la pelota cae en un charco suena un splash de agua o de nieve.
+- **Sonido:** se quitó el botón «Probar efecto» del control de sonido.
+
+**Por qué.**
+
+- **Perro:** si dejaba la pelota cerca del arco de quien tiró, esa persona volvía a tirar, y otra vez
+  más si el perro reaparecía. Ahora nunca hay doble turno. Si el perro deja la pelota cerca del arco
+  de quien tiró, esa es la mala suerte de la jugada: el perro ayudó al rival.
+- **Charcos:** caer al charco era de lo poco que pasaba en la cancha sin sonido.
+- **«Probar efecto»:** sonaba un clic sin ningún efecto visible y parecía una función de prueba.
+
+**Cómo.**
+
+- **Perro:** `tiro.ts` ya no cambia el turno cuando aparece el perro, y se borró
+  `ladoDelArcoMasCercano`, que quedó sin uso. `turnoPara` sigue en el evento para anunciar a quién
+  le toca.
+- **Charcos:**
+  - La física no sabe si un charco es de agua o de nieve. `simularTiro` solo anota en qué cuadro cayó
+    la pelota y en qué charco (`caidasEnCharcos`), con el mismo criterio de cuadro que los golpes.
+  - `contactosDeCharco`, en `dominio/estadios`, convierte cada caída en un contacto `charcoDeAgua` o
+    `charcoDeNieve`. Lo hace antes de que los charcos se sequen.
+  - El cliente no cambió: ya hacía sonar cada contacto por su tipo, que coincide con el id del sonido.
+  - Los audios aportados (`splashWater`, `splashSnow`) quedaron en `sfx/gameplay/puddle/` como
+    `charco-agua.mp3` y `charco-nieve.mp3`, con su copia web, sin recomprimir.
+
+**Verificación.**
+
+- **Perro:** una prueba unitaria comprueba que el turno pasa al rival y otra que no hay doble turno
+  en cinco apariciones seguidas.
+- **Charcos:** la prueba del charco informa el contacto de agua, y una E2E comprueba que la caída en
+  nieve suena una sola vez con su splash.
+- **«Probar efecto»:** las pruebas de audio usan en su lugar la transición de abrir una tarjeta y el
+  último control del modal.
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano
@@ -1176,3 +1217,5 @@ necesitara servicios adicionales.
 | La duración se elige con radios y las opciones van centradas | El `select` desplegable no seguía el estilo del juego y los grupos alineados a la izquierda quedaban desparejos. |
 | Salir tiene su árbitro y su sonido; las opciones suenan y el perro empieza desactivado | Pausa y salida compartían cara y solo una sonaba; activar al perro con un ladrido le da presencia. |
 | Título ilustrado, cabeceras centradas, ícono de sonido y reloj de Liga con segundos | El título de texto no tenía fuerza, «Volver» no parecía botón y con solo el minuto el reloj parecía quieto. |
+| El perro ya no cambia el turno: siempre pasa al rival | Dar el turno al dueño del arco más cercano permitía que alguien tirara dos o más veces seguidas. |
+| Los charcos suenan al caer la pelota y se quitó «Probar efecto» | La caída en un charco no tenía sonido; «Probar efecto» parecía una función de prueba. |

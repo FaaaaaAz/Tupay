@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-**24 archivos: 15 Ogg Vorbis, 8 MP3 y 1 WAV, 2.159.085 bytes (2,06 MB).**
+**26 archivos: 15 Ogg Vorbis, 10 MP3 y 1 WAV, 2.198.925 bytes (2,10 MB).**
 No hay hinchada, cánticos ni ambiente de público. El único audio sintetizado es el aplauso del
 empate, generado con un script propio (ver más abajo).
 
@@ -17,7 +17,7 @@ Los recursos descargados están publicados bajo
 adaptación incluso comercial. Se conserva la autoría aunque atribuir no sea obligatorio.
 Las licencias de los paquetes de Kenney que siguen en uso están en `licencias/`.
 Los siete sonidos que reemplazaron a los anteriores (choque, patear, pared, poder, pitido, ganador y
-perdedor) y el de salir los aportó el autor del proyecto: su origen y licencia quedan **pendientes de registrar** en
+perdedor), el de salir y los dos splash de los charcos los aportó el autor del proyecto: su origen y licencia quedan **pendientes de registrar** en
 `catalogo.json`, y conviene completarlos antes de difundir el juego fuera del ámbito académico.
 Las páginas de Ansimuz y MatiasVME enlazadas debajo identifican autor y licencia.
 La procedencia exacta de los dos recursos nuevos se registra en [licencias/freesound.md](licencias/freesound.md).
@@ -36,6 +36,8 @@ Los nombres de victoria, derrota y emociones describen su uso en Tupay, no títu
 | `sfx/gameplay/collision/choque.mp3` | `choque.mp3` | Aportado por el autor del proyecto (fuente: pendiente de registrar) | Pendiente de registrar | integrado |
 | `sfx/gameplay/kick/patear.mp3` | `patear.mp3` | Aportado por el autor del proyecto (fuente: pendiente de registrar) | Pendiente de registrar | integrado |
 | `sfx/gameplay/bounce/pared.mp3` | `pared.mp3` | Aportado por el autor del proyecto (fuente: pendiente de registrar) | Pendiente de registrar | integrado |
+| `sfx/gameplay/puddle/charco-agua.mp3` | `splashWater.mp3` | Aportado por el autor del proyecto (fuente: pendiente de registrar) | Pendiente de registrar | integrado |
+| `sfx/gameplay/puddle/charco-nieve.mp3` | `splashSnow.mp3` | Aportado por el autor del proyecto (fuente: pendiente de registrar) | Pendiente de registrar | integrado |
 | `sfx/gameplay/goal/gol-arcade.ogg` | `powerUp8.ogg` | [Kenney](https://kenney.nl/assets/digital-audio) | CC0-1.0 | integrado |
 | `sfx/ui/click/clic.ogg` | `click_001.ogg` | [Kenney](https://kenney.nl/assets/interface-sounds) | CC0-1.0 | integrado |
 | `sfx/ui/selection/seleccion.ogg` | `select_001.ogg` | [Kenney](https://kenney.nl/assets/interface-sounds) | CC0-1.0 | integrado |
@@ -87,6 +89,8 @@ Los nombres de victoria, derrota y emociones describen su uso en Tupay, no títu
   (patear), chocó con otra tapita (choque) o rebotó en una pared o un poste (pared). Cada golpe suena
   cuando la animación llega a ese cuadro, en tiros humanos y del rival. Los golpes más suaves que 60
   unidades por segundo no suenan, y pausar no los repite. Un tiro rechazado suena a error, sin golpes.
+- **Charcos:** cuando la pelota cae en un charco suena su splash, de agua o de nieve, en el cuadro
+  en que cae. Express lo informa en `contactos` como `charcoDeAgua` o `charcoDeNieve`.
 - **Poder:** señal al activar el botón; desactivarlo usa selección. No consume un tiro adicional.
 - **Gol:** evento confirmado al terminar la animación, una sola vez.
 - **Perro:** un ladrido cuando aparece en los cuadros confirmados; reanudar no repite el ladrido.

@@ -145,6 +145,20 @@ manualmente los commits y el push.
   revisar que el fondo del marcador no tape escudos ni emotes en la pantalla habitual.
 - **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
 
+### Perro sin doble turno, splash de los charcos y sin «Probar efecto» — 15 de septiembre de 2026
+
+- **Solicitud:** quitar «Probar efecto», impedir que el perro genere doble turno, hacer sonar los
+  audios `splashWater` y `splashSnow` cuando la pelota cae en un charco, y explicar dónde ajustar la
+  opacidad del fondo del menú sin modificarlo.
+- **Aporte de la IA:** turno siempre al rival en `tiro.ts` y borrado de `ladoDelArcoMasCercano`;
+  reglas, instrucciones y `api.md` actualizados; caídas en charcos anotadas por la física y
+  convertidas en contactos `charcoDeAgua` y `charcoDeNieve`; audios movidos a
+  `sfx/gameplay/puddle/` con entrada de catálogo; pruebas unitarias y E2E ajustadas.
+- **Verificado por el agente:** lint, tipos, unitarias y E2E.
+- **Verificación personal del autor:** pendiente. Escuchar los splash en La Paz, Oruro, El Alto y
+  Potosí, confirmar la licencia de los dos audios y jugar con el perro activado.
+- **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
+
 ## Cómo añadir una entrada
 
 En cada cambio asistido se registra, de forma breve:
