@@ -62,6 +62,8 @@ test("la pausa conserva el aviso de turno y movimiento reducido elimina la anima
 test("menú, configuración, temporada y resultado conservan el diseño en tres tamaños", async ({ page }, info) => {
   // Juega tres partidos completos, uno por tamaño: necesita más que el tiempo de una prueba común.
   test.slow();
+  // Los formularios de configuración entran enteros: no se desplazan como las instrucciones.
+  const sinDesplazamientoVertical = () => page.evaluate(() => document.documentElement.scrollHeight <= innerHeight);
   for (const [width, height] of [[1280, 720], [1366, 768], [1920, 1080]]) {
     await page.setViewportSize({ width, height });
     await abrirMenu(page);
@@ -75,9 +77,20 @@ test("menú, configuración, temporada y resultado conservan el diseño en tres 
     await elegirEnElMenu(page, "Eliminatoria");
     await expect(page.getByRole("button", { name: "Jugar", exact: true })).toBeInViewport({ ratio: 1 });
     await expect(page.getByRole("main")).toHaveCSS("background-image", /paneles/);
+    expect(await sinDesplazamientoVertical()).toBe(true);
     await page.screenshot({ path: info.outputPath(`configuracion-${width}.jpg`), type: "jpeg", quality: 85, animations: "disabled" });
     await page.getByRole("button", { name: "← Volver" }).click();
+    // La duración se elige con radios, como la dificultad, y el formulario sigue sin desplazarse.
+    await elegirEnElMenu(page, "Liga");
+    await expect(page.getByRole("group", { name: "Duración real del partido" }).getByLabel("5 minutos")).toBeChecked();
+    await expect(page.getByRole("button", { name: "Jugar", exact: true })).toBeInViewport({ ratio: 1 });
+    expect(await sinDesplazamientoVertical()).toBe(true);
+    await page.screenshot({ path: info.outputPath(`liga-${width}.jpg`), type: "jpeg", quality: 85, animations: "disabled" });
+    await page.getByRole("button", { name: "← Volver" }).click();
     await elegirEnElMenu(page, "Temporada");
+    await expect(page.getByRole("button", { name: "Empezar temporada" })).toBeInViewport({ ratio: 1 });
+    expect(await sinDesplazamientoVertical()).toBe(true);
+    await page.screenshot({ path: info.outputPath(`configurar-temporada-${width}.jpg`), type: "jpeg", quality: 85, animations: "disabled" });
     await page.getByRole("button", { name: "Empezar temporada" }).click();
     await expect(page.getByTestId("jornada")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
