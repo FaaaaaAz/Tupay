@@ -35,6 +35,8 @@ export const FISICA = {
   radioPoste: 6,
   /** Por debajo de esta velocidad el cuerpo se da por detenido. */
   velocidadMinima: 8,
+  /** Un golpe más suave que esto no suena: evita ruido de tapitas que apenas se rozan. */
+  velocidadMinimaParaSonar: 60,
   /** Tope de seguridad: ninguna simulación sigue más allá de este tiempo de juego. */
   segundosMaximosDeSimulacion: 20,
 } as const;

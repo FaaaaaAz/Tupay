@@ -1,5 +1,5 @@
 import type { Vector } from "../../../../compartido/geometria.js";
-import type { Cuadro } from "../../../../compartido/partida.js";
+import type { Contacto, Cuadro, TipoContacto } from "../../../../compartido/partida.js";
 import { escalar, normalizar, redondear } from "../../utilidades/vector.js";
 import {
   atraparSiEntra,
@@ -47,6 +47,8 @@ export interface ResultadoSimulacion {
   pelotaAtrapada: PelotaAtrapada | null;
   /** En el orden en que ocurrieron: una pelota puede salir de un charco y caer en otro. */
   eventosDeCharco: EventoDeCharco[];
+  /** Golpes que suenan, con el cuadro del recorrido en que ocurren. */
+  contactos: Contacto[];
   arcoConGol: Arco | null;
   terminoPor: FinDeSimulacion;
 }
@@ -78,9 +80,17 @@ export function simularTiro(entrada: EntradaSimulacion): ResultadoSimulacion {
   const cuadros: Cuadro[] = [fotografiar(tapitas, pelota)];
   let arcoConGol: Arco | null = null;
   let terminoPor: FinDeSimulacion = "limite";
+  const contactos: Contacto[] = [];
+  // Cada golpe se anota en el cuadro que se fotografía al terminar este paso.
+  const sonar = (tipo: TipoContacto) => {
+    const cuadro = cuadros.length;
+    if (!contactos.some((contacto) => contacto.cuadro === cuadro && contacto.tipo === tipo)) {
+      contactos.push({ cuadro, tipo });
+    }
+  };
 
   for (let paso = 1; paso <= PASOS_MAXIMOS; paso++) {
-    arcoConGol = avanzarUnPaso(cuerpos, charcos, liberaDeUnGolpe);
+    arcoConGol = avanzarUnPaso(cuerpos, charcos, liberaDeUnGolpe, sonar);
     if (arcoConGol) terminoPor = "gol";
     else if (cuerpos.moviles.every(enReposo)) terminoPor = "reposo";
 
@@ -97,6 +107,7 @@ export function simularTiro(entrada: EntradaSimulacion): ResultadoSimulacion {
     pelota: pelota.posicion,
     pelotaAtrapada: charcos.atrapada,
     eventosDeCharco: charcos.eventos,
+    contactos,
     arcoConGol,
     terminoPor,
   };
@@ -106,23 +117,39 @@ function avanzarUnPaso(
   { tapitas, pelota, moviles, postes }: Cuerpos,
   charcos: EstadoDeCharcos,
   liberaDeUnGolpe: number | null,
+  sonar: (tipo: TipoContacto) => void,
 ): Arco | null {
   for (let subpaso = 0; subpaso < FISICA.subpasosPorPaso; subpaso++) {
     for (const cuerpo of moviles) mover(cuerpo, DT);
 
     // Se revisa antes de los choques: si este golpe la libera, el choque ya la trata como pelota libre.
     const impulsoAlLiberar = golpearPelotaAtrapada(charcos, tapitas, pelota, liberaDeUnGolpe);
-    resolverColisiones(moviles, postes);
+    resolverColisiones(moviles, postes, (a, b, velocidad) => {
+      const tipo = tipoDeGolpe(a, b);
+      if (tipo && velocidad >= FISICA.velocidadMinimaParaSonar) sonar(tipo);
+    });
     if (impulsoAlLiberar !== null) pelota.velocidad = escalar(pelota.velocidad, impulsoAlLiberar);
 
     // Las paredes van después de los choques: un choque no puede empujar nada fuera de la cancha.
-    for (const cuerpo of moviles) rebotarEnParedes(cuerpo);
+    for (const cuerpo of moviles) {
+      const golpe = rebotarEnParedes(cuerpo);
+      if (!cuerpo.esPelota && golpe >= FISICA.velocidadMinimaParaSonar) sonar("pared");
+    }
     atraparSiEntra(charcos, pelota);
 
     const arco = detectarGol(pelota.posicion);
     if (arco) return arco;
   }
   return null;
+}
+
+/** Qué suena en un choque. La pelota contra un poste no suena; una tapita contra un poste, como la pared. */
+function tipoDeGolpe(a: Cuerpo, b: Cuerpo): TipoContacto | null {
+  if (a.esPelota || b.esPelota) {
+    const otro = a.esPelota ? b : a;
+    return otro.masaInversa > 0 ? "patear" : null;
+  }
+  return a.masaInversa > 0 && b.masaInversa > 0 ? "choque" : "pared";
 }
 
 function fotografiar(tapitas: Cuerpo[], pelota: Cuerpo): Cuadro {

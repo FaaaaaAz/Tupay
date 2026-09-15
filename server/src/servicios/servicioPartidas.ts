@@ -92,12 +92,13 @@ export class ServicioPartidas {
   private jugar(id: string, jugada: Jugada): RespuestaTiro {
     const registro = this.buscar(id);
     const momento = this.dependencias.ahora();
-    const { recorrido, eventos } = jugada(registro, momento);
+    const { recorrido, eventos, contactos } = jugada(registro, momento);
 
     this.dependencias.repositorio.guardar(registro);
     return {
       recorrido,
       eventos,
+      contactos,
       cuadrosPorSegundo: CUADROS_POR_SEGUNDO,
       partida: aPartidaPublica(registro, momento),
     };

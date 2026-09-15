@@ -116,3 +116,59 @@ describe("simulación de un tiro", () => {
     assert.deepEqual(simularTiro(PARTIDO_COMPLETO), simularTiro(PARTIDO_COMPLETO));
   });
 });
+
+describe("golpes que suenan", () => {
+  it("una tapita que toca la pelota avisa un pateo, en un cuadro del recorrido", () => {
+    const { contactos, cuadros } = simularTiro({
+      tapitas: [{ x: 400, y: 150 }],
+      pelota: { x: 500, y: 150 },
+      tiro: { tapita: 0, direccion: { x: 1, y: 0 }, fuerza: 0.3 },
+    });
+
+    assert.ok(contactos.some((contacto) => contacto.tipo === "patear"), "no avisó el pateo");
+    assert.ok(contactos.every((contacto) => contacto.cuadro > 0 && contacto.cuadro < cuadros.length));
+  });
+
+  it("dos tapitas que chocan avisan un choque", () => {
+    const { contactos } = simularTiro({
+      tapitas: [{ x: 400, y: 150 }, { x: 500, y: 150 }],
+      pelota: { x: 100, y: 600 },
+      tiro: { tapita: 0, direccion: { x: 1, y: 0 }, fuerza: 0.3 },
+    });
+
+    assert.ok(contactos.some((contacto) => contacto.tipo === "choque"), "no avisó el choque");
+    assert.ok(!contactos.some((contacto) => contacto.tipo === "patear"), "avisó un pateo sin tocar la pelota");
+  });
+
+  it("una tapita que rebota en la pared avisa la pared", () => {
+    const { contactos } = simularTiro({
+      tapitas: [{ x: 600, y: 150 }],
+      pelota: { x: 100, y: 600 },
+      tiro: { tapita: 0, direccion: { x: 0, y: -1 }, fuerza: 0.5 },
+    });
+
+    assert.deepEqual(contactos.map((contacto) => contacto.tipo), ["pared"]);
+  });
+
+  it("la pelota que rebota en la pared no suena como una tapita", () => {
+    const { contactos } = simularTiro({
+      tapitas: [{ x: 600, y: 300 }],
+      pelota: { x: 600, y: 200 },
+      tiro: { tapita: 0, direccion: { x: 0, y: -1 }, fuerza: 0.3 },
+    });
+
+    // La pelota sube, rebota arriba y puede volver a tocar la tapita: eso sí es otro pateo.
+    assert.ok(contactos.length > 0);
+    assert.ok(contactos.every((contacto) => contacto.tipo === "patear"), "la pelota sonó contra la pared");
+  });
+
+  it("un tiro que no toca nada no avisa ningún golpe", () => {
+    const { contactos } = simularTiro({
+      tapitas: [{ x: 600, y: 350 }],
+      pelota: { x: 100, y: 600 },
+      tiro: { tapita: 0, direccion: { x: 1, y: 0 }, fuerza: 0.1 },
+    });
+
+    assert.deepEqual(contactos, []);
+  });
+});

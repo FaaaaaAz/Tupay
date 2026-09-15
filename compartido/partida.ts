@@ -169,6 +169,15 @@ export interface Cuadro {
   perro: Vector | null;
 }
 
+/** Qué golpe suena: dos tapitas, una tapita contra la pelota o una tapita contra la pared. */
+export type TipoContacto = "choque" | "patear" | "pared";
+
+/** Un golpe del recorrido. `cuadro` es el índice del cuadro en que ocurre, para sonar en ese momento. */
+export interface Contacto {
+  cuadro: number;
+  tipo: TipoContacto;
+}
+
 export type Evento =
   | { tipo: "gol"; lado: Lado }
   | { tipo: "perro"; posicionPelota: Vector; turnoPara: Lado }
@@ -180,6 +189,8 @@ export type Evento =
 export interface RespuestaTiro {
   recorrido: Cuadro[];
   eventos: Evento[];
+  /** Golpes que suenan durante la animación. */
+  contactos: Contacto[];
   /** Velocidad a la que hay que reproducir el recorrido para que dure lo mismo que en el servidor. */
   cuadrosPorSegundo: number;
   /** Estado confirmado por el servidor, que React aplica al terminar la animación. */

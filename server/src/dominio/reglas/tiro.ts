@@ -1,4 +1,4 @@
-import type { Cuadro, Evento, PeticionTiro } from "../../../../compartido/partida.js";
+import type { Contacto, Cuadro, Evento, PeticionTiro } from "../../../../compartido/partida.js";
 import { longitud, redondear } from "../../utilidades/vector.js";
 import { avanzarCharcos, eventosDeCharco } from "../estadios/charcos.js";
 import { ErrorDeJuego } from "../errores.js";
@@ -17,6 +17,7 @@ import { exigirSinPausa } from "./pausa.js";
 export interface ResultadoDelTiro {
   recorrido: Cuadro[];
   eventos: Evento[];
+  contactos: Contacto[];
 }
 
 /** Valida el tiro, lo simula y aplica sus consecuencias: charcos, gol, perro, turno y final. */
@@ -85,7 +86,7 @@ export function ejecutarTiro(
 
   // El reloj del turno siguiente arranca cuando termina la animación, no cuando responde el servidor.
   registro.inicioTurno = ahora + (recorrido.length / CUADROS_POR_SEGUNDO) * 1000;
-  return { recorrido, eventos };
+  return { recorrido, eventos, contactos: simulacion.contactos };
 }
 
 /** Aplica en orden las acciones inválidas de `docs/reglas.md`. Devuelve el índice de la tapita. */
