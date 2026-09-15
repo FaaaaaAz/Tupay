@@ -900,6 +900,64 @@ ni temporizadores por cuadro para audio. Resultados, límites y evidencias en
 [fase-10-auditoria.md](evidencias/fase-10-auditoria.md). La valoración auditiva subjetiva de los
 bucles y la mezcla sigue pendiente del autor, separada de la validación técnica.
 
+### Los golpes suenan en el cuadro en que ocurren
+
+**Decisión.** La simulación anota cada golpe que suena —una tapita contra la pelota, dos tapitas,
+una tapita contra una pared o un poste— con el índice del cuadro en que ocurre, y la respuesta del
+tiro los devuelve en `contactos`. El cliente los reproduce cuando la animación llega a ese cuadro.
+
+**Por qué.** El sonido de tiro sonaba al llegar la respuesta de Express, antes de que la tapita
+tocara nada, y los choques y la pared estaban reservados porque el navegador no tiene la física:
+calcularlos comparando posiciones sería adivinar. El servidor ya resuelve cada choque, así que
+informar cuándo ocurrió es exacto y no cuesta cálculo extra.
+
+**Detalles.** Un golpe más suave que 60 unidades por segundo no suena: tapitas que apenas se rozan
+generaban ruido. Cada tipo aparece como mucho una vez por cuadro, y el motor de audio además respeta
+un intervalo mínimo por sonido. La pelota contra la pared no suena, porque «pared» es el golpe de una
+tapita. Pausar no repite golpes: el hook recuerda hasta qué cuadro ya sonaron.
+
+### Los selectores de equipo y estadio son carruseles
+
+**Decisión.** El componente `Carrusel` reemplaza a los `select`: dos flechas, recorrido circular en
+orden alfabético, flechas del teclado y el clic de la interfaz en cada cambio. Los escudos muestran a
+sus vecinos a los costados; el estadio se ve grande, con su ciudad, su efecto y la marca «Estadio
+del local». El estadio acompaña al equipo local hasta que se elige otro a mano.
+
+**Por qué.** El `select` escondía justamente lo que distingue a cada opción: el escudo y la imagen
+del estadio. Con el carrusel se elige mirando.
+
+**Accesibilidad y pruebas.** Cada carrusel es un grupo con nombre («Tu equipo», «Rival», «Estadio»),
+los botones se llaman «Anterior» y «Siguiente», y el nombre elegido se anuncia con `aria-live`. Las
+pruebas lo encuentran por ese rol y leen la opción actual en `data-valor`. La prueba de diseño, que
+juega tres partidos completos, se marcó como lenta: con los clics del carrusel superaba los 30 segundos
+de una prueba común.
+
+### Los sonidos nuevos se publican como MP3, sin convertir
+
+**Decisión.** El catálogo de audio acepta `.ogg`, `.mp3` y `.wav`, y los siete sonidos aportados se
+publican con sus bytes originales.
+
+**Por qué.** Convertirlos a OGG exigía sumar `ffmpeg` al proyecto y recomprimir, con pérdida de
+calidad, archivos que todos los navegadores de escritorio ya decodifican. Se comprobó en Chromium que
+los siete decodifican y que ninguno pasa de 6 segundos.
+
+**Pendiente.** Su origen y licencia no venían en los archivos. Quedan como «pendiente de registrar» en
+`assets/audio/catalogo.json`.
+
+### El empate suena a aplausos sintetizados
+
+**Decisión.** `scripts/generar-aplausos.mjs` genera tres segundos de aplauso: palmadas de ruido
+filtrado que llegan al azar, con una densidad que sube, se sostiene y se apaga. El azar tiene semilla,
+así que el archivo sale siempre igual.
+
+**Por qué.** El empate no tenía ningún sonido y no se quiso descargar uno sin una licencia
+verificada. Sintetizarlo no suma dependencias ni dudas de autoría.
+
+**Se encontró un error.** La primera versión generó un archivo mudo: la densidad valía cero justo al
+empezar y el bucle de palmadas terminaba antes de la primera. Se detectó midiendo la señal en Chromium
+(pico 0). Ahora la densidad nunca arranca en cero y el script falla si el resultado no tiene señal.
+La versión final decodifica con pico 0,8, sin saturar.
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano
@@ -980,3 +1038,6 @@ necesitara servicios adicionales.
 | Las trazas se guardan en toda prueba que falla, no solo en el reintento | Sin reintentos en local no quedaba ninguna traza, y fue una traza la que explicó la falla de la animación. |
 | El deploy también prueba la URL pública | Probar solo antes del deploy no demuestra que la versión publicada funcione. |
 | Los escudos reemplazan a las tapitas fuera de la cancha | La tapita es la ficha del juego; el escudo identifica al club en el marcador, la temporada y el resultado. |
+| Los golpes suenan cuando ocurren | El sonido de tiro llegaba antes del golpe, y choques y paredes no podían sonar sin datos de la física. |
+| Equipos y estadio se eligen con carruseles | El `select` escondía el escudo y la imagen del estadio. |
+| El empate suena a aplausos | El resultado empatado era el único sin sonido. |

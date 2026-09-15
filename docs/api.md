@@ -309,6 +309,12 @@ dos primeros:
 }
 ```
 
+**`contactos`** lista los golpes que suenan durante la animación, por ejemplo
+`{ "cuadro": 12, "tipo": "patear" }`. `cuadro` es el índice dentro de `recorrido` y `tipo` es
+`"patear"` (una tapita toca la pelota), `"choque"` (dos tapitas) o `"pared"` (una tapita contra
+una pared o un poste). Los golpes más suaves que 60 unidades por segundo no se informan, y cada tipo
+aparece a lo sumo una vez por cuadro. La pelota contra la pared no suena.
+
 `cuadrosPorSegundo` le dice al cliente a qué velocidad reproducir el recorrido para que dure lo
 mismo que en el servidor. En el segundo cuadro ya se ve a `visitante-4` salir de (720, 280) hacia la izquierda. Las posiciones
 de `tapitas` van **en el mismo orden** que `partida.tapitas`: repetir los identificadores en cada
