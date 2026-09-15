@@ -22,9 +22,14 @@ test("tiro y gol confirmados suenan una vez; pausa conserva música y no repite 
   await tirar(page, tapita, GOL_DESDE_EL_SAQUE.direccion, 1);
   // Suena cuando la tapita toca la pelota, durante la animación.
   await expect.poll(() => vecesSonido(page, "patear")).toBeGreaterThanOrEqual(1);
+  const pitidos = await vecesSonido(page, "pitido");
   await page.getByRole("button", { name: "Pausar" }).click();
   await expect(page.getByRole("button", { name: "Reanudar partido" })).toBeEnabled();
-  await expect.poll(() => page.evaluate(() => window.audioPrueba.activos)).toBe(0);
+  // El árbitro toca el silbato una sola vez; confirmar la pausa en Express no lo corta ni lo repite.
+  await expect.poll(() => vecesSonido(page, "pitido")).toBe(pitidos + 1);
+  // Lo único que suena en pausa es el silbato (unos 3,4 s): después no queda ningún efecto activo.
+  await expect.poll(() => page.evaluate(() => window.audioPrueba.activos), { timeout: 8000 }).toBe(0);
+  expect(await vecesSonido(page, "pitido")).toBe(pitidos + 1);
   await page.getByRole("button", { name: "Reanudar partido" }).click();
   await expect.poll(() => vecesSonido(page, "competicion")).toBe(2);
   const offset = await page.evaluate(() => window.audioPrueba.eventos.filter((evento) => evento.url.includes("/competicion-")).at(-1)!.offset);

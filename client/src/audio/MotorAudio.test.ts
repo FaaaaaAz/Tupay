@@ -170,6 +170,19 @@ test("reutilizar un tono como reacción respeta su canal, prioridad y pausa", as
   assert.equal(await motor.efecto("clic", "reacciones"), false);
 });
 
+test("un efecto del juego suena en pausa por la interfaz y confirmar la pausa no lo corta", async () => {
+  const motor = new MotorAudio(recursos);
+  await motor.desbloquear();
+  motor.pausar(true);
+  assert.equal(await motor.efecto("tiro"), false);
+  assert.equal(await motor.efecto("tiro", "interfaz"), true);
+  motor.pausar(true);
+  assert.equal(fuentes.at(-1)!.parada, false);
+  motor.pausar(false);
+  motor.pausar(true);
+  assert.equal(fuentes.at(-1)!.parada, true); // Una pausa nueva sí corta lo que sonaba.
+});
+
 test("el resultado distingue derrota contra servidor, victoria compartida y empate", () => {
   const partida = { local: { tipo: "humano" }, visitante: { tipo: "servidor" }, resultado: { ganador: "visitante" } } as Partida;
   assert.equal(sonidoDelResultado(partida), "derrota");
