@@ -381,16 +381,6 @@ input[type="checkbox"] {
   box-shadow: var(--sombra-tarjeta);
 }
 
-.selector-equipo__escudo {
-  width: 5.5rem;
-  height: 5.5rem;
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
-}
-
-.selector-equipo select {
-  width: 100%;
-}
-
 .instrucciones h2 {
   margin: 1.3rem 0 0.3rem;
   font-size: 1rem;
@@ -703,26 +693,6 @@ input[type="checkbox"] {
 
 /* Estadio elegido en la configuración */
 
-.estadio-elegido {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 9.5rem;
-  align-items: center;
-  gap: 1rem;
-}
-
-.estadio-elegido__efecto {
-  font-size: 0.88rem;
-  opacity: 0.85;
-}
-
-.estadio-elegido__vista {
-  width: 100%;
-  aspect-ratio: 1672 / 941;
-  object-fit: cover;
-  border: 1px solid var(--borde);
-  border-radius: 0.5rem;
-}
-
 /* Instrucciones con imágenes */
 
 .instrucciones__charcos {
@@ -855,9 +825,247 @@ input[type="checkbox"] {
   .tarjeta-menu { min-height: 12rem; }
   .enfrentamiento { gap: 0.4rem; }
   .selector-equipo { min-width: 0; padding: 0.6rem; }
-  .estadio-elegido { grid-template-columns: minmax(0, 1fr); }
-  .estadio-elegido__vista { max-width: 12rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .panel, .resultado__equipo img, .resultado__equipo--ganador img { animation: none; }
+}
+
+/* Carruseles de equipos y estadios */
+
+.carrusel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.carrusel__escenario {
+  grid-area: escenario;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: 100%;
+}
+
+.carrusel__vista {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.carrusel__imagen {
+  position: relative;
+  z-index: 1;
+  object-fit: contain;
+}
+
+.carrusel__flecha {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  color: var(--dorado);
+  background: radial-gradient(circle at 35% 30%, #2d4a60, #0e2033);
+  border: 1px solid color-mix(in srgb, var(--dorado) 55%, transparent);
+  border-radius: 50%;
+  box-shadow:
+    0 3px 0 #06101a,
+    0 6px 14px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition:
+    transform 0.12s,
+    box-shadow 0.12s,
+    border-color 0.12s;
+}
+
+.carrusel__flecha svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.carrusel__flecha--siguiente svg {
+  scale: -1 1;
+}
+
+.carrusel__flecha:hover {
+  transform: translateY(-2px);
+  border-color: var(--dorado);
+  box-shadow:
+    0 5px 0 #06101a,
+    0 0 16px color-mix(in srgb, var(--dorado) 45%, transparent);
+}
+
+.carrusel__flecha:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 #06101a;
+}
+
+.carrusel__nombre {
+  grid-area: nombre;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.carrusel__detalle {
+  grid-area: detalle;
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  opacity: 0.8;
+}
+
+.carrusel__puntos {
+  grid-area: puntos;
+  display: flex;
+  gap: 0.3rem;
+  margin: 0.1rem 0 0;
+}
+
+.carrusel__punto {
+  width: 0.4rem;
+  height: 0.4rem;
+  background: var(--borde);
+  border-radius: 999px;
+  transition: width 0.2s;
+}
+
+.carrusel__punto--actual {
+  width: 1rem;
+  background: var(--dorado);
+}
+
+.carrusel__imagen--desde-siguiente {
+  animation: carrusel-desde-la-derecha 0.22s ease-out;
+}
+
+.carrusel__imagen--desde-anterior {
+  animation: carrusel-desde-la-izquierda 0.22s ease-out;
+}
+
+@keyframes carrusel-desde-la-derecha {
+  from { opacity: 0; translate: 1.2rem 0; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes carrusel-desde-la-izquierda {
+  from { opacity: 0; translate: -1.2rem 0; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+/* Escudos: el actual al frente y sus vecinos asomando a los costados */
+
+.carrusel--escudo .carrusel__vista {
+  height: 6rem;
+}
+
+.carrusel--escudo .carrusel__imagen {
+  width: 5.5rem;
+  height: 5.5rem;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
+}
+
+.carrusel__vecino {
+  position: absolute;
+  top: 50%;
+  width: 2.8rem;
+  height: 2.8rem;
+  object-fit: contain;
+  opacity: 0.3;
+  filter: grayscale(0.4);
+  translate: 0 -50%;
+  pointer-events: none;
+}
+
+.carrusel__vecino--anterior {
+  left: 0;
+}
+
+.carrusel__vecino--siguiente {
+  right: 0;
+}
+
+/* Estadio: imagen grande a la izquierda, nombre y efecto a la derecha */
+
+.carrusel--estadio {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  grid-template-areas:
+    "etiqueta etiqueta"
+    "escenario nombre"
+    "escenario detalle"
+    "escenario puntos";
+  grid-template-rows: auto 1fr auto 1fr;
+  align-items: center;
+  justify-items: start;
+  column-gap: 1.2rem;
+  width: 100%;
+}
+
+.carrusel--estadio > .campo__etiqueta {
+  grid-area: etiqueta;
+}
+
+.carrusel--estadio .carrusel__nombre {
+  align-self: end;
+  text-align: left;
+}
+
+.carrusel--estadio .carrusel__puntos {
+  align-self: start;
+}
+
+.carrusel--estadio .carrusel__imagen {
+  width: 100%;
+  aspect-ratio: 1672 / 941;
+  object-fit: cover;
+  border: 1px solid var(--borde);
+  border-radius: 0.7rem;
+  box-shadow: var(--sombra-tarjeta);
+}
+
+.carrusel__distintivo {
+  position: absolute;
+  z-index: 2;
+  top: 0.45rem;
+  left: 50%;
+  translate: -50% 0;
+  padding: 0.15rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #2a1a00;
+  white-space: nowrap;
+  background: var(--dorado);
+  border-radius: 999px;
+}
+
+@media (max-height: 800px) and (min-width: 1000px) {
+  .carrusel--escudo .carrusel__vista { height: 4.8rem; }
+  .carrusel--escudo .carrusel__imagen { width: 4.5rem; height: 4.5rem; }
+  .carrusel--estadio { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+}
+
+@media (max-width: 600px) {
+  .carrusel--estadio {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "etiqueta" "escenario" "nombre" "detalle" "puntos";
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carrusel__imagen--desde-siguiente,
+  .carrusel__imagen--desde-anterior { animation: none; }
+  .carrusel__flecha, .carrusel__punto { transition: none; }
 }

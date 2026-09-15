@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from "react";
 import type { Equipo, Estadio, IdEquipo, IdEstadio } from "../../../compartido/catalogo.js";
 import type { Dificultad, Modo, Partida, PeticionCrearPartida } from "../../../compartido/partida.js";
-import { DESCRIPCION_DE_EFECTO, DIFICULTADES, DURACIONES_DE_LIGA } from "../componentes/opcionesDeJuego";
+import { DIFICULTADES, DURACIONES_DE_LIGA } from "../componentes/opcionesDeJuego";
 import { SelectorDeEquipo } from "../componentes/SelectorDeEquipo";
+import { SelectorDeEstadio } from "../componentes/SelectorDeEstadio";
 import { equipoPorId } from "../hooks/useCatalogo";
 import { useCrearPartida } from "../hooks/useCrearPartida";
-import { IMAGEN_DE_ESTADIO } from "../recursos/indice";
 
 const METAS_DE_GOLES = [1, 2, 3, 4, 5];
 
@@ -22,16 +22,15 @@ export function Configuracion({ modo, equipos, estadios, alJugar, alVolver }: Pr
   const [dificultad, setDificultad] = useState<Dificultad>("medio");
   const [local, setLocal] = useState<IdEquipo>("bolivar");
   const [visitante, setVisitante] = useState<IdEquipo>("theStrongest");
-  const [estadio, setEstadio] = useState<IdEstadio | "">("");
+  // El estadio acompaña al equipo local hasta que se elige otro a mano.
+  const [estadioAMano, setEstadioAMano] = useState<IdEstadio | null>(null);
   const [golesParaGanar, setGolesParaGanar] = useState(3);
   const [duracion, setDuracion] = useState(300);
   const [perroActivo, setPerroActivo] = useState(true);
   const { crear, enviando, error } = useCrearPartida();
 
-  const estadioDelLocal = estadios.find(
-    (candidato) => candidato.id === equipoPorId(equipos, local).estadio,
-  );
-  const estadioElegido = estadios.find((candidato) => candidato.id === estadio) ?? estadioDelLocal;
+  const estadioDelLocal = equipoPorId(equipos, local).estadio;
+  const estadio = estadioAMano ?? estadioDelLocal;
 
   // Que los dos equipos sean distintos no se revisa aquí: lo valida Express y aquí se muestra su respuesta.
   async function empezar(evento: FormEvent) {
@@ -44,7 +43,7 @@ export function Configuracion({ modo, equipos, estadios, alJugar, alVolver }: Pr
           ? { equipo: visitante, tipo: "servidor", dificultad }
           : { equipo: visitante, tipo: "humano" },
       perroActivo,
-      estadio: estadioElegido?.id,
+      estadio,
       ...(modo === "eliminatoria" ? { golesParaGanar } : { duracionRealSegundos: duracion }),
     };
     const partida = await crear(peticion);
@@ -106,27 +105,12 @@ export function Configuracion({ modo, equipos, estadios, alJugar, alVolver }: Pr
           />
         </div>
 
-        <div className="estadio-elegido">
-          <label className="campo">
-            <span className="campo__etiqueta">Estadio</span>
-            <select value={estadio} onChange={(evento) => setEstadio(evento.target.value as IdEstadio | "")}>
-              <option value="">El del equipo local ({estadioDelLocal?.nombre})</option>
-              {estadios.map((opcion) => (
-                <option key={opcion.id} value={opcion.id}>
-                  {opcion.nombre} · {opcion.ciudad}
-                </option>
-              ))}
-            </select>
-            {estadioElegido && (
-              <span className="estadio-elegido__efecto" data-testid="efecto-estadio">
-                {DESCRIPCION_DE_EFECTO[estadioElegido.efecto]}
-              </span>
-            )}
-          </label>
-          {estadioElegido && (
-            <img className="estadio-elegido__vista" src={IMAGEN_DE_ESTADIO[estadioElegido.id]} alt="" />
-          )}
-        </div>
+        <SelectorDeEstadio
+          valor={estadio}
+          estadios={estadios}
+          estadioDelLocal={estadioDelLocal}
+          alCambiar={setEstadioAMano}
+        />
 
         {modo === "eliminatoria" ? (
           <fieldset className="grupo">

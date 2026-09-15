@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import type { Equipo, IdEquipo } from "../../../compartido/catalogo.js";
 import { IMAGEN_DE_ESCUDO } from "../recursos/indice";
+import { Carrusel } from "./Carrusel";
 
 interface Props {
   etiqueta: string;
@@ -8,18 +10,24 @@ interface Props {
   alCambiar: (equipo: IdEquipo) => void;
 }
 
+/** Carrusel de escudos en orden alfabético. Los equipos siguen llegando del servidor. */
 export function SelectorDeEquipo({ etiqueta, valor, equipos, alCambiar }: Props) {
+  const opciones = useMemo(
+    () =>
+      [...equipos]
+        .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
+        .map((equipo) => ({ id: equipo.id, nombre: equipo.nombre, imagen: IMAGEN_DE_ESCUDO[equipo.id] })),
+    [equipos],
+  );
+
   return (
-    <label className="selector-equipo">
-      <span className="campo__etiqueta">{etiqueta}</span>
-      <img className="selector-equipo__escudo" src={IMAGEN_DE_ESCUDO[valor]} alt="" />
-      <select value={valor} onChange={(evento) => alCambiar(evento.target.value as IdEquipo)}>
-        {equipos.map((equipo) => (
-          <option key={equipo.id} value={equipo.id}>
-            {equipo.nombre}
-          </option>
-        ))}
-      </select>
-    </label>
+    <Carrusel
+      etiqueta={etiqueta}
+      opciones={opciones}
+      valor={valor}
+      alCambiar={alCambiar}
+      variante="escudo"
+      clase="selector-equipo"
+    />
   );
 }
