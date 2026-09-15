@@ -23,8 +23,6 @@ import { SONIDO_DE_EMOTE } from "../audio/sonidosDelJuego";
 
 /** Pausa antes de que tire el servidor, para que se note de quién es el turno. */
 const PAUSA_DEL_RIVAL_MS = 800;
-/** Igual que en el reglamento: la Liga dura 90 minutos de juego. */
-const MINUTOS_DE_JUEGO = 90;
 
 export type TiroDesdeLaCancha = Omit<PeticionTiro, "lado">;
 
@@ -281,12 +279,10 @@ export function usePartida(inicial: Partida) {
     if (vencio) void refrescar();
   }, [vencio, refrescar]);
 
-  const minutoDeJuego =
+  // El reloj de la Liga en este tic. `RelojDeLiga` sigue contando desde aquí, más fino que cada 250 ms.
+  const relojDeLiga =
     reloj && restanteDeLiga !== null
-      ? Math.floor(
-          ((reloj.duracionRealSegundos - Math.max(0, restanteDeLiga)) / reloj.duracionRealSegundos) *
-            MINUTOS_DE_JUEGO,
-        )
+      ? { duracionRealSegundos: reloj.duracionRealSegundos, restante: Math.max(0, restanteDeLiga), medidoEn: ahora }
       : null;
 
   const emoteVisible = (lado: Lado) => (ahora < relojesDeEmote[lado].hasta ? relojesDeEmote[lado].id : null);
@@ -305,7 +301,7 @@ export function usePartida(inicial: Partida) {
     animando: jugada !== null,
     puedeTirar: libre && !leTocaAlServidor,
     segundosDelTurno: jugada || esperando ? null : Math.max(0, Math.ceil(restanteDelTurno)),
-    minutoDeJuego,
+    relojDeLiga,
     eventos,
     error,
     perdida,

@@ -23,11 +23,12 @@ test("la configuración muestra exactamente los equipos y estadios que manda el 
 
 const MODOS = [
   { modo: "Eliminatoria", enElContrato: "eliminatoria", detalle: /^Gana quien llegue a 3$/ },
-  { modo: "Liga", enElContrato: "liga", detalle: /^Minuto \d+'$/ },
+  // El reloj de la Liga muestra minutos y segundos de juego, por ejemplo «00:18».
+  { modo: "Liga", enElContrato: "liga", detalle: /^\d{2}:\d{2}$/ },
 ] as const;
 
 for (const { modo, enElContrato, detalle } of MODOS) {
-  test(`se crea un partido de ${modo} contra el servidor y se ve la cancha completa`, async ({ page }) => {
+  test(`se crea un partido de ${modo} contra el servidor y se ve la cancha completa`, async ({ page }, info) => {
     const partida = await empezarPartido(page, { modo, jugadores: 1 });
 
     expect(partida.modo).toBe(enElContrato);
@@ -35,6 +36,11 @@ for (const { modo, enElContrato, detalle } of MODOS) {
     await expect(page.locator('[data-testid^="tapita-"]')).toHaveCount(10);
     await expect(page.getByTestId("marcador")).toHaveText("0 – 0");
     await expect(page.getByText(detalle)).toBeVisible();
+    if (enElContrato === "liga") {
+      // Con 5 minutos reales, cada segundo real son 18 de juego: los segundos avanzan enseguida.
+      await expect(page.getByText(detalle)).not.toHaveText("00:00", { timeout: 3000 });
+    }
+    await page.screenshot({ path: info.outputPath(`cancha-${enElContrato}.jpg`), type: "jpeg", quality: 85 });
     await expect(page.getByText("Servidor · tiros de poder: 2")).toBeVisible();
   });
 }

@@ -13,6 +13,7 @@ import { Cancha } from "../componentes/Cancha";
 import { Modal } from "../componentes/Modal";
 import { AvisoDeJugada } from "../componentes/AvisoDeJugada";
 import { ControlesAudio } from "../componentes/ControlesAudio";
+import { RelojDeLiga } from "../componentes/RelojDeLiga";
 import { equipoPorId } from "../hooks/useCatalogo";
 import { usePartida, type TiroDesdeLaCancha } from "../hooks/usePartida";
 import { IMAGENES, IMAGEN_DE_ESCUDO } from "../recursos/indice";
@@ -147,11 +148,14 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
           <span key={`${partida.marcador.local}-${partida.marcador.visitante}`} className="marcador__goles" data-testid="marcador">
             {partida.marcador.local} – {partida.marcador.visitante}
           </span>
-          <span className="marcador__detalle">
-            {partida.modo === "eliminatoria"
-              ? `Gana quien llegue a ${partida.golesParaGanar}`
-              : `Minuto ${juego.minutoDeJuego ?? 0}'`}
-          </span>
+          {partida.modo === "eliminatoria" ? (
+            <span className="marcador__detalle">Gana quien llegue a {partida.golesParaGanar}</span>
+          ) : juego.relojDeLiga ? (
+            <RelojDeLiga {...juego.relojDeLiga}
+              detenido={juego.pausada || juego.cambiandoPausa || juego.perdida || terminada} />
+          ) : (
+            <span className="marcador__detalle marcador__reloj">00:00</span>
+          )}
         </div>
         <EquipoEnMarcador
           equipo={equipoDe("visitante")}
