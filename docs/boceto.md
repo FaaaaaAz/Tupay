@@ -210,10 +210,11 @@ jugador, como cuando alguien agarra el control del equipo de la máquina.
 | Color | Valor | Dónde |
 |---|---|---|
 | Verde cancha | `#1f6f43` | fondo general fuera de la cancha |
-| Verde oscuro | `#12492c` | degradado de fondo, bordes |
+| Verde oscuro | `#0d3b24` | iluminación y degradado de fondo |
+| Azul noche | `#0b1626` | fondo base y superficies oscuras |
 | Crema | `#f4efe4` | texto principal |
 | Dorado | `#f2c14e` | título, acentos, botón principal |
-| Rojo | `#c0392b` | errores y acciones inválidas |
+| Rojo | `#ff6b57` | errores y acciones inválidas |
 
 Los colores de cada equipo llegan desde el servidor en `GET /api/equipos` y se usan para los
 marcadores y los indicadores de turno, para que se note de quién es cada cosa sin leer el nombre.
@@ -233,6 +234,25 @@ completos y reconocibles por su pista y sus tribunas.
 **Escudos:** ningún equipo usa su escudo oficial. Las tapitas llevan los colores y el nombre del
 club, que es lo que permite reconocerlo, pero la ilustración es propia. El criterio y su motivo
 están en `docs/introduccion.md` y en `docs/decisiones.md`.
+
+### Pulido de interfaz (10.5–10.6)
+
+El menú conserva su ilustración con viñeta y añade iconos SVG por modo. Las tarjetas, los paneles
+y los modales comparten superficies azul nocturno, luz verde, acentos dorados, radios y sombras
+definidos en `global.css`. Configuración, temporada y resultado usan patrones y gradientes CSS,
+sin descargar imágenes nuevas. Las entradas y los estados de foco/selección son breves y
+respetan la preferencia de movimiento reducido.
+
+En la cancha, la flecha se acompaña de un anillo y un porcentaje de potencia. El poder activo
+se distingue también con texto. Avisos pequeños y no bloqueantes anuncian turno, gol, perro,
+pelota atrapada y final; junto a la pelota se indica cuántos golpes faltan para liberarla.
+Los avisos conservan su duración restante durante la pausa.
+
+Se verificaron las pantallas a 1280 × 720, 1366 × 768 y 1920 × 1080. La configuración mantiene
+su botón de jugar visible en los tres tamaños; la temporada admite desplazamiento vertical en
+pantallas bajas. Véanse las capturas de [menú](evidencias/fase-10-menu-pulido.jpg),
+[configuración](evidencias/fase-10-configuracion-pulida.jpg) y
+[apuntado](evidencias/fase-10-potencia.jpg).
 
 ### Recursos
 

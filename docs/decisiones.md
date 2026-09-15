@@ -785,6 +785,42 @@ normal para descubrir las nuevas URLs después de publicar. No se modificaron lo
 dependencias. La mejora reduce descargas repetidas y anticipa la primera imagen; el tiempo de red
 y el arranque en frío del servidor siguen dependiendo de la conexión y del alojamiento.
 
+### Respuesta visual sin alterar la jugada (10.5)
+
+**Decisión.** El apuntado conserva la flecha y añade un anillo de carga y un porcentaje calculado
+con la misma fuerza que se envía al servidor. El tiro de poder tiene una etiqueta explícita y un
+resaltado propio. Su etiqueta se posiciona fuera del flujo: activarla no debe mover la cancha ni
+cambiar la relación entre el cursor y las coordenadas del tiro.
+
+Los avisos de gol y pelota atrapada usan los eventos confirmados por Express al finalizar la
+animación; el perro se anuncia cuando aparece en los cuadros recibidos. El turno se identifica
+con el nombre del equipo y el resultado tiene una entrada breve y el texto «Pitazo final».
+El indicador junto a la pelota atrapada muestra los golpes restantes del estado del servidor.
+
+**Interacción.** Los avisos superiores no capturan clics ni añaden esperas para jugar. Duran
+1,8 segundos para el turno y 2,6 para los demás eventos, con el tiempo restante conservado al
+pausar. Las animaciones decorativas se detienen durante la pausa y se desactivan con movimiento
+reducido. El modal queda fuera de esa suspensión para que su entrada no se congele.
+
+### Una misma identidad para paneles y tarjetas (10.6)
+
+**Decisión.** Colores, superficies, bordes, sombras, radios y capas se comparten mediante variables
+CSS. Menú, configuración, temporada, resultado y modales combinan azul nocturno, iluminación
+verde y acentos dorados. El fondo de paneles usa gradientes y patrones CSS; los iconos del menú
+son SVG decorativos pequeños. Se conservan el arte existente, la precarga y la caché de 10.1–10.4:
+no se añaden bitmaps, fuentes externas ni dependencias.
+
+**Verificación de 10.5–10.6.** Lint, tipos y 103 pruebas unitarias aprobados. El reporte completo de
+Playwright registra 42 E2E aprobados, sin fallos ni pruebas inestables, ejecutados contra el build
+de producción local. Cuatro recorridos nuevos cubren potencia, gol real, perro, nieve, pausa de
+avisos, movimiento reducido y presentación en 1280 × 720, 1366 × 768 y 1920 × 1080. Las capturas
+permitieron revisar menú, configuración, temporada, resultado y los modales existentes. En
+pantallas bajas, la temporada permite desplazamiento vertical sin desbordamiento horizontal.
+Evidencias seleccionadas: [menú](evidencias/fase-10-menu-pulido.jpg),
+[configuración](evidencias/fase-10-configuracion-pulida.jpg),
+[potencia](evidencias/fase-10-potencia.jpg) y
+[pelota atrapada](evidencias/fase-10-pelota-atrapada.jpg).
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano

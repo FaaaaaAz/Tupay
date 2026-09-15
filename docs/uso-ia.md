@@ -23,6 +23,22 @@ manualmente los commits y el push.
   salir/cancelar en temporada y el rodado con movimiento reducido activado/desactivado.
 - **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
 
+### Tareas 10.5–10.6 — cierre el 15 de septiembre de 2026
+
+- **Solicitud:** mejorar la respuesta visual de las jugadas y unificar fondos, tarjetas y modales.
+- **Aporte de la IA:** medidor de potencia, resaltado del poder, avisos de eventos y animaciones
+  cortas; variables CSS compartidas, patrones, iluminación e iconos SVG del menú. Conservó
+  imágenes, precarga y caché existentes, sin cambiar reglas ni física de Express.
+- **Verificado por el agente:** lint y tipos; 103 pruebas unitarias; reporte completo de 42 E2E
+  aprobados sin fallos ni pruebas inestables, con build de producción local; revisión de capturas
+  en las tres resoluciones de escritorio del plan. Cuatro pruebas E2E nuevas y cuatro capturas
+  seleccionadas en `docs/evidencias/`.
+- **Corrección durante la verificación:** la etiqueta del poder inicialmente desplazaba la cancha
+  y alteraba el porcentaje del arrastre. Se posicionó fuera del flujo y el E2E confirmó el 50 %.
+- **Verificación personal del autor:** pendiente. Revisar sensación del apuntado, legibilidad de
+  avisos y diseño de menú, configuración, temporada y resultado.
+- **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
+
 ## Cómo añadir una entrada
 
 En cada cambio asistido se registra, de forma breve:
