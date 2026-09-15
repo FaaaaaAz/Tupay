@@ -958,6 +958,30 @@ empezar y el bucle de palmadas terminaba antes de la primera. Se detectó midien
 (pico 0). Ahora la densidad nunca arranca en cero y el script falla si el resultado no tiene señal.
 La versión final decodifica con pico 0,8, sin saturar.
 
+### Las tarjetas del menú y los paneles usan ilustraciones propias
+
+**Decisión.** Las cuatro tarjetas del menú muestran una ilustración en lugar del icono SVG, y
+configuración, instrucciones, temporada y resultado comparten un estadio nocturno de fondo. Esto
+reemplaza lo decidido en 10.6, donde el menú usaba iconos SVG y los paneles, patrones CSS.
+
+**Por qué.** Los iconos de línea eran genéricos y los patrones CSS se veían planos al lado de la
+portada y del menú, que ya son ilustraciones. Las imágenes nuevas siguen la línea de las tapitas.
+Todos los paneles usan la misma imagen, así que no hace falta una imagen para cada uno.
+
+**Cómo.** `scripts/optimizar-recursos.mjs` suma dos grupos. `tarjetas` recorta el margen transparente
+de cada ilustración y la reduce a 560 × 420 como máximo, sin rellenarla: el CSS la centra en un hueco
+de alto fijo, así la tarjeta no salta mientras carga. `paneles` convierte el fondo a WebP con su
+tamaño original de 1811 × 868. Los cinco PNG pesaban 11,2 MB y los cinco WebP pesan 377 kB. El fondo
+se dibuja desde `global.css` y el menú lo precarga, porque todas sus tarjetas llevan a un panel. El
+panel quedó algo translúcido y con desenfoque, así se ve el estadio detrás sin perder lectura. Se
+borraron el componente `IconoDeModo`, su estilo y los patrones del fondo (líneas diagonales y el óvalo
+de cancha), que ya no tenían uso.
+
+**Verificación.** Lint, tipos, unitarias y E2E. La prueba de presentación ahora comprueba que las
+cuatro ilustraciones se descargan y que la configuración usa el fondo nuevo, en los tres tamaños.
+Evidencias: [menú](evidencias/fase-10-menu-ilustrado.jpg) y
+[configuración](evidencias/fase-10-configuracion-fondo.jpg).
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano
@@ -1041,3 +1065,4 @@ necesitara servicios adicionales.
 | Los golpes suenan cuando ocurren | El sonido de tiro llegaba antes del golpe, y choques y paredes no podían sonar sin datos de la física. |
 | Equipos y estadio se eligen con carruseles | El `select` escondía el escudo y la imagen del estadio. |
 | El empate suena a aplausos | El resultado empatado era el único sin sonido. |
+| Ilustraciones en las tarjetas del menú y estadio de fondo en los paneles | Los iconos SVG y los patrones CSS se veían genéricos al lado del arte de la portada y el menú. |

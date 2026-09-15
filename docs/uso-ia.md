@@ -73,6 +73,21 @@ manualmente los commits y el push.
   resortera/tiro y adecuación de los jingles. No se afirma una evaluación auditiva subjetiva de la IA.
 - **Publicación y commit:** pendientes; no se ejecutaron commits, push ni tags.
 
+### Ilustraciones del menú y fondo de los paneles — 15 de septiembre de 2026
+
+- **Solicitud:** reemplazar los iconos de las cuatro tarjetas del menú por las ilustraciones
+  que el autor agregó a `assets/UI/`, usar `fondoCards.png` como fondo de las pantallas de
+  configuración, optimizar las imágenes sin perder calidad y borrar el código que quedara sin uso.
+- **Aporte de la IA:** grupos `tarjetas` y `paneles` en `scripts/optimizar-recursos.mjs`
+  (11,2 MB en PNG a 377 kB en WebP); ilustraciones centradas en las tarjetas, fondo compartido
+  con precarga desde el menú y panel translúcido. Borró `IconoDeModo`, su estilo y los patrones
+  CSS del fondo anterior. Sumó una comprobación a la prueba E2E de presentación.
+- **Verificado por el agente:** lint, tipos, unitarias y E2E; revisión de las capturas del menú,
+  configuración y temporada en 1280 × 720, 1366 × 768 y 1920 × 1080.
+- **Verificación personal del autor:** pendiente. Revisar el tamaño de las ilustraciones y la
+  lectura de los paneles sobre el estadio.
+- **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
+
 ## Cómo añadir una entrada
 
 En cada cambio asistido se registra, de forma breve:

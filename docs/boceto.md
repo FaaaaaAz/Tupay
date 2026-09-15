@@ -237,11 +237,12 @@ están en `docs/introduccion.md` y en `docs/decisiones.md`.
 
 ### Pulido de interfaz (10.5–10.6)
 
-El menú conserva su ilustración con viñeta y añade iconos SVG por modo. Las tarjetas, los paneles
-y los modales comparten superficies azul nocturno, luz verde, acentos dorados, radios y sombras
-definidos en `global.css`. Configuración, temporada y resultado usan patrones y gradientes CSS,
-sin descargar imágenes nuevas. Las entradas y los estados de foco/selección son breves y
-respetan la preferencia de movimiento reducido.
+El menú conserva su ilustración con viñeta, y cada tarjeta lleva su propia ilustración centrada
+(tapitas con la copa, el cronómetro, el calendario o el árbitro). Las tarjetas, los paneles y los
+modales comparten superficies azul nocturno, acentos dorados, radios y sombras definidos en
+`global.css`. Configuración, instrucciones, temporada y resultado comparten un mismo estadio
+nocturno de fondo, con viñeta, detrás de un panel algo translúcido. Las entradas y los estados de
+foco/selección son breves y respetan la preferencia de movimiento reducido.
 
 En la cancha, la flecha se acompaña de un anillo y un porcentaje de potencia. El poder activo
 se distingue también con texto. Avisos pequeños y no bloqueantes anuncian turno, gol, perro,
@@ -257,7 +258,7 @@ pantallas bajas. Véanse las capturas de [menú](evidencias/fase-10-menu-pulido.
 ### Recursos
 
 Los originales sin comprimir están en `assets/` y pesan 60,1 MB; no se publican. Las versiones que usa
-el juego están en `client/src/recursos/` y pesan 2,4 MB en total, generadas con
+el juego están en `client/src/recursos/` y las imágenes pesan 2,8 MB en total, generadas con
 `scripts/optimizar-recursos.mjs`.
 
 | Carpeta | Contenido | Medida |
@@ -265,7 +266,8 @@ el juego están en `client/src/recursos/` y pesan 2,4 MB en total, generadas con
 | `equipos/` | las 10 tapitas: las fichas de la cancha | 256 × 256 |
 | `escudos/` | los 10 escudos: identifican a cada equipo fuera de la cancha | 256 × 256 |
 | `estadios/` | los 6 estadios | 1672 × 941 |
-| `pantallas/` | portada y menú | 1672 × 941 |
+| `pantallas/` | portada y menú; fondo de los paneles | 1672 × 941; 1811 × 868 |
+| `tarjetas/` | las 4 ilustraciones de las tarjetas del menú, recortadas a su dibujo | hasta 560 × 420 |
 | `juego/` | pelota, perro, arco, charcos de agua y de nieve | según elemento |
 | `emotes/` | las 7 caritas | 256 × 256 |
 
