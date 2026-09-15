@@ -821,6 +821,51 @@ Evidencias seleccionadas: [menú](evidencias/fase-10-menu-pulido.jpg),
 [potencia](evidencias/fase-10-potencia.jpg) y
 [pelota atrapada](evidencias/fase-10-pelota-atrapada.jpg).
 
+### Audio optativo y desacoplado de la simulación (10.7)
+
+**Decisión.** Un `MotorAudio` de TypeScript concentra Web Audio, la caché de buffers decodificados,
+una sola pista musical y canales separados de música, interfaz, gameplay y reacciones. React
+solo observa las preferencias desde `ControlesAudio` mediante `useSyncExternalStore`; el audio
+no añade actualizaciones por cuadro ni toca Express. Se mantienen las dependencias existentes.
+
+**Activación.** Crear el controlador no crea un `AudioContext` ni descarga recursos. El botón
+Iniciar lo desbloquea y la navegación real solicita música de menú. Navegar por configuración,
+instrucciones o temporada no la reinicia. Entrar al partido/resultado o volver a portada la
+detiene. Los hooks de jugadas y la música de partido quedan para 10.8. Esto sigue el requisito
+de interacción de la [política de Web Audio de Chrome](https://developer.chrome.com/blog/web-audio-autoplay).
+
+**Preferencias y fallos.** Silencio global, volumen musical y volumen de efectos/interfaz se
+persisten en `tupay.audio.v1`, validando tipos y valores entre 0 y 1. Predeterminados: 25 % y
+60 %, con ganancia adicional por recurso. Si falta almacenamiento se usa memoria; si falta
+Web Audio o falla un archivo, se avisa sin impedir la partida. Los controles viven en el menú
+y en la pausa, con las superficies ya existentes. El foco del modal incluye ahora `summary`
+y los sliders, además de sus botones.
+
+**Superposición.** Se comparte cada descarga; una generación identifica solicitudes vigentes y
+descarta las que terminan después de salir/silenciar. Los efectos tienen intervalo mínimo,
+máximo cuatro voces simultáneas y descarte si llegan con más de 350 ms de retraso. Las reacciones
+suenan más bajo, no se acumulan y ceden ante gameplay. El motor ofrece pausa con conservación de
+posición musical para conectar en 10.8; ocultar la pestaña ya detiene efectos y conserva la
+música. No se sonorizan automáticamente todos los botones ni cada render de un reloj.
+
+**Recursos y alcance.** Se descargaron 21 OGG reales (1,62 MB), todos publicados bajo CC0:
+Kenney (interfaz, fichas, impactos, tonos y jingles), Ansimuz y MatiasVME (bucles musicales).
+No se convirtieron ni recortaron los originales. El inventario, nombres originales, enlaces,
+licencias y pendientes están en [assets/audio/README.md](../assets/audio/README.md), con
+`catalogo.json` como fuente de rutas y ganancias. No hay hinchada, por indicación del autor.
+Perro y algunas voces cómicas siguen pendientes de descarga/selección; no se simularon con
+archivos vacíos. Las reacciones seleccionadas son tonos, no voces humanas.
+
+**Verificación.** Lint, tipos, 109 unitarias (seis nuevas del motor), 47 E2E (cinco nuevos) y
+build local aprobados. Chromium descargó y decodificó los 21 archivos, con duración y señal
+no nulas; los efectos seleccionados duran menos de seis segundos. Los recorridos verifican
+ausencia de audio antes del gesto, una sola música, silencio, persistencia, teclado, estado de
+partida intacto al ajustar en pausa y continuidad sin almacenamiento/AudioContext o con audio
+inválido. El recorrido normal de audio no produjo errores de consola. Se revisaron controles
+de pausa en las tres resoluciones del plan; [captura](evidencias/fase-10-audio-pausa.jpg).
+La escucha subjetiva de bucles, jingles y mezcla queda pendiente de aprobación del autor:
+la comprobación técnica no demuestra por sí sola que un sonido sea agradable.
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano

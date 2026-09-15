@@ -39,6 +39,23 @@ manualmente los commits y el push.
   avisos y diseño de menú, configuración, temporada y resultado.
 - **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
 
+### Tarea 10.7 — 15 de septiembre de 2026
+
+- **Solicitud:** organizar y conseguir audio legal, preparar reproducción centralizada y controles;
+  no usar hinchada ni modificar diseño/mecánicas, ejecutar solo 10.7.
+- **Aporte de la IA:** buscó y descargó 21 OGG publicados con CC0, conservó licencias e inventario;
+  creó el motor Web Audio, persistencia, canales y controles de menú/pausa. Conectó música al
+  pulsar Iniciar y prueba manual del clic. Preparó los demás recursos sin dispararlos en jugadas.
+- **Pendientes explícitos:** descarga del ladrido de Freesound, selección/recorte de voces cómicas,
+  resortera y conexión de eventos de 10.8. Se corrigió el plan para excluir hinchada.
+- **Verificado por el agente:** lint, tipos, build; 109 unitarias y 47 E2E aprobados. Decodificación
+  real de los 21 recursos en Chromium, sin archivos vacíos; persistencia, silencio, música única,
+  teclado y degradación segura. Capturas de pausa con controles en tres tamaños de escritorio.
+- **Verificación personal del autor:** pendiente escuchar varios ciclos musicales y juzgar
+  volumen, repetición, carácter de las reacciones y adecuación de jingles a victoria/derrota.
+  La IA no afirma haber realizado esa evaluación auditiva subjetiva.
+- **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
+
 ## Cómo añadir una entrada
 
 En cada cambio asistido se registra, de forma breve:
