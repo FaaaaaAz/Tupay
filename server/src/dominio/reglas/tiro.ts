@@ -1,6 +1,6 @@
 import type { Contacto, Cuadro, Evento, PeticionTiro } from "../../../../compartido/partida.js";
 import { longitud, redondear } from "../../utilidades/vector.js";
-import { avanzarCharcos, eventosDeCharco } from "../estadios/charcos.js";
+import { avanzarCharcos, contactosDeCharco, eventosDeCharco } from "../estadios/charcos.js";
 import { ErrorDeJuego } from "../errores.js";
 import { intentarAparicion } from "../eventos/perro.js";
 import { CUADROS_POR_SEGUNDO } from "../fisica/configuracionFisica.js";
@@ -8,7 +8,7 @@ import { MENSAJES } from "../mensajes.js";
 import { decidirTiroDelRival } from "../rival/rivalPorMuestreo.js";
 import { REGLAS } from "./configuracionReglas.js";
 import { CENTRO_DE_LA_CANCHA, formacionInicial } from "./formacion.js";
-import { ladoDelArcoMasCercano, ladoQueAnota, rival } from "./lados.js";
+import { ladoQueAnota, rival } from "./lados.js";
 import { finalizar, type RegistroPartida } from "./partida.js";
 import { simularEnLaPartida } from "./simulacionEnLaPartida.js";
 import { actualizarTiempo } from "./tiempo.js";
@@ -33,6 +33,8 @@ export function ejecutarTiro(
 
   let recorrido = simulacion.cuadros;
   const eventos = eventosDeCharco(registro.charcos, simulacion.eventosDeCharco);
+  // Antes de avanzar los charcos: uno que se seca en este tiro todavía dice si era de agua o de nieve.
+  const contactos = [...simulacion.contactos, ...contactosDeCharco(registro.charcos, simulacion.caidasEnCharcos)];
   registro.tapitas = registro.tapitas.map((tapita, i) => ({
     ...tapita,
     posicion: simulacion.tapitas[i],
@@ -73,7 +75,8 @@ export function ejecutarTiro(
       // Si la pelota estaba en un charco, el perro también la saca de ahí.
       registro.pelotaAtrapada = null;
       registro.perro.apariciones += 1;
-      registro.turno = ladoDelArcoMasCercano(aparicion.pelota) ?? registro.turno;
+      // El turno sigue siendo del rival: el perro nunca da doble turno, aunque deje la pelota
+      // cerca del arco de quien tiró. En ese caso, la mala suerte ayudó al rival.
       eventos.push({
         tipo: "perro",
         posicionPelota: redondear(aparicion.pelota),
@@ -86,7 +89,7 @@ export function ejecutarTiro(
 
   // El reloj del turno siguiente arranca cuando termina la animación, no cuando responde el servidor.
   registro.inicioTurno = ahora + (recorrido.length / CUADROS_POR_SEGUNDO) * 1000;
-  return { recorrido, eventos, contactos: simulacion.contactos };
+  return { recorrido, eventos, contactos };
 }
 
 /** Aplica en orden las acciones inválidas de `docs/reglas.md`. Devuelve el índice de la tapita. */

@@ -311,8 +311,9 @@ dos primeros:
 
 **`contactos`** lista los golpes que suenan durante la animación, por ejemplo
 `{ "cuadro": 12, "tipo": "patear" }`. `cuadro` es el índice dentro de `recorrido` y `tipo` es
-`"patear"` (una tapita toca la pelota), `"choque"` (dos tapitas) o `"pared"` (una tapita contra
-una pared o un poste). Los golpes más suaves que 60 unidades por segundo no se informan, y cada tipo
+`"patear"` (una tapita toca la pelota), `"choque"` (dos tapitas), `"pared"` (una tapita contra
+una pared o un poste), `"charcoDeAgua"` o `"charcoDeNieve"` (la pelota cae en un charco de ese
+tipo; cada tipo coincide con el id de su sonido). Los golpes más suaves que 60 unidades por segundo no se informan, y cada tipo
 aparece a lo sumo una vez por cuadro. La pelota contra la pared no suena.
 
 `cuadrosPorSegundo` le dice al cliente a qué velocidad reproducir el recorrido para que dure lo
@@ -339,8 +340,8 @@ mismo punto:
 { "pelota": { "x": 647.7, "y": 392.7 }, "perro": { "x": 647.7, "y": 392.7 } }
 ```
 
-El turno pasó al visitante aunque tiró el local: el perro dejó la pelota en la mitad derecha, cerca
-del arco del visitante, y el reglamento le da el turno a quien tiene que defender.
+El turno pasó al visitante, el rival de quien tiró, igual que en cualquier tiro: el perro nunca da
+doble turno. `turnoPara` lo informa para que el cliente pueda anunciar a quién le toca.
 
 **Cuando la pelota cae en un charco.** Partida en Hernando Siles con `"semilla": 3`, que arrancó con
 un charco de agua en `(85.6, 322.8)`, cerca del arco del local. Tiró el visitante:

@@ -71,7 +71,7 @@ Notas:
 - Cuando está activo, después de cada tiro hay una probabilidad de que aparezca (valor inicial sugerido: 12% por tiro, con un máximo de 5 apariciones por partido; ambos números son un punto de partida para ajustar al probar el juego).
 - Se lleva la pelota a un punto de la cancha, casi siempre pasándola de un arco al otro, para "dar vuelta la tortilla".
 - **Nunca genera gol por sí mismo:** si el perro deja la pelota dentro de un arco, el gol se anula y la pelota queda en esa posición.
-- **El turno pasa al equipo cuyo arco quede más cerca de donde el perro dejó la pelota.** Así, si el perro deja la pelota peligrosamente cerca del propio arco de un jugador, ese jugador recibe el turno para poder defenderse, en vez de regalarle el turno al rival.
+- **El perro nunca genera doble turno.** Después de su aparición el turno pasa al rival de quien tiró, como en cualquier tiro. Si el perro deja la pelota cerca del arco del rival, el rival tira y puede defenderse; si la deja cerca del arco de quien tiró, esa es la mala suerte de la jugada: el perro ayudó al rival.
 
 ## Turno y tiro
 
@@ -80,7 +80,7 @@ Notas:
 3. Opcionalmente, activa el tiro de poder antes de soltar.
 4. Al soltar, el tiro se envía al servidor, que lo valida y lo simula hasta que todo se detiene.
 5. El servidor devuelve el recorrido de todos los elementos y el nuevo estado; React lo anima.
-6. El turno pasa al rival, salvo que el perro haya decidido lo contrario (ver arriba).
+6. El turno pasa al rival, también cuando aparece el perro: nunca hay doble turno.
 
 Reglas del turno:
 
@@ -223,3 +223,4 @@ Al crear un partido o una temporada se pueden enviar valores opcionales para que
 7. **Emotes:** al dibujar las tapitas aparecieron caritas propias como recurso visual. En vez de dejarlas como decoración fija, se convirtieron en una acción del jugador: una carita que se aplica a todas sus tapitas, dura 5 segundos y tiene 15 segundos de enfriamiento para que nadie pueda llenar la pantalla.
 8. **Charcos, versión final:** al probarlos se vio que la tapita que manda la pelota al charco suele venir detrás y volver a tocarla, así que la pelota salía en el mismo tiro en que caía. Desde entonces los golpes para liberarla cuentan recién desde el tiro siguiente.
 9. **Rival por muestreo:** el rival simple, que solo apuntaba como en el billar, pasó a probar varios tiros con la física del juego y elegir el mejor. Su tiro de billar sigue existiendo como punto de partida de los candidatos.
+10. **El perro sin doble turno:** dar el turno al equipo del arco más cercano a la pelota (versión 5) permitía que alguien tirara dos veces seguidas, y más veces si el perro volvía a aparecer. Ahora el turno siempre pasa al rival de quien tiró. Si el perro deja la pelota cerca del arco de quien tiró, el perro ayudó al rival.

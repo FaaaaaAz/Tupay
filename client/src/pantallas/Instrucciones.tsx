@@ -82,7 +82,7 @@ export function Instrucciones({ alVolver }: { alVolver: () => void }) {
         <h2>El perro</h2>
         <p>
           Después de cualquier tiro puede meterse a la cancha y llevarse la pelota al otro lado.
-          Nunca hace un gol, y el turno pasa al equipo que tiene que defender.
+          Nunca hace un gol ni da doble turno: el turno pasa al rival de quien tiró, como siempre.
         </p>
 
         <h2>Emotes</h2>

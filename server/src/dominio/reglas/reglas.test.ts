@@ -5,7 +5,7 @@ import { ErrorDeJuego } from "../errores.js";
 import { CUADROS_POR_SEGUNDO } from "../fisica/configuracionFisica.js";
 import { MENSAJES } from "../mensajes.js";
 import { CENTRO_DE_LA_CANCHA } from "./formacion.js";
-import { ladoDelArcoMasCercano, rival } from "./lados.js";
+import { rival } from "./lados.js";
 import { crearRegistro, type RegistroPartida } from "./partida.js";
 import { actualizarTiempo } from "./tiempo.js";
 import { ejecutarTiro } from "./tiro.js";
@@ -245,10 +245,15 @@ describe("los charcos en el partido", () => {
       tapita.id === "local-4" ? { ...tapita, posicion: { x: 520, y: 350 } } : tapita,
     );
 
-    const { eventos } = ejecutarTiro(registro, golpeALaPelota({ fuerza: 0.5 }), INICIO);
+    const { eventos, contactos, recorrido } = ejecutarTiro(registro, golpeALaPelota({ fuerza: 0.5 }), INICIO);
     const { pelota } = aPartidaPublica(registro, INICIO);
+    const splash = contactos.filter((contacto) => contacto.tipo === "charcoDeAgua");
 
     assert.deepEqual(eventos[0], { tipo: "pelotaAtrapada", charco: "agua-9", tipoCharco: "agua" });
+    // El splash suena una vez, en un cuadro del recorrido, y es de agua como el charco.
+    assert.equal(splash.length, 1);
+    assert.ok(splash[0].cuadro > 0 && splash[0].cuadro < recorrido.length);
+    assert.ok(!contactos.some((contacto) => contacto.tipo === "charcoDeNieve"));
     assert.equal(pelota.atrapadaEn, "agua-9");
     assert.equal(pelota.golpesParaLiberar, 1);
   });
@@ -279,15 +284,27 @@ describe("los charcos en el partido", () => {
 });
 
 describe("el perro en el partido", () => {
-  it("se lleva la pelota y le da el turno al dueño del arco más cercano", () => {
+  it("se lleva la pelota y el turno pasa al rival de quien tiró", () => {
     const registro = crearPartida({ perroActivo: true, probabilidadPerro: 1 });
-    const { eventos, recorrido } = ejecutarTiro(registro, tiroInofensivo(registro), INICIO);
+    const tiro = tiroInofensivo(registro);
+    const { eventos, recorrido } = ejecutarTiro(registro, tiro, INICIO);
     const perro = eventos.find((evento) => evento.tipo === "perro");
 
-    assert.ok(perro, "el perro no apareció con probabilidad 1");
-    assert.equal(registro.turno, ladoDelArcoMasCercano(registro.pelota));
+    assert.ok(perro?.tipo === "perro", "el perro no apareció con probabilidad 1");
+    assert.equal(registro.turno, rival(tiro.lado));
+    assert.equal(perro.turnoPara, rival(tiro.lado));
     assert.equal(registro.perro.apariciones, 1);
     assert.ok(recorrido.some((cuadro) => cuadro.perro !== null), "el recorrido no muestra al perro");
+  });
+
+  it("nunca da doble turno, aunque aparezca en varios tiros seguidos", () => {
+    const registro = crearPartida({ perroActivo: true, probabilidadPerro: 1 });
+    for (let tiro = 0; tiro < 5; tiro++) {
+      const peticion = tiroInofensivo(registro);
+      ejecutarTiro(registro, peticion, INICIO);
+      assert.equal(registro.turno, rival(peticion.lado), `el tiro ${tiro + 1} dio doble turno`);
+    }
+    assert.equal(registro.perro.apariciones, 5);
   });
 
   it("no aparece más de cinco veces por partido", () => {
