@@ -130,6 +130,21 @@ manualmente los commits y el push.
   y el ladrido al activar al perro, y confirmar la licencia de `salir.mp3`.
 - **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
 
+### Título ilustrado, cabeceras, ícono de sonido y reloj con segundos — 15 de septiembre de 2026
+
+- **Solicitud:** centrar los títulos de las tarjetas y de los paneles, destacar «Volver», cambiar la
+  palabra «Sonido» por un ícono, reemplazar el título y el lema del menú por la imagen `titulo`,
+  mostrar los segundos del reloj de Liga y usar la imagen `marcador` de fondo del marcador.
+- **Aporte de la IA:** grupo `interfaz` en `scripts/optimizar-recursos.mjs` (título de 1,5 MB a
+  123 kB; marcador de 496 kB a 42 kB); cabecera en grilla y botón «Volver»; ícono SVG en
+  `ControlesAudio`; componente `RelojDeLiga` que cuenta por cuadro; fondo y relleno del marcador;
+  pruebas de audio por nombre accesible y prueba de que el reloj avanza.
+- **Verificado por el agente:** lint, tipos, unitarias y E2E; capturas de menú, configuración,
+  temporada, pausa y cancha de Liga en escritorio.
+- **Verificación personal del autor:** pendiente. Jugar una Liga para ver correr los segundos y
+  revisar que el fondo del marcador no tape escudos ni emotes en la pantalla habitual.
+- **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
+
 ## Cómo añadir una entrada
 
 En cada cambio asistido se registra, de forma breve:

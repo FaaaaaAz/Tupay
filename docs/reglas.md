@@ -192,7 +192,7 @@ El servidor valida cada acción y rechaza las inválidas con un mensaje que se m
 - Posición y velocidad de cada tapita (5 por equipo) y de la pelota.
 - Charcos en la cancha, con los tiros que les quedan, y si la pelota está atrapada y cuántos golpes le faltan.
 - Turno actual y tiempo restante del turno.
-- Minuto de partido (modo Liga) o goles rumbo a la meta (modo Eliminatoria).
+- Minutos y segundos de partido (modo Liga) o goles rumbo a la meta (modo Eliminatoria).
 - Marcador del partido.
 - Tiros de poder restantes de cada jugador.
 - Emote activo de cada jugador, con su tiempo restante y su enfriamiento.

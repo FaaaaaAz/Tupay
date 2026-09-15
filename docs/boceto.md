@@ -237,7 +237,10 @@ están en `docs/introduccion.md` y en `docs/decisiones.md`.
 
 ### Pulido de interfaz (10.5–10.6)
 
-El menú conserva su ilustración con viñeta, y cada tarjeta lleva su propia ilustración centrada
+El menú conserva su ilustración con viñeta y se encabeza con el título ilustrado de Tupay, a todo
+color. El control de sonido es un ícono de parlante, en el menú y en la pausa. En los paneles, el
+título va centrado y «Volver» es un botón con borde dorado. En la partida, el marcador usa su propia
+ilustración de fondo y el reloj de la Liga muestra minutos y segundos. Cada tarjeta lleva su propia ilustración centrada
 (tapitas con la copa, el cronómetro, el calendario o el árbitro). Las tarjetas, los paneles y los
 modales comparten superficies azul nocturno, acentos dorados, radios y sombras definidos en
 `global.css`. Configuración, instrucciones, temporada y resultado comparten un mismo estadio
@@ -268,9 +271,9 @@ el juego están en `client/src/recursos/` y las imágenes pesan 2,8 MB en total,
 | `equipos/` | las 10 tapitas: las fichas de la cancha | 256 × 256 |
 | `escudos/` | los 10 escudos: identifican a cada equipo fuera de la cancha | 256 × 256 |
 | `estadios/` | los 6 estadios | 1672 × 941 |
-| `pantallas/` | portada y menú; fondo de los paneles; árbitros de la pausa y de salir | 1672 × 941; 1811 × 868; hasta 360 × 300 |
+| `pantallas/` | portada y menú; título del menú; fondo de los paneles; árbitros de la pausa y de salir | 1672 × 941; 1200 × 375; 1811 × 868; hasta 360 × 300 |
 | `tarjetas/` | las 4 ilustraciones de las tarjetas del menú, recortadas a su dibujo | hasta 560 × 420 |
-| `juego/` | pelota, perro, arco, charcos de agua y de nieve | según elemento |
+| `juego/` | pelota, perro, arco, charcos de agua y de nieve, fondo del marcador | según elemento |
 | `emotes/` | las 7 caritas | 256 × 256 |
 
 Las caritas están recortadas a su contenido y centradas al 70 % de un lienzo cuadrado. Así se dibujan

@@ -106,7 +106,7 @@ Los nombres de victoria, derrota y emociones describen su uso en Tupay, no títu
 
 ## Volúmenes, límites y fallos
 
-«Sonido» en menú y pausa guarda silencio, volumen de música y volumen de efectos/interfaz
+El ícono de sonido (parlante con ondas, o con una cruz si está silenciado), en menú y pausa, guarda silencio, volumen de música y volumen de efectos/interfaz
 en `localStorage['tupay.audio.v1']`. Valores iniciales: música 25 % y efectos 60 %, además
 de las ganancias individuales. Sin almacenamiento funciona en memoria.
 

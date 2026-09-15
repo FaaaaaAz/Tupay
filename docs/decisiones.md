@@ -1054,6 +1054,40 @@ desactivado al entrar, activarlo es un gesto y el ladrido lo confirma.
 como desde la pausa, y que volver a la pausa no repite el sonido. La prueba del perro cuenta el ladrido
 de la configuración y el de la cancha. Espera los 2 s de intervalo mínimo del ladrido entre uno y otro.
 
+### Título ilustrado, cabeceras centradas, ícono de sonido y reloj con segundos
+
+**Decisión.**
+
+- **Menú:** el título de texto, la leyenda y el lema se reemplazaron por la ilustración `titulo`, a
+  todo color y separada de las tarjetas. Los nombres de las tarjetas van centrados.
+- **Paneles:** en configuración, temporada e instrucciones, la cabecera centra el título, y «Volver»
+  es un botón con borde dorado y un relleno amarillo suave, que se nota sin competir con el título.
+- **Sonido:** el control muestra un ícono de parlante, con ondas o con una cruz si está silenciado,
+  en el menú y en la pausa. Su nombre accesible sigue siendo «Sonido activado» o «Sonido silenciado».
+- **Liga:** el reloj muestra minutos y segundos de juego (`MM:SS`). El marcador de cualquier modo
+  usa de fondo la ilustración `marcador`.
+
+**Por qué.** El título de texto no tenía la fuerza del resto del arte. En la cabecera, «Volver» parecía
+un texto suelto. La palabra «Sonido · activado» ocupaba lugar y un ícono se entiende igual. Con solo el
+minuto, el reloj parecía quieto: con 5 minutos reales, un minuto de juego pasa cada 3,3 s. Con segundos
+se ve que corre rápido: 45:00 llega a los 150 s reales, lo que duran 10 turnos de 15 s.
+
+**Cómo.**
+
+- **Imágenes:** el grupo `interfaz` de `scripts/optimizar-recursos.mjs` recorta las dos imágenes. El
+  título baja de 1,5 MB a 123 kB (1200 × 375) y el marcador, de 496 kB a 42 kB (1920 × 160).
+- **Título:** su alto sigue al de la pantalla (`clamp(7rem, 22vh, 13rem)`), así el menú entra en
+  1280 × 720.
+- **Reloj:** `usePartida` solo informa lo que quedaba del reloj en su último tic, cada 250 ms. El
+  componente `RelojDeLiga` sigue contando desde ahí cuadro a cuadro, sin volver a dibujar la cancha, y
+  se detiene en pausa o al terminar.
+- **Marcador:** el fondo se estira al marcador y los costados tienen más relleno, para que escudos y
+  emotes no queden encima de los reflectores de la barra.
+
+**Verificación.** Lint, tipos, unitarias y E2E. Las pruebas de audio encuentran el control por su nombre
+accesible, y la de Liga comprueba que el reloj tiene formato `MM:SS` y avanza. Se revisaron capturas del
+menú, la configuración, la temporada, la pausa y la cancha de Liga.
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano
@@ -1141,3 +1175,4 @@ necesitara servicios adicionales.
 | Un árbitro reemplaza al símbolo de pausa y pausar suena a silbato | El «Ⅱ» era genérico; el silbato existente anuncia la pausa sin sumar archivos de audio. |
 | La duración se elige con radios y las opciones van centradas | El `select` desplegable no seguía el estilo del juego y los grupos alineados a la izquierda quedaban desparejos. |
 | Salir tiene su árbitro y su sonido; las opciones suenan y el perro empieza desactivado | Pausa y salida compartían cara y solo una sonaba; activar al perro con un ladrido le da presencia. |
+| Título ilustrado, cabeceras centradas, ícono de sonido y reloj de Liga con segundos | El título de texto no tenía fuerza, «Volver» no parecía botón y con solo el minuto el reloj parecía quieto. |
