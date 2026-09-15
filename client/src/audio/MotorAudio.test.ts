@@ -176,6 +176,8 @@ test("el resultado distingue derrota contra servidor, victoria compartida y empa
   partida.visitante.tipo = "humano";
   assert.equal(sonidoDelResultado(partida), "victoria");
   partida.resultado!.ganador = null;
+  assert.equal(sonidoDelResultado(partida), "empate");
+  partida.resultado = null;
   assert.equal(sonidoDelResultado(partida), null);
   assert.equal(SONIDO_DE_EMOTE.dormido, null);
   assert.equal(SONIDO_DE_EMOTE.enojadoSerio, "confirmacion");

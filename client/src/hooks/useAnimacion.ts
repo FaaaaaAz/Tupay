@@ -19,7 +19,7 @@ export function useAnimacion(
   alTerminar: () => void,
   pausada = false,
   radioPelota = 1,
-): { cuadro: Cuadro | null; rotacion: number } {
+): { cuadro: Cuadro | null; rotacion: number; indice: number | null } {
   const [progreso, setProgreso] = useState<Progreso>({ recorrido: null, posicion: 0, rotacion: 0 });
   const reloj = useRef({ recorrido: null as Cuadro[] | null, transcurrido: 0, base: 0 });
   const rotacionActual = useRef(0);
@@ -69,11 +69,11 @@ export function useAnimacion(
     return () => cancelAnimationFrame(pedido);
   }, [recorrido, cuadrosPorSegundo, pausada, angulos]);
 
-  if (!recorrido) return { cuadro: null, rotacion: progreso.rotacion };
+  if (!recorrido) return { cuadro: null, rotacion: progreso.rotacion, indice: null };
   const posicion = progreso.recorrido === recorrido ? progreso.posicion : 0;
   const indice = Math.floor(posicion);
   const siguiente = Math.min(indice + 1, recorrido.length - 1);
-  return { cuadro: mezclar(recorrido[indice], recorrido[siguiente], posicion - indice), rotacion: progreso.rotacion };
+  return { cuadro: mezclar(recorrido[indice], recorrido[siguiente], posicion - indice), rotacion: progreso.rotacion, indice };
 }
 
 function mezclar(a: Cuadro, b: Cuadro, t: number): Cuadro {

@@ -2,7 +2,7 @@ import recursos from "../../../assets/audio/catalogo.json";
 import type { RecursoAudio } from "./MotorAudio";
 
 // Vite resuelve las URLs con hash; importar una URL no descarga ni decodifica el audio.
-const archivos = import.meta.glob<string>("../recursos/audio/**/*.ogg", {
+const archivos = import.meta.glob<string>("../recursos/audio/**/*.{ogg,mp3,wav}", {
   eager: true, query: "?url&no-inline", import: "default",
 });
 

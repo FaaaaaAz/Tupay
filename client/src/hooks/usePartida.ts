@@ -57,6 +57,8 @@ export function usePartida(inicial: Partida) {
   const ocupado = useRef(false);
   const vigente = useRef(true);
   const perroSonado = useRef(false);
+  /** Último cuadro de la jugada cuyos golpes ya sonaron. */
+  const golpesSonados = useRef(-1);
   useEffect(() => { vigente.current = true; return () => { vigente.current = false; }; }, []);
   const emoteOcupado = useRef(false);
   const [pausada, setPausada] = useState(inicial.pausada);
@@ -116,7 +118,7 @@ export function usePartida(inicial: Partida) {
       try {
         const respuesta = await pedirJugada();
         perroSonado.current = false;
-        if (vigente.current) void audio.efecto("tiro");
+        golpesSonados.current = -1;
         setJugada({ respuesta, recibidaEn: Date.now() });
       } catch (causa) {
         informarError(causa);
@@ -131,21 +133,38 @@ export function usePartida(inicial: Partida) {
     [informarError, refrescar],
   );
 
+  /** Hace sonar los golpes de la jugada hasta un cuadro, una sola vez cada uno. */
+  const sonarGolpesHasta = useCallback((respuesta: RespuestaTiro, hasta: number) => {
+    for (const contacto of respuesta.contactos ?? []) {
+      if (vigente.current && contacto.cuadro > golpesSonados.current && contacto.cuadro <= hasta) {
+        void audio.efecto(contacto.tipo);
+      }
+    }
+    golpesSonados.current = Math.max(golpesSonados.current, hasta);
+  }, []);
+
   const terminarAnimacion = useCallback(() => {
     if (!jugada) return;
+    sonarGolpesHasta(jugada.respuesta, jugada.respuesta.recorrido.length - 1);
     if (vigente.current && jugada.respuesta.eventos.some((evento) => evento.tipo === "gol")) void audio.efecto("gol");
     aplicar(jugada.respuesta.partida, jugada.recibidaEn);
     setEventos(jugada.respuesta.eventos);
     setJugada(null);
-  }, [jugada, aplicar]);
+  }, [jugada, aplicar, sonarGolpesHasta]);
 
-  const { cuadro, rotacion } = useAnimacion(
+  const { cuadro, rotacion, indice } = useAnimacion(
     jugada?.respuesta.recorrido ?? null,
     jugada?.respuesta.cuadrosPorSegundo ?? 0,
     terminarAnimacion,
     pausada || cambiandoPausa || perdida,
     partida.cancha.radioPelota,
   );
+
+  // Cada golpe suena cuando la animación llega a su cuadro; pausar no los repite ni los adelanta.
+  useEffect(() => {
+    if (!jugada || indice === null || pausada || cambiandoPausa || perdida) return;
+    sonarGolpesHasta(jugada.respuesta, indice);
+  }, [jugada, indice, pausada, cambiandoPausa, perdida, sonarGolpesHasta]);
 
   const perroVisible = Boolean(cuadro?.perro);
   useEffect(() => {
