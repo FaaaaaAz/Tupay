@@ -42,6 +42,7 @@ import inicio from "./pantallas/inicio.webp";
 import menu from "./pantallas/menu.webp";
 import paneles from "./pantallas/paneles.webp";
 import pausa from "./pantallas/pausa.webp";
+import salir from "./pantallas/salir.webp";
 import tarjetaEliminatoria from "./tarjetas/eliminatoria.webp";
 import tarjetaInstrucciones from "./tarjetas/instrucciones.webp";
 import tarjetaLiga from "./tarjetas/liga.webp";
@@ -112,6 +113,6 @@ export const IMAGEN_DE_TARJETA = {
 
 /**
  * `paneles` es el fondo de configuración, instrucciones, temporada y resultado; lo dibuja `global.css`.
- * `pausa` es el árbitro que encabeza los modales de la partida.
+ * `pausa` y `salir` son los árbitros que encabezan los modales de la partida.
  */
-export const IMAGENES = { arco, pelota, perro, inicio, menu, paneles, pausa };
+export const IMAGENES = { arco, pelota, perro, inicio, menu, paneles, pausa, salir };

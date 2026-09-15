@@ -141,8 +141,10 @@ const GRUPOS = {
       await recortarIlustracion(`${ORIGEN}/UI/${archivo}.png`, `${DESTINO}/tarjetas/${nombre}.webp`, 560, 420);
     }
   },
-  async pausa() {
+  /** Los árbitros que encabezan los modales de la partida: uno para la pausa y otro para salir. */
+  async modales() {
     await recortarIlustracion(`${ORIGEN}/UI/pausa.png`, `${DESTINO}/pantallas/pausa.webp`, 360, 300);
+    await recortarIlustracion(`${ORIGEN}/UI/salir.png`, `${DESTINO}/pantallas/salir.webp`, 360, 300);
   },
   async juego() {
     await ajustar(`${ORIGEN}/items/pelota.png`, `${DESTINO}/juego/pelota.webp`, 160, 160);

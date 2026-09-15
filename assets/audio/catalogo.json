@@ -182,6 +182,18 @@
     "estado": "integrado"
   },
   {
+    "id": "salir",
+    "archivo": "sfx/transitions/salir.mp3",
+    "autor": "Aportado por el autor del proyecto",
+    "fuente": "Pendiente de registrar",
+    "original": "salir.mp3",
+    "licencia": "Pendiente de registrar",
+    "canal": "interfaz",
+    "ganancia": 0.5,
+    "intervaloMs": 300,
+    "estado": "integrado"
+  },
+  {
     "id": "fin",
     "archivo": "sfx/transitions/fin-partido.ogg",
     "autor": "Kenney",
