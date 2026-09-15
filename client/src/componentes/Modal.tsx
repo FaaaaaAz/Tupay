@@ -7,10 +7,12 @@ interface Props {
   children: ReactNode;
   alCancelar: () => void;
   ocupado?: boolean;
+  /** El árbitro que encabeza el modal: por defecto, el de la pausa. */
+  ilustracion?: string;
 }
 
 /** El diálogo nativo aísla el fondo y mantiene el foco de teclado dentro del modal. */
-export function Modal({ titulo, detalle, children, alCancelar, ocupado = false }: Props) {
+export function Modal({ titulo, detalle, children, alCancelar, ocupado = false, ilustracion = IMAGENES.pausa }: Props) {
   const dialogo = useRef<HTMLDialogElement>(null);
   const id = useId();
   useEffect(() => {
@@ -41,7 +43,7 @@ export function Modal({ titulo, detalle, children, alCancelar, ocupado = false }
         else if (!evento.shiftKey && document.activeElement === ultimo) { evento.preventDefault(); primero.focus(); }
       }}
       onCancel={(evento) => { evento.preventDefault(); if (!ocupado) alCancelar(); }}>
-      <img className="modal__ilustracion" src={IMAGENES.pausa} alt="" />
+      <img className="modal__ilustracion" src={ilustracion} alt="" />
       <p className="modal__etiqueta">Tupay · Tiempo fuera</p>
       <h2 id={`${id}-titulo`}>{titulo}</h2>
       <p id={`${id}-detalle`} className="modal__detalle">{detalle}</p>

@@ -15,7 +15,7 @@ import { AvisoDeJugada } from "../componentes/AvisoDeJugada";
 import { ControlesAudio } from "../componentes/ControlesAudio";
 import { equipoPorId } from "../hooks/useCatalogo";
 import { usePartida, type TiroDesdeLaCancha } from "../hooks/usePartida";
-import { IMAGEN_DE_ESCUDO } from "../recursos/indice";
+import { IMAGENES, IMAGEN_DE_ESCUDO } from "../recursos/indice";
 
 /** Tiempo para ver la última jugada antes de pasar a la pantalla de resultado. */
 const PAUSA_ANTES_DEL_RESULTADO_MS = 1800;
@@ -43,13 +43,17 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
   const jugadorDelTurno = partida[ladoDelTurno];
   const terminada = partida.estado === "finalizada" && !juego.animando;
   const finSonado = useRef(false);
-  const silbatoPendiente = useRef(false);
+  /** El sonido con que entra el modal que pidió la persona: el silbato de la pausa o el de salir. */
+  const sonidoDelModal = useRef<"inicio" | "salir" | null>(null);
   useEffect(() => {
     audio.pausar(juego.pausada || juego.cambiandoPausa || juego.perdida || modal !== null);
-    // Después de pausar el audio del juego, así la pausa no corta el silbato que la anuncia.
-    if (silbatoPendiente.current && modal === "pausa") {
-      silbatoPendiente.current = false;
-      void audio.efecto("inicio", "interfaz");
+    // Después de pausar el audio del juego, así la pausa no corta el sonido que anuncia el modal.
+    const sonido = sonidoDelModal.current;
+    if (sonido && modal) {
+      sonidoDelModal.current = null;
+      // Si se sale desde la pausa, el silbato no se pisa con el sonido de salir.
+      if (sonido === "salir") audio.detenerEfecto("inicio");
+      void audio.efecto(sonido, "interfaz");
     }
   }, [juego.pausada, juego.cambiandoPausa, juego.perdida, modal]);
   useEffect(() => {
@@ -78,7 +82,7 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
 
   /** Pausar desde el botón o con Esc: el árbitro toca el silbato. */
   function pausar() {
-    silbatoPendiente.current = true;
+    sonidoDelModal.current = "inicio";
     setModal("pausa");
     void juego.cambiarPausa(true);
   }
@@ -88,7 +92,9 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
     setTiroDePoder(false);
   }
 
+  /** Salir desde el marcador o desde la pausa. Volver de «Seguir jugando» a la pausa no suena. */
   function salir() {
+    sonidoDelModal.current = "salir";
     setVolverAPausa(modal === "pausa");
     setModal("salir");
     if (!juego.pausada) void juego.cambiarPausa(true);
@@ -232,6 +238,7 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
       )}
       {modal && !juego.perdida && (
         <Modal titulo={modal === "salir" ? "¿Abandonar el partido?" : "Partido en pausa"}
+          ilustracion={modal === "salir" ? IMAGENES.salir : IMAGENES.pausa}
           detalle={modal === "salir"
             ? esTemporada
               ? "Si el partido no terminó, el marcador se descarta y podrás volver a jugarlo desde la temporada. Los resultados ya confirmados se conservan."
