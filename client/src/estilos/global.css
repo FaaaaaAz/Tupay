@@ -268,16 +268,15 @@ input {
   display: grid;
   place-items: center;
   padding: 2rem;
-  background:
-    radial-gradient(ellipse at 10% 0%, #23645280, transparent 55%),
-    radial-gradient(ellipse at 100% 80%, #27467080, transparent 55%),
-    linear-gradient(135deg, #071a22, #0c2532 50%, #07101e);
+  background: var(--noche) url("../recursos/pantallas/paneles.webp") center / cover no-repeat;
 }
 
 .panel {
   width: min(46rem, 100%);
   padding: 1.8rem 2.2rem;
-  background: var(--superficie);
+  /* Un poco translúcido: el estadio del fondo se adivina detrás del panel sin restarle lectura. */
+  background: linear-gradient(145deg, #173544e0, #0b192beb 70%);
+  backdrop-filter: blur(6px);
   border: 1px solid var(--borde);
   border-radius: var(--radio-panel);
   box-shadow: var(--sombra-panel);
@@ -727,28 +726,14 @@ input[type="checkbox"] {
   background: radial-gradient(circle at 40% 35%, #fff8e1, #e3b95a);
 }
 
-/* Identidad compartida: iluminación de estadio y líneas de cancha sin descargas nuevas. */
+/* Identidad compartida: la viñeta oscurece los bordes del estadio para que resalte el panel. */
 .fondo-panel::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: var(--capa-fondo);
   pointer-events: none;
-  background:
-    repeating-linear-gradient(115deg, transparent 0 79px, #e8f4ff04 80px 81px),
-    radial-gradient(ellipse at center, transparent 30%, #030a1666);
-}
-.fondo-panel::after {
-  content: "";
-  position: fixed;
-  width: min(72vw, 75rem);
-  height: 66vh;
-  top: 17vh;
-  left: 14vw;
-  border: 1px solid #9cd7c916;
-  border-radius: 50%;
-  z-index: var(--capa-fondo);
-  pointer-events: none;
+  background: radial-gradient(ellipse at center, #06152433 30%, #020b18b3);
 }
 .menu::before {
   content: "";
@@ -769,16 +754,17 @@ input[type="checkbox"] {
 }
 .menu__subtitulo { color: #eef1e9; margin: 0.3rem 0 0; font-size: 1rem; text-shadow: 0 2px 6px #000; }
 .menu > .boton--enlace { background: #08192cbd; border: 1px solid var(--borde); padding: 0.65rem 1.2rem; }
-.tarjeta-menu__icono {
-  width: 3.5rem;
-  height: 3.5rem;
-  margin-bottom: 0.6rem;
-  padding: 0.45rem;
-  color: var(--dorado);
-  border: 1px solid var(--borde-acento);
-  border-radius: var(--radio-control);
-  background: #f2c14e0d;
+/* Alto fijo: la tarjeta no salta mientras carga la ilustración, que se centra en ese hueco. */
+.tarjeta-menu__imagen {
+  display: block;
+  width: 100%;
+  height: 8.5rem;
+  margin-bottom: 0.3rem;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 12px #0009);
+  transition: transform var(--transicion);
 }
+.tarjeta-menu:hover .tarjeta-menu__imagen, .tarjeta-menu:focus-visible .tarjeta-menu__imagen { transform: scale(1.06); }
 .tarjeta-menu__accion {
   display: flex;
   align-items: center;
@@ -811,6 +797,7 @@ input[type="checkbox"] {
   .configuracion { gap: 0.8rem; padding: 1.35rem 2rem; }
   .configuracion .panel__cabecera { padding-bottom: 0.65rem; }
   .configuracion .selector-equipo { padding: 0.7rem; }
+  .tarjeta-menu__imagen { height: 7rem; }
 }
 @media (max-width: 1050px) {
   .menu__tarjetas { grid-template-columns: repeat(2, minmax(0, 18rem)); }
