@@ -63,9 +63,18 @@ test("audio de partido se detiene al pausar; controles accesibles sin cambiar el
   await expect(modal).not.toBeVisible();
 });
 
-test("todos los recursos publicados se descargan, decodifican y contienen señal real", async ({ page }, info) => {
-  const archivos = readdirSync("dist/cliente/assets").filter((archivo) => archivo.endsWith(".ogg"));
-  expect(archivos).toHaveLength(23);
+test("todos los recursos publicados se descargan, decodifican y contienen señal real", async ({ page, request }, info) => {
+  // Los audios se leen de la aplicación que se está probando, no de `dist/`: contra producción
+  // no hay build local. El catálogo usa `import.meta.glob` inmediato, así que todas las URLs
+  // con hash quedan dentro del script principal que carga `index.html`.
+  const originales = readdirSync("client/src/recursos/audio", { recursive: true, encoding: "utf8" })
+    .filter((ruta) => ruta.endsWith(".ogg"));
+  const html = await (await request.get("/")).text();
+  const script = html.match(/<script[^>]+src="([^"]+\.js)"/)?.[1];
+  expect(script, "index.html no carga ningún script").toBeTruthy();
+  const codigo = await (await request.get(script ?? "")).text();
+  const archivos = [...new Set(codigo.match(/\/assets\/[\w.-]+\.ogg/g) ?? [])].map((url) => url.slice("/assets/".length));
+  expect(archivos).toHaveLength(originales.length);
   await page.goto("/");
   const mediciones = [];
   for (const archivo of archivos) {
