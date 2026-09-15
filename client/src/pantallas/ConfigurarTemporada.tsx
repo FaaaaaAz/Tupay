@@ -5,6 +5,7 @@ import type { PeticionCrearTemporada } from "../../../compartido/temporada.js";
 import { DIFICULTADES, DURACIONES_DE_LIGA } from "../componentes/opcionesDeJuego";
 import { SelectorDeEquipo } from "../componentes/SelectorDeEquipo";
 import { useCrearTemporada } from "../hooks/useCrearTemporada";
+import { IMAGENES } from "../recursos/indice";
 
 interface Props {
   equipos: Equipo[];
@@ -88,19 +89,24 @@ export function ConfigurarTemporada({ equipos, alEmpezar, alVolver }: Props) {
           ))}
         </fieldset>
 
-        <label className="campo">
-          <span className="campo__etiqueta">Duración real de cada partido</span>
-          <select value={duracion} onChange={(evento) => setDuracion(Number(evento.target.value))}>
-            {DURACIONES_DE_LIGA.map(({ segundos, texto }) => (
-              <option key={segundos} value={segundos}>
-                {texto}
-              </option>
-            ))}
-          </select>
-        </label>
+        <fieldset className="grupo">
+          <legend>Duración real de cada partido</legend>
+          {DURACIONES_DE_LIGA.map(({ segundos, texto }) => (
+            <label key={segundos} className="opcion">
+              <input
+                type="radio"
+                name="duracion"
+                checked={duracion === segundos}
+                onChange={() => setDuracion(segundos)}
+              />
+              {texto}
+            </label>
+          ))}
+        </fieldset>
 
-        <label className="opcion">
+        <label className="opcion opcion--perro">
           <input type="checkbox" checked={perroActivo} onChange={(evento) => setPerroActivo(evento.target.checked)} />
+          <img src={IMAGENES.perro} alt="" />
           El perro puede meterse a la cancha
         </label>
 

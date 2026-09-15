@@ -6,6 +6,7 @@ import { SelectorDeEquipo } from "../componentes/SelectorDeEquipo";
 import { SelectorDeEstadio } from "../componentes/SelectorDeEstadio";
 import { equipoPorId } from "../hooks/useCatalogo";
 import { useCrearPartida } from "../hooks/useCrearPartida";
+import { IMAGENES } from "../recursos/indice";
 
 const METAS_DE_GOLES = [1, 2, 3, 4, 5];
 
@@ -128,20 +129,25 @@ export function Configuracion({ modo, equipos, estadios, alJugar, alVolver }: Pr
             ))}
           </fieldset>
         ) : (
-          <label className="campo">
-            <span className="campo__etiqueta">Duración real del partido</span>
-            <select value={duracion} onChange={(evento) => setDuracion(Number(evento.target.value))}>
-              {DURACIONES_DE_LIGA.map(({ segundos, texto }) => (
-                <option key={segundos} value={segundos}>
-                  {texto}
-                </option>
-              ))}
-            </select>
-          </label>
+          <fieldset className="grupo">
+            <legend>Duración real del partido</legend>
+            {DURACIONES_DE_LIGA.map(({ segundos, texto }) => (
+              <label key={segundos} className="opcion">
+                <input
+                  type="radio"
+                  name="duracion"
+                  checked={duracion === segundos}
+                  onChange={() => setDuracion(segundos)}
+                />
+                {texto}
+              </label>
+            ))}
+          </fieldset>
         )}
 
-        <label className="opcion">
+        <label className="opcion opcion--perro">
           <input type="checkbox" checked={perroActivo} onChange={(evento) => setPerroActivo(evento.target.checked)} />
+          <img src={IMAGENES.perro} alt="" />
           El perro puede meterse a la cancha
         </label>
 

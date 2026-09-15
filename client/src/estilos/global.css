@@ -42,7 +42,6 @@ body {
 }
 
 button,
-select,
 input {
   font: inherit;
 }
@@ -317,6 +316,7 @@ input {
 .grupo {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.5rem 1.4rem;
   margin: 0;
   padding: 0;
@@ -326,6 +326,7 @@ input {
 .grupo legend {
   width: 100%;
   margin-bottom: 0.4rem;
+  text-align: center;
 }
 
 .opcion {
@@ -335,19 +336,28 @@ input {
   cursor: pointer;
 }
 
-.campo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+/* El perro se ve a color cuando puede entrar y apagado cuando no. */
+.opcion--perro {
+  align-self: center;
+  gap: 0.6rem;
+  padding: 0.2rem 1.1rem 0.2rem 0.8rem;
+  background: var(--superficie-suave);
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  transition: border-color var(--transicion);
 }
 
-select {
-  padding: 0.55rem 0.7rem;
-  color: var(--crema);
-  background: #0f2236;
-  border: 1px solid var(--borde);
-  border-radius: var(--radio-control);
+.opcion--perro img {
+  width: 3.4rem;
+  height: 3.4rem;
+  object-fit: contain;
+  filter: grayscale(1) opacity(0.45);
+  transition: filter var(--transicion), transform var(--transicion);
 }
+
+.opcion--perro:has(input:checked) { border-color: var(--borde-acento); }
+.opcion--perro:has(input:checked) img { filter: drop-shadow(0 3px 5px #0008); transform: rotate(-6deg); }
+.opcion--perro:hover { border-color: var(--dorado); }
 
 input[type="radio"],
 input[type="checkbox"] {
@@ -795,9 +805,12 @@ input[type="checkbox"] {
 @keyframes celebrar-escudo { 0% { opacity: 0; transform: scale(0.85); } 65% { transform: scale(1.06); } 100% { opacity: 1; transform: none; } }
 @media (max-height: 800px) and (min-width: 1000px) {
   .fondo-panel { padding: 1.2rem; }
-  .configuracion { gap: 0.8rem; padding: 1.35rem 2rem; }
+  .configuracion { gap: 0.7rem; padding: 1.35rem 2rem; }
   .configuracion .panel__cabecera { padding-bottom: 0.65rem; }
   .configuracion .selector-equipo { padding: 0.7rem; }
+  .configuracion .grupo legend { margin-bottom: 0.2rem; }
+  .opcion--perro { padding-block: 0.1rem; }
+  .opcion--perro img { width: 2.4rem; height: 2.4rem; }
   .tarjeta-menu__imagen { height: 7rem; }
 }
 @media (max-width: 1050px) {
@@ -1004,6 +1017,7 @@ input[type="checkbox"] {
 
 .carrusel--estadio > .campo__etiqueta {
   grid-area: etiqueta;
+  justify-self: center;
 }
 
 .carrusel--estadio .carrusel__nombre {
