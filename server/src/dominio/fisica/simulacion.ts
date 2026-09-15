@@ -6,6 +6,7 @@ import {
   crearEstadoDeCharcos,
   golpearPelotaAtrapada,
   type EstadoDeCharcos,
+  type CaidaEnCharco,
   type EventoDeCharco,
   type PelotaAtrapada,
   type ZonaDeCharco,
@@ -49,6 +50,8 @@ export interface ResultadoSimulacion {
   eventosDeCharco: EventoDeCharco[];
   /** Golpes que suenan, con el cuadro del recorrido en que ocurren. */
   contactos: Contacto[];
+  /** En qué cuadro cayó la pelota en cada charco. La física no sabe si es de agua o de nieve. */
+  caidasEnCharcos: CaidaEnCharco[];
   arcoConGol: Arco | null;
   terminoPor: FinDeSimulacion;
 }
@@ -89,8 +92,15 @@ export function simularTiro(entrada: EntradaSimulacion): ResultadoSimulacion {
     }
   };
 
+  const caidasEnCharcos: CaidaEnCharco[] = [];
+
   for (let paso = 1; paso <= PASOS_MAXIMOS; paso++) {
+    const eventosAntes = charcos.eventos.length;
     arcoConGol = avanzarUnPaso(cuerpos, charcos, liberaDeUnGolpe, sonar);
+    // Igual que un golpe: la caída se anota en el cuadro que se fotografía al terminar este paso.
+    for (const evento of charcos.eventos.slice(eventosAntes)) {
+      if (evento.tipo === "pelotaAtrapada") caidasEnCharcos.push({ cuadro: cuadros.length, charco: evento.charco });
+    }
     if (arcoConGol) terminoPor = "gol";
     else if (cuerpos.moviles.every(enReposo)) terminoPor = "reposo";
 
@@ -108,6 +118,7 @@ export function simularTiro(entrada: EntradaSimulacion): ResultadoSimulacion {
     pelotaAtrapada: charcos.atrapada,
     eventosDeCharco: charcos.eventos,
     contactos,
+    caidasEnCharcos,
     arcoConGol,
     terminoPor,
   };

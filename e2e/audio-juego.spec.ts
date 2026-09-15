@@ -83,6 +83,17 @@ test("salir suena al abrir su modal, con su propio árbitro, y volver a la pausa
   expect(await vecesSonido(page, "salir")).toBe(2);
 });
 
+test("la pelota que cae en un charco de nieve suena una sola vez, con el splash de nieve", async ({ page }) => {
+  await observarAudio(page);
+  // Encontrado con ejecutarTiro: semilla 1, visitante-4 a 135° cae en nieve-1.
+  const partida = await empezarPartido(page, { estadio: "villaIngenio", opciones: { semilla: 1 } });
+  const respuesta = await tirar(page, tapitaDe(partida, "visitante-4"), { x: -1, y: 1 }, 1);
+  expect(respuesta.contactos.filter((contacto) => contacto.tipo === "charcoDeNieve")).toHaveLength(1);
+  await expect(page.getByTestId("pelota-atrapada")).toBeVisible({ timeout: 15000 });
+  await expect.poll(() => vecesSonido(page, "charco-nieve")).toBe(1);
+  expect(await vecesSonido(page, "charco-agua")).toBe(0);
+});
+
 test("resultado reproduce un solo jingle y la revancha cambia a una única música de partido", async ({ page }) => {
   await observarAudio(page);
   const partida = await empezarPartido(page, { estadio: "felixCapriles", golesParaGanar: 1, opciones: { semilla: 12345 } });

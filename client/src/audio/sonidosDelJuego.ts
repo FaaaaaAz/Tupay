@@ -2,7 +2,8 @@ import type { IdEmote } from "../../../compartido/catalogo.js";
 import type { Partida } from "../../../compartido/partida.js";
 
 export const SONIDOS_DE_PARTIDA = ["partido", "inicio", "fin", "victoria", "derrota", "empate", "patear", "choque", "pared", "poder", "gol",
-  "perro", "resortera", "seleccion", "error", "confirmacion", "feliz", "triste", "sorprendido", "euforico", "salir"] as const;
+  "perro", "resortera", "seleccion", "error", "confirmacion", "feliz", "triste", "sorprendido", "euforico", "salir",
+  "charcoDeAgua", "charcoDeNieve"] as const;
 
 // Dormida no recibe una voz improvisada. Seria y enojada reutilizan tonos, a volumen de reacción.
 export const SONIDO_DE_EMOTE: Record<IdEmote, string | null> = {

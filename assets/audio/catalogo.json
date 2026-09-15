@@ -98,6 +98,30 @@
     "estado": "integrado"
   },
   {
+    "id": "charcoDeAgua",
+    "archivo": "sfx/gameplay/puddle/charco-agua.mp3",
+    "autor": "Aportado por el autor del proyecto",
+    "fuente": "Pendiente de registrar",
+    "original": "splashWater.mp3",
+    "licencia": "Pendiente de registrar",
+    "canal": "efectos",
+    "ganancia": 0.55,
+    "intervaloMs": 300,
+    "estado": "integrado"
+  },
+  {
+    "id": "charcoDeNieve",
+    "archivo": "sfx/gameplay/puddle/charco-nieve.mp3",
+    "autor": "Aportado por el autor del proyecto",
+    "fuente": "Pendiente de registrar",
+    "original": "splashSnow.mp3",
+    "licencia": "Pendiente de registrar",
+    "canal": "efectos",
+    "ganancia": 0.55,
+    "intervaloMs": 300,
+    "estado": "integrado"
+  },
+  {
     "id": "gol",
     "archivo": "sfx/gameplay/goal/gol-arcade.ogg",
     "autor": "Kenney",

@@ -170,7 +170,8 @@ export interface Cuadro {
 }
 
 /** Qué golpe suena: dos tapitas, una tapita contra la pelota o una tapita contra la pared. */
-export type TipoContacto = "choque" | "patear" | "pared";
+/** Cada tipo coincide con el id de su sonido. `charcoDeAgua` y `charcoDeNieve`: la pelota cae en un charco. */
+export type TipoContacto = "choque" | "patear" | "pared" | "charcoDeAgua" | "charcoDeNieve";
 
 /** Un golpe del recorrido. `cuadro` es el índice del cuadro en que ocurre, para sonar en ese momento. */
 export interface Contacto {

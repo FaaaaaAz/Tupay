@@ -1,7 +1,7 @@
 import type { IdEstadio } from "../../../../compartido/catalogo.js";
-import type { Charco, Evento, TipoCharco } from "../../../../compartido/partida.js";
+import type { Charco, Contacto, Evento, TipoCharco } from "../../../../compartido/partida.js";
 import { ESTADIOS } from "../catalogo.js";
-import { contiene, type EventoDeCharco, type ZonaDeCharco } from "../fisica/charcos.js";
+import { contiene, type CaidaEnCharco, type EventoDeCharco, type ZonaDeCharco } from "../fisica/charcos.js";
 import { CANCHA } from "../fisica/configuracionFisica.js";
 import type { RegistroPartida } from "../reglas/partida.js";
 import { APARICION_DE_CHARCOS, CHARCO_DE_CADA_EFECTO, CHARCOS } from "./configuracionEstadios.js";
@@ -59,6 +59,14 @@ export function eventosDeCharco(charcos: Charco[], eventos: EventoDeCharco[]): E
     const tipoCharco = charcos.find((charco) => charco.id === evento.charco)?.tipo ?? "agua";
     return { tipo: "pelotaAtrapada", charco: evento.charco, tipoCharco };
   });
+}
+
+/** Las caídas en charcos como contactos del recorrido: el splash de agua o de nieve suena en su cuadro. */
+export function contactosDeCharco(charcos: Charco[], caidas: CaidaEnCharco[]): Contacto[] {
+  return caidas.map(({ cuadro, charco }): Contacto => ({
+    cuadro,
+    tipo: charcos.find((candidato) => candidato.id === charco)?.tipo === "nieve" ? "charcoDeNieve" : "charcoDeAgua",
+  }));
 }
 
 /**

@@ -27,6 +27,12 @@ export type EventoDeCharco =
   | { tipo: "pelotaAtrapada"; charco: string }
   | { tipo: "pelotaLiberada"; charco: string };
 
+/** La pelota cayó en un charco en este cuadro del recorrido: ahí suena el splash. */
+export interface CaidaEnCharco {
+  cuadro: number;
+  charco: string;
+}
+
 /** Lo que cambia en los charcos mientras se simula un tiro. */
 export interface EstadoDeCharcos {
   zonas: ZonaDeCharco[];
