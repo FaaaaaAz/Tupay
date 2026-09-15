@@ -8,6 +8,18 @@
   --rojo: #ff6b57;
   --panel: rgba(8, 20, 34, 0.86);
   --borde: rgba(244, 239, 228, 0.22);
+  --texto-secundario: #c4d2df;
+  --borde-acento: #f2c14e66;
+  --superficie: linear-gradient(145deg, #173544f5, #0b192bf5 70%);
+  --superficie-suave: linear-gradient(135deg, #ffffff0d, #ffffff03);
+  --radio-panel: 1.5rem;
+  --radio-tarjeta: 1rem;
+  --radio-control: 0.6rem;
+  --sombra-panel: 0 24px 65px #0006, inset 0 1px 0 #ffffff12;
+  --sombra-tarjeta: 0 8px 24px #0003, inset 0 1px 0 #ffffff0d;
+  --capa-fondo: -1;
+  --capa-aviso: 2;
+  --transicion: 180ms ease-out;
 
   color-scheme: dark;
   font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
@@ -114,10 +126,10 @@ input {
   padding: 2rem;
   color: var(--crema);
   text-align: center;
-  border: 1px solid rgba(242, 193, 78, 0.5);
-  border-radius: 1.5rem;
-  background: radial-gradient(ellipse at 50% 0%, #224b48 0%, #10273a 45%, #0b1626 85%);
-  box-shadow: 0 28px 90px #0009, inset 0 1px 0 #fff2;
+  border: 1px solid var(--borde-acento);
+  border-radius: var(--radio-panel);
+  background: var(--superficie);
+  box-shadow: var(--sombra-panel);
 }
 .modal[open] { animation: entrar-modal 220ms cubic-bezier(0.2, 0.8, 0.2, 1); }
 .modal::backdrop { background: #020b18b8; backdrop-filter: blur(5px); }
@@ -179,12 +191,14 @@ input {
 /* Menú */
 
 .menu {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
+  gap: 1.6rem;
   padding: 2rem;
   background-size: cover;
   background-position: center;
@@ -192,7 +206,7 @@ input {
 
 .menu__titulo {
   margin: 0;
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-size: clamp(3rem, 6vw, 5rem);
   letter-spacing: 0.12em;
   color: var(--dorado);
   text-shadow: 0 4px 0 rgba(0, 0, 0, 0.5);
@@ -205,30 +219,34 @@ input {
 }
 
 .tarjeta-menu {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
-  min-height: 11rem;
+  min-height: 17rem;
   padding: 1.5rem;
   text-align: left;
   color: var(--crema);
-  background: var(--panel);
+  background: var(--superficie);
   border: 1px solid var(--borde);
-  border-radius: 1rem;
+  border-radius: var(--radio-tarjeta);
+  box-shadow: var(--sombra-tarjeta);
   cursor: pointer;
-  backdrop-filter: blur(4px);
   transition:
-    transform 0.15s,
-    border-color 0.15s;
+    transform var(--transicion),
+    border-color var(--transicion),
+    box-shadow var(--transicion);
 }
 
-.tarjeta-menu:hover {
+.tarjeta-menu:hover, .tarjeta-menu:focus-visible {
   transform: translateY(-4px);
   border-color: var(--dorado);
+  box-shadow: 0 14px 32px #0007, inset 0 3px 0 var(--dorado);
 }
 
 .tarjeta-menu__nombre {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -237,32 +255,42 @@ input {
 
 .tarjeta-menu__detalle {
   line-height: 1.45;
-  opacity: 0.88;
+  color: var(--texto-secundario);
+  font-size: 0.9rem;
 }
 
 /* Paneles: configuración, instrucciones, resultado */
 
 .fondo-panel {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
   display: grid;
   place-items: center;
   padding: 2rem;
-  background: radial-gradient(circle at 50% 20%, var(--verde-cancha), var(--verde-oscuro) 70%);
+  background:
+    radial-gradient(ellipse at 10% 0%, #23645280, transparent 55%),
+    radial-gradient(ellipse at 100% 80%, #27467080, transparent 55%),
+    linear-gradient(135deg, #071a22, #0c2532 50%, #07101e);
 }
 
 .panel {
   width: min(46rem, 100%);
   padding: 1.8rem 2.2rem;
-  background: var(--panel);
+  background: var(--superficie);
   border: 1px solid var(--borde);
-  border-radius: 1.2rem;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  border-radius: var(--radio-panel);
+  box-shadow: var(--sombra-panel);
+  border-top-color: var(--borde-acento);
+  animation: entrar-panel 260ms ease-out;
 }
 
 .panel__cabecera {
   display: flex;
   align-items: center;
   gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--borde);
 }
 
 .panel__cabecera h1 {
@@ -277,7 +305,7 @@ input {
   font-size: 0.78rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  opacity: 0.75;
+  color: var(--texto-secundario);
 }
 
 .configuracion {
@@ -318,7 +346,7 @@ select {
   color: var(--crema);
   background: #0f2236;
   border: 1px solid var(--borde);
-  border-radius: 0.5rem;
+  border-radius: var(--radio-control);
 }
 
 input[type="radio"],
@@ -347,9 +375,10 @@ input[type="checkbox"] {
   align-items: center;
   gap: 0.5rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--superficie-suave);
   border: 1px solid var(--borde);
-  border-radius: 0.9rem;
+  border-radius: var(--radio-tarjeta);
+  box-shadow: var(--sombra-tarjeta);
 }
 
 .selector-equipo__escudo {
@@ -416,6 +445,7 @@ input[type="checkbox"] {
 .resultado__equipo img {
   width: 5rem;
   height: 5rem;
+  animation: entrar-panel 350ms ease-out;
 }
 
 .resultado__equipo--ganador {
@@ -424,6 +454,7 @@ input[type="checkbox"] {
 
 .resultado__equipo--ganador img {
   filter: drop-shadow(0 0 14px var(--dorado));
+  animation: celebrar-escudo 600ms ease-out;
 }
 
 .resultado__acciones {
@@ -503,9 +534,9 @@ input[type="checkbox"] {
   align-items: center;
   gap: 1.2rem;
   padding: 0.8rem 1.1rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--superficie-suave);
   border: 1px solid var(--borde);
-  border-radius: 0.9rem;
+  border-radius: var(--radio-tarjeta);
 }
 
 .proximo .boton {
@@ -607,9 +638,9 @@ input[type="checkbox"] {
 
 .calendario__jornada {
   padding: 0.6rem 0.8rem;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--superficie-suave);
   border: 1px solid transparent;
-  border-radius: 0.7rem;
+  border-radius: var(--radio-control);
 }
 
 .calendario__jornada--actual {
@@ -724,4 +755,109 @@ input[type="checkbox"] {
   height: 2.8rem;
   border-radius: 50%;
   background: radial-gradient(circle at 40% 35%, #fff8e1, #e3b95a);
+}
+
+/* Identidad compartida: iluminación de estadio y líneas de cancha sin descargas nuevas. */
+.fondo-panel::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: var(--capa-fondo);
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(115deg, transparent 0 79px, #e8f4ff04 80px 81px),
+    radial-gradient(ellipse at center, transparent 30%, #030a1666);
+}
+.fondo-panel::after {
+  content: "";
+  position: fixed;
+  width: min(72vw, 75rem);
+  height: 66vh;
+  top: 17vh;
+  left: 14vw;
+  border: 1px solid #9cd7c916;
+  border-radius: 50%;
+  z-index: var(--capa-fondo);
+  pointer-events: none;
+}
+.menu::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--capa-fondo);
+  background: radial-gradient(ellipse at 50% 45%, #06152426, #020b18bc), linear-gradient(#06152455, #06152488);
+  pointer-events: none;
+}
+.menu__cabecera { text-align: center; }
+.menu__leyenda, .resultado__etiqueta {
+  color: var(--dorado);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+}
+.menu__subtitulo { color: #eef1e9; margin: 0.3rem 0 0; font-size: 1rem; text-shadow: 0 2px 6px #000; }
+.menu > .boton--enlace { background: #08192cbd; border: 1px solid var(--borde); padding: 0.65rem 1.2rem; }
+.tarjeta-menu__icono {
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: 0.6rem;
+  padding: 0.45rem;
+  color: var(--dorado);
+  border: 1px solid var(--borde-acento);
+  border-radius: var(--radio-control);
+  background: #f2c14e0d;
+}
+.tarjeta-menu__accion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  margin-top: auto;
+  width: 100%;
+  color: var(--dorado);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.tarjeta-menu__accion span { font-size: 1.1rem; }
+.tarjeta-menu:active { transform: translateY(-1px); }
+.selector-equipo:focus-within { border-color: var(--dorado); }
+.enfrentamiento__vs { padding: 0.45rem; border-radius: 50%; background: #f2c14e10; }
+.tabla th { opacity: 1; color: var(--texto-secundario); }
+.tabla tbody tr:hover { background: #ffffff09; }
+.resultado { position: relative; overflow: hidden; border-color: var(--borde-acento); }
+.resultado__marcador { width: 100%; justify-content: center; padding: 1.3rem 0; background: var(--superficie-suave); border-radius: var(--radio-tarjeta); }
+.resultado__goles { color: var(--dorado); }
+.resultado__acciones { flex-wrap: wrap; justify-content: center; }
+.temporada__jornada { color: var(--dorado); font-size: 0.85rem; }
+.proximo { border-left: 3px solid var(--dorado); }
+.calendario { scrollbar-color: #567582 #0c1e30; scrollbar-width: thin; }
+@keyframes entrar-panel { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes celebrar-escudo { 0% { opacity: 0; transform: scale(0.85); } 65% { transform: scale(1.06); } 100% { opacity: 1; transform: none; } }
+@media (max-height: 800px) and (min-width: 1000px) {
+  .fondo-panel { padding: 1.2rem; }
+  .configuracion { gap: 0.8rem; padding: 1.35rem 2rem; }
+  .configuracion .panel__cabecera { padding-bottom: 0.65rem; }
+  .configuracion .selector-equipo { padding: 0.7rem; }
+}
+@media (max-width: 1050px) {
+  .menu__tarjetas { grid-template-columns: repeat(2, minmax(0, 18rem)); }
+  .tarjeta-menu { min-height: 14rem; }
+  .temporada__cuerpo { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .menu, .fondo-panel { padding: 1rem; }
+  .panel { padding: 1.2rem; }
+  .panel__cabecera { flex-wrap: wrap; }
+  .menu__tarjetas { grid-template-columns: minmax(0, 24rem); }
+  .tarjeta-menu { min-height: 12rem; }
+  .enfrentamiento { gap: 0.4rem; }
+  .selector-equipo { min-width: 0; padding: 0.6rem; }
+  .estadio-elegido { grid-template-columns: minmax(0, 1fr); }
+  .estadio-elegido__vista { max-width: 12rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel, .resultado__equipo img, .resultado__equipo--ganador img { animation: none; }
 }

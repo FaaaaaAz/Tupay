@@ -28,6 +28,7 @@ export function Resultado({ partida, equipos, revancha, alJugarDeNuevo, textoPar
   return (
     <main className="fondo-panel">
       <section className="panel resultado">
+        <p className="resultado__etiqueta">Pitazo final · {partida.modo === "liga" ? "Liga" : "Eliminatoria"}</p>
         <h1 data-testid="resultado">{ganador ? `¡Ganó ${equipoDe(ganador).nombre}!` : "¡Empate!"}</h1>
 
         <div className="resultado__marcador">
