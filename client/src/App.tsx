@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { audio } from "./audio/audio";
 import type { Modo, Partida as DatosPartida, PeticionCrearPartida } from "../../compartido/partida.js";
 import { useCatalogo } from "./hooks/useCatalogo";
 import { Configuracion } from "./pantallas/Configuracion";
@@ -25,7 +26,17 @@ type Pantalla =
 
 /** Sin React Router: la pantalla actual es un estado más, y navegar es cambiar ese estado. */
 export function App() {
-  const [pantalla, setPantalla] = useState<Pantalla>({ tipo: "portada" });
+  const [pantalla, cambiarPantalla] = useState<Pantalla>({ tipo: "portada" });
+  // La música sigue una navegación real, no el montaje ni los renders de React.
+  const setPantalla = (siguiente: Pantalla) => {
+    audio.reproducirMusica(["menu", "configuracion", "configurarTemporada", "temporada", "instrucciones"].includes(siguiente.tipo) ? "menu" : null);
+    cambiarPantalla(siguiente);
+  };
+  useEffect(() => {
+    const visibilidad = () => audio.ocultar(document.hidden);
+    document.addEventListener("visibilitychange", visibilidad);
+    return () => { document.removeEventListener("visibilitychange", visibilidad); audio.detenerTodo(); };
+  }, []);
   const { catalogo, error } = useCatalogo();
   const irAlMenu = () => setPantalla({ tipo: "menu" });
   const volverAlOrigen = (origen: Origen) =>
@@ -33,7 +44,7 @@ export function App() {
 
   switch (pantalla.tipo) {
     case "portada":
-      return <Portada alIniciar={irAlMenu} />;
+      return <Portada alIniciar={() => { void audio.desbloquear(); irAlMenu(); }} />;
     case "menu":
       return (
         <Menu

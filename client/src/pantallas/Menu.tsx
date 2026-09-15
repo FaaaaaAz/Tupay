@@ -1,5 +1,6 @@
 import type { Modo } from "../../../compartido/partida.js";
 import { IMAGENES } from "../recursos/indice";
+import { ControlesAudio } from "../componentes/ControlesAudio";
 
 interface Props {
   alElegirModo: (modo: Modo) => void;
@@ -11,6 +12,7 @@ interface Props {
 export function Menu({ alElegirModo, alVerTemporada, alVerInstrucciones, alVolver }: Props) {
   return (
     <main className="menu" style={{ backgroundImage: `url(${IMAGENES.menu})` }}>
+      <ControlesAudio />
       <header className="menu__cabecera">
         <p className="menu__leyenda">Fútbol de tapitas · Bolivia</p>
         <h1 className="menu__titulo">Tupay</h1>

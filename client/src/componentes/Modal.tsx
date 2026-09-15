@@ -30,7 +30,9 @@ export function Modal({ titulo, detalle, children, alCancelar, ocupado = false }
       aria-describedby={`${id}-detalle`} aria-busy={ocupado}
       onKeyDown={(evento) => {
         if (evento.key !== "Tab") return;
-        const botones = Array.from(evento.currentTarget.querySelectorAll<HTMLButtonElement>("button:not(:disabled)"));
+        const botones = Array.from(evento.currentTarget.querySelectorAll<HTMLElement>(
+          "button:not(:disabled), input:not(:disabled), summary, select:not(:disabled), a[href]",
+        )).filter((elemento) => elemento.getClientRects().length > 0);
         const primero = botones[0];
         const ultimo = botones.at(-1);
         if (!primero) { evento.preventDefault(); return; }

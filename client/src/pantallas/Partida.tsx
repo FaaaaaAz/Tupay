@@ -11,6 +11,7 @@ import { BarraDeEmotes } from "../componentes/BarraDeEmotes";
 import { Cancha } from "../componentes/Cancha";
 import { Modal } from "../componentes/Modal";
 import { AvisoDeJugada } from "../componentes/AvisoDeJugada";
+import { ControlesAudio } from "../componentes/ControlesAudio";
 import { equipoPorId } from "../hooks/useCatalogo";
 import { usePartida, type TiroDesdeLaCancha } from "../hooks/usePartida";
 import { IMAGEN_DE_ESCUDO } from "../recursos/indice";
@@ -225,6 +226,7 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
               : salir}>
             {modal === "salir" ? "Sí, abandonar" : "Salir del partido"}
           </button>
+          {modal === "pausa" && <ControlesAudio />}
         </Modal>
       )}
     </main>

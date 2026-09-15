@@ -1,0 +1,7 @@
+/* Solo controles nuevos: conserva el diseño de pantallas, paneles y cancha. */
+.controles-audio { color: var(--texto-secundario); font-size: 0.85rem; text-align: left; }
+.controles-audio summary { cursor: pointer; padding: 0.5rem; border-radius: var(--radio-control); }
+.controles-audio__opciones { display: grid; gap: 0.5rem; padding: 0.8rem; }
+.controles-audio input[type="range"] { width: 100%; accent-color: var(--dorado); }
+.menu > .controles-audio { position: absolute; top: 0.75rem; right: 0.75rem; z-index: 3; }
+.menu > .controles-audio[open] { width: min(18rem, calc(100vw - 1.5rem)); background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-tarjeta); box-shadow: var(--sombra-tarjeta); }
