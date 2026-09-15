@@ -53,6 +53,8 @@ El detalle de cada decisión técnica y su justificación está en `docs/decisio
 
 - `docs/reglas.md`: reglas completas del juego, los dos modos, el perro, los estadios y las acciones inválidas.
 - `docs/plan.md`: plan de trabajo por fases, desde el repositorio hasta la defensa.
-- `docs/api.md`: diseño de la API (se completa en la fase de diseño).
+- `docs/api.md`: contrato de la API, con solicitudes y respuestas JSON reales.
+- `docs/boceto.md`: pantallas, identidad visual y recursos gráficos.
+- `docs/investigacion.md`: pruebas E2E, despliegue en Render y tiempos medidos.
 - `docs/decisiones.md`: decisiones técnicas y su justificación.
 - `docs/uso-ia.md`: registro del uso de IA como asistente.

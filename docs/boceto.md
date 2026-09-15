@@ -39,7 +39,9 @@ en la defensa que lo que está en pantalla es exactamente el commit desplegado.
 
 ## Menú
 
-Fondo: `recursos/pantallas/menu.webp`, que tiene el centro libre a propósito. Encima, tres tarjetas.
+Fondo: `recursos/pantallas/menu.webp`, que tiene el centro libre a propósito. Encima, el título
+ilustrado y cuatro tarjetas: Eliminatoria, Liga, Temporada y Cómo se juega. El dibujo de abajo es el
+boceto original, con tres; la versión final se describe en «Pulido de interfaz».
 
 ```text
 ┌──────────────────────────────────────────────────────────┐

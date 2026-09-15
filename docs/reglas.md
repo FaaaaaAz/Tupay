@@ -67,7 +67,7 @@ Notas:
 
 ## El perro
 
-- Se activa o desactiva al crear cada partido (por defecto, activado). Puede desactivarse tanto en Eliminatoria como en cada partido de una Liga.
+- Se activa o desactiva al crear cada partido. En la pantalla de configuración la casilla empieza desactivada y, al activarla, se oye ladrar al perro; si un pedido a la API no lo indica, el servidor lo deja activado. Puede desactivarse tanto en Eliminatoria como en cada partido de una Liga.
 - Cuando está activo, después de cada tiro hay una probabilidad de que aparezca (valor inicial sugerido: 12% por tiro, con un máximo de 5 apariciones por partido; ambos números son un punto de partida para ajustar al probar el juego).
 - Se lleva la pelota a un punto de la cancha, casi siempre pasándola de un arco al otro, para "dar vuelta la tortilla".
 - **Nunca genera gol por sí mismo:** si el perro deja la pelota dentro de un arco, el gol se anula y la pelota queda en esa posición.

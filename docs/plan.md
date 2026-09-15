@@ -357,11 +357,11 @@ de audio y pruebas en verde. Tag: `fase-10`.
 
 ### Fase 11 — Documentación final y video
 
-- [ ] **11.1 Completar el README.** Requisitos, instalación, comandos, arquitectura, endpoints JSON, variables de entorno, pruebas, despliegue y URL pública. Commit: `docs: completar README`.
-- [ ] **11.2 Completar la documentación.** Revisar `introduccion.md`, `reglas.md`, `plan.md`, `api.md`, `boceto.md`, `decisiones.md` (riesgos con su mitigación y cambios importantes con su justificación), `investigacion.md` y `uso-ia.md`. Commit: `docs: completar documentación técnica`.
-- [ ] **11.3 Reunir evidencias.** Capturas útiles en `docs/evidencias/`, sin secretos ni datos irrelevantes. Commit: `docs: agregar evidencias finales`.
+- [x] **11.1 Completar el README.** Requisitos, instalación, comandos, arquitectura, endpoints JSON, variables de entorno, pruebas, despliegue y URL pública. *Se sumaron qué se puede jugar, la arquitectura con el recorrido de un tiro, las pruebas, los endpoints de pausa y el pipeline de tres trabajos.* Commit: `docs: completar README`.
+- [x] **11.2 Completar la documentación.** Revisar `introduccion.md`, `reglas.md`, `plan.md`, `api.md`, `boceto.md`, `decisiones.md` (riesgos con su mitigación y cambios importantes con su justificación), `investigacion.md` y `uso-ia.md`. *Se corrigieron el perro desactivado por defecto en la configuración, las cuatro tarjetas del menú, la descripción de `api.md` y la referencia a la tarea 12.6.* Commit: `docs: completar documentación técnica`.
+- [x] **11.3 Reunir evidencias.** Capturas útiles en `docs/evidencias/`, sin secretos ni datos irrelevantes. *Siete capturas `fase-11-*` de la versión final: menú, configuración, cancha de Liga, pausa, salida, temporada y resultado.* Commit: `docs: agregar evidencias finales`.
 - [ ] **11.4 Grabar el video.** Entre 3 y 5 minutos: una partida, una solicitud JSON, una prueba E2E visual, GitHub Actions y la aplicación publicada.
-- [ ] **11.5 Auditoría final.** Comparar el proyecto con la lista de verificación de la sección 10 de este documento y revisar que no haya ninguna librería prohibida instalada.
+- [x] **11.5 Auditoría final.** Comparar el proyecto con la lista de verificación de la sección 10 de este documento y revisar que no haya ninguna librería prohibida instalada. *Resultado en [`evidencias/fase-11-auditoria.md`](evidencias/fase-11-auditoria.md): las dependencias de producción son solo Express, React y React DOM.*
 
 **Criterio de salida:** repositorio, documentación, video, CI y aplicación pública corresponden a la misma versión estable.
 
@@ -461,7 +461,7 @@ Cada diapositiva responde tres preguntas: **qué decisión se tomó, por qué se
 | Exceso de alcance | Se empieza una ampliación con el núcleo todavía incompleto. | Aplicar estrictamente el orden de reducción de la sección 8. |
 | Código difícil de defender | No se puede explicar una función o modificar una regla en el momento. | Tareas pequeñas, revisión personal y valores de configuración centralizados. |
 | Identidad de los clubes | Uso de escudos oficiales sin autorización. | Escudos ilustrados propios, no oficiales; registrar el criterio en `docs/decisiones.md`. |
-| Contradicción del cierre | El cambio de la defensa exige actualizar el repositorio ya congelado. | Solicitar una instrucción escrita del docente antes de la entrega (tarea 11.6). |
+| Contradicción del cierre | El cambio de la defensa exige actualizar el repositorio ya congelado. | Solicitar una instrucción escrita del docente antes de la entrega (tarea 12.6). |
 
 ## 12. Condición final de éxito
 

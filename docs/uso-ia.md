@@ -159,6 +159,20 @@ manualmente los commits y el push.
   Potosí, confirmar la licencia de los dos audios y jugar con el perro activado.
 - **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
 
+### Tareas 11.1, 11.2, 11.3 y 11.5 — 15 de septiembre de 2026
+
+- **Solicitud:** dejar el proyecto listo para publicar la versión final y grabar el video.
+- **Aporte de la IA:** completó el README (qué se puede jugar, arquitectura, recorrido de un tiro,
+  pruebas, endpoints de pausa y pipeline); corrigió `reglas.md`, `boceto.md`, `introduccion.md` y
+  `plan.md`; copió siete capturas finales a `docs/evidencias/` y redactó
+  `docs/evidencias/fase-11-auditoria.md`. Además preparó en la conversación una guía para grabar el
+  video, sin incorporarla al repositorio.
+- **Verificado por el agente:** que los enlaces del README y de la auditoría apunten a archivos
+  existentes y `git diff --check`. Los números de pruebas corresponden a la última corrida completa:
+  120 unitarias y 55 E2E.
+- **Verificación personal del autor:** pendiente. Leer el README completo y grabar el video (11.4).
+- **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
+
 ## Cómo añadir una entrada
 
 En cada cambio asistido se registra, de forma breve:
