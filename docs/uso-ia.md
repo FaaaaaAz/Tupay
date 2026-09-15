@@ -56,6 +56,23 @@ manualmente los commits y el push.
   La IA no afirma haber realizado esa evaluación auditiva subjetiva.
 - **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
 
+### Tareas 10.8–10.9 — 15 de septiembre de 2026
+
+- **Solicitud:** integrar los sonidos y completar la revisión audiovisual para cerrar fase 10.
+- **Aporte de la IA:** obtuvo vistas previas públicas CC0 de perro/resortera, conectó música,
+  tiros, goles, poder, emotes y transiciones a acciones/confirmaciones reales; conectó pausa,
+  conservación de posición y cancelación de cargas. Actualizó inventario/licencias sin
+  añadir dependencias ni cambiar la simulación.
+- **Verificado por el agente:** lint, tipos, build local, 113 unitarias y 53 E2E aprobados;
+  decodificación de los 23 archivos y comparación SHA-256 de originales/copia web. Auditoría
+  de eventos sin repeticiones, silencio, movimiento reducido, teclado de controles/modales y
+  tiempos entre cuadros con/sin audio. Evidencia en `docs/evidencias/fase-10-auditoria.md`.
+- **Recortes documentados:** dormida sin voz; tonos reutilizados para enojada/seria; contactos
+  y gol fallado sin sonidos por falta de eventos fiables. No se incorporó hinchada.
+- **Verificación personal del autor:** pendiente escuchar bucles y mezcla, revisar sensación de
+  resortera/tiro y adecuación de los jingles. No se afirma una evaluación auditiva subjetiva de la IA.
+- **Publicación y commit:** pendientes; no se ejecutaron commits, push ni tags.
+
 ## Cómo añadir una entrada
 
 En cada cambio asistido se registra, de forma breve:

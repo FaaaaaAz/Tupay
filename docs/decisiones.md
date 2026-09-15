@@ -866,6 +866,40 @@ de pausa en las tres resoluciones del plan; [captura](evidencias/fase-10-audio-p
 La escucha subjetiva de bucles, jingles y mezcla queda pendiente de aprobación del autor:
 la comprobación técnica no demuestra por sí sola que un sonido sea agradable.
 
+### Integración y cierre audiovisual (10.8–10.9)
+
+**Decisión.** Se conectó la música a creación, revancha y navegación reales. `usePartida`
+dispara impacto/emote solo después de la aceptación de Express y el gol al terminar su
+animación. El perro se anuncia una sola vez cuando aparece en el recorrido; la pausa no
+reinicia esa identidad. El apuntado suena una vez al superar el mínimo de arrastre y cancelar
+invalida también el audio todavía en carga. Poder y errores tienen señales propias.
+
+**Pausa y salida.** Se pausa audio al abrir el modal y mientras se confirma la pausa. Reanudar
+continúa la música desde su posición; cambiar de pantalla cancela efectos pendientes. Los
+bucles se declaran en el catálogo, no por nombres fijos en el motor. Los jingles de resultado
+no se repiten: derrota cuando gana el servidor, victoria cuando gana una persona; con dos
+jugadores se celebra al ganador. El empate no usa ninguno de esos jingles.
+
+**Recursos resueltos.** Se descargaron las vistas previas públicas OGG CC0 de
+[Dog_Bark.wav](https://freesound.org/people/michael_grinnell/sounds/464400/) y
+[Slingshot](https://freesound.org/people/renne100/sounds/353033/), sin iniciar sesión ni obtener
+los originales restringidos. Procedencia y enlaces en
+[licencias/freesound.md](../assets/audio/licencias/freesound.md). Hay 23 recursos, 1,64 MB,
+sin transcodificación y con copias verificadas. Se mantiene la exclusión de hinchada.
+
+**Límites.** Dormida no necesita una voz para funcionar; enojada/seria reutilizan tonos en
+el canal de reacciones, con menor ganancia y prioridad. No se añadieron contactos ficticios
+ni «gol fallado»: el contrato no informa esos eventos. No se modifica la simulación para
+justificar un efecto decorativo.
+
+**Auditoría.** Lint, tipos, build, 113 unitarias y 53 E2E aprobados. Se verificó silencio,
+movimiento reducido, teclado de controles/modales, eventos únicos, pausa, revancha, caché y
+fallos de audio. Mediana entre cuadros de 16,7 ms tanto con audio como en silencio en la
+muestra local; 20 descargas únicas con audio y ninguna en silencio. Sin dependencias nuevas
+ni temporizadores por cuadro para audio. Resultados, límites y evidencias en
+[fase-10-auditoria.md](evidencias/fase-10-auditoria.md). La valoración auditiva subjetiva de los
+bucles y la mezcla sigue pendiente del autor, separada de la validación técnica.
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano

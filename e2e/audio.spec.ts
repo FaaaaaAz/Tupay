@@ -1,31 +1,8 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { observarAudio } from "./observarAudio.js";
 import { readdirSync } from "node:fs";
 import { abrirMenu, elegirEnElMenu, empezarPartido } from "./ayudantes.js";
 
-declare global {
-  interface Window { audioPrueba: { iniciados: number; bucles: number; activos: number; contextos: number } }
-}
-async function observarAudio(page: Page) {
-  await page.addInitScript(() => {
-    window.audioPrueba = { iniciados: 0, bucles: 0, activos: 0, contextos: 0 };
-    const Original = window.AudioContext;
-    window.AudioContext = class extends Original {
-      constructor() { super(); window.audioPrueba.contextos++; }
-      override createBufferSource() {
-        const fuente = super.createBufferSource();
-        const iniciar = fuente.start.bind(fuente);
-        fuente.start = (cuando = 0, offset = 0) => {
-          window.audioPrueba.iniciados++;
-          window.audioPrueba.activos++;
-          if (fuente.loop) window.audioPrueba.bucles++;
-          fuente.addEventListener("ended", () => window.audioPrueba.activos--, { once: true });
-          iniciar(cuando, offset);
-        };
-        return fuente;
-      }
-    };
-  });
-}
 
 test("audio espera Iniciar, mantiene una música, persiste ajustes y permite silencio", async ({ page }) => {
   const errores: string[] = [];
@@ -61,10 +38,10 @@ test("audio espera Iniciar, mantiene una música, persiste ajustes y permite sil
   expect(errores).toEqual([]);
 });
 
-test("audio de menú se detiene al jugar; controles de pausa accesibles sin cambiar el partido", async ({ page, request }, info) => {
+test("audio de partido se detiene al pausar; controles accesibles sin cambiar el partido", async ({ page, request }, info) => {
   await observarAudio(page);
   const partida = await empezarPartido(page);
-  await expect.poll(() => page.evaluate(() => window.audioPrueba.activos)).toBe(0);
+  await expect.poll(() => page.evaluate(() => window.audioPrueba.bucles)).toBe(2);
   await page.getByRole("button", { name: "Pausar" }).click();
   const modal = page.getByRole("dialog", { name: "Partido en pausa" });
   await expect(modal.getByRole("button", { name: "Reanudar partido" })).toBeEnabled();
@@ -88,7 +65,7 @@ test("audio de menú se detiene al jugar; controles de pausa accesibles sin camb
 
 test("todos los recursos publicados se descargan, decodifican y contienen señal real", async ({ page }, info) => {
   const archivos = readdirSync("dist/cliente/assets").filter((archivo) => archivo.endsWith(".ogg"));
-  expect(archivos).toHaveLength(21);
+  expect(archivos).toHaveLength(23);
   await page.goto("/");
   const mediciones = [];
   for (const archivo of archivos) {
