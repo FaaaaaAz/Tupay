@@ -204,12 +204,18 @@ input {
   background-position: center;
 }
 
+/* El título es una ilustración a todo color. Su alto sigue a la pantalla para que las tarjetas entren. */
 .menu__titulo {
-  margin: 0;
-  font-size: clamp(3rem, 6vw, 5rem);
-  letter-spacing: 0.12em;
-  color: var(--dorado);
-  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.5);
+  margin: 0 0 1.4rem;
+  line-height: 0;
+}
+
+.menu__titulo img {
+  display: block;
+  height: clamp(7rem, 22vh, 13rem);
+  max-width: min(90vw, 46rem);
+  object-fit: contain;
+  filter: drop-shadow(0 10px 18px #000a);
 }
 
 .menu__tarjetas {
@@ -246,6 +252,7 @@ input {
 }
 
 .tarjeta-menu__nombre {
+  text-align: center;
   font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -284,15 +291,36 @@ input {
   animation: entrar-panel 260ms ease-out;
 }
 
+/* Tres columnas: volver a la izquierda, el título centrado y, si hay, un dato a la derecha. */
 .panel__cabecera {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--borde);
 }
 
+.panel__cabecera > :first-child { justify-self: start; }
+.panel__cabecera > :nth-child(3) { justify-self: end; }
+
+/* «Volver» se nota como botón sin competir con el título: borde dorado y un relleno apenas amarillo. */
+.panel__cabecera > .boton--enlace {
+  padding: 0.45rem 1rem;
+  font-size: 0.9rem;
+  color: var(--dorado);
+  background: #f2c14e1a;
+  border: 1px solid var(--borde-acento);
+  opacity: 1;
+}
+
+.panel__cabecera > .boton--enlace:hover:not(:disabled) {
+  background: #f2c14e30;
+  border-color: var(--dorado);
+}
+
 .panel__cabecera h1 {
+  text-align: center;
   margin: 0;
   color: var(--dorado);
   letter-spacing: 0.08em;
@@ -755,7 +783,7 @@ input[type="checkbox"] {
   pointer-events: none;
 }
 .menu__cabecera { text-align: center; }
-.menu__leyenda, .resultado__etiqueta {
+.resultado__etiqueta {
   color: var(--dorado);
   font-size: 0.72rem;
   font-weight: 800;
@@ -763,7 +791,6 @@ input[type="checkbox"] {
   text-transform: uppercase;
   margin: 0 0 0.5rem;
 }
-.menu__subtitulo { color: #eef1e9; margin: 0.3rem 0 0; font-size: 1rem; text-shadow: 0 2px 6px #000; }
 .menu > .boton--enlace { background: #08192cbd; border: 1px solid var(--borde); padding: 0.65rem 1.2rem; }
 /* Alto fijo: la tarjeta no salta mientras carga la ilustración, que se centra en ese hueco. */
 .tarjeta-menu__imagen {
@@ -821,7 +848,8 @@ input[type="checkbox"] {
 @media (max-width: 600px) {
   .menu, .fondo-panel { padding: 1rem; }
   .panel { padding: 1.2rem; }
-  .panel__cabecera { flex-wrap: wrap; }
+  .panel__cabecera { grid-template-columns: 1fr; }
+  .panel__cabecera > * { justify-self: center; }
   .menu__tarjetas { grid-template-columns: minmax(0, 24rem); }
   .tarjeta-menu { min-height: 12rem; }
   .enfrentamiento { gap: 0.4rem; }

@@ -19,9 +19,9 @@ export function Menu({ alElegirModo, alVerTemporada, alVerInstrucciones, alVolve
     <main className="menu" style={{ backgroundImage: `url(${IMAGENES.menu})` }}>
       <ControlesAudio />
       <header className="menu__cabecera">
-        <p className="menu__leyenda">Fútbol de tapitas · Bolivia</p>
-        <h1 className="menu__titulo">Tupay</h1>
-        <p className="menu__subtitulo">Tu equipo. Tu jugada. Tu cancha.</p>
+        <h1 className="menu__titulo">
+          <img src={IMAGENES.titulo} alt="Tupay" fetchPriority="high" />
+        </h1>
       </header>
 
       <div className="menu__tarjetas">
