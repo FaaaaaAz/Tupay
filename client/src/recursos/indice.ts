@@ -40,6 +40,11 @@ import pelota from "./juego/pelota.webp";
 import perro from "./juego/perro.webp";
 import inicio from "./pantallas/inicio.webp";
 import menu from "./pantallas/menu.webp";
+import paneles from "./pantallas/paneles.webp";
+import tarjetaEliminatoria from "./tarjetas/eliminatoria.webp";
+import tarjetaInstrucciones from "./tarjetas/instrucciones.webp";
+import tarjetaLiga from "./tarjetas/liga.webp";
+import tarjetaTemporada from "./tarjetas/temporada.webp";
 
 // Vite les agrega un hash a las imágenes importadas, así el navegador puede guardarlas en caché.
 // Si falta la imagen de un equipo, estadio, emote o charco del contrato, TypeScript no compila.
@@ -96,4 +101,13 @@ export const IMAGEN_DE_CHARCO: Record<TipoCharco, string> = {
   nieve: charcoDeNieve,
 };
 
-export const IMAGENES = { arco, pelota, perro, inicio, menu };
+/** La ilustración de cada tarjeta del menú. */
+export const IMAGEN_DE_TARJETA = {
+  eliminatoria: tarjetaEliminatoria,
+  liga: tarjetaLiga,
+  temporada: tarjetaTemporada,
+  instrucciones: tarjetaInstrucciones,
+};
+
+/** `paneles` es el fondo de configuración, instrucciones, temporada y resultado; lo dibuja `global.css`. */
+export const IMAGENES = { arco, pelota, perro, inicio, menu, paneles };
