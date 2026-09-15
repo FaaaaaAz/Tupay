@@ -101,6 +101,20 @@ manualmente los commits y el push.
   `Esc`, y juzgar si su duración resulta cómoda.
 - **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
 
+### Duración con radios, opciones centradas y perro ilustrado — 15 de septiembre de 2026
+
+- **Solicitud:** cambiar el `select` de duración por radios, centrar todos los grupos de opciones
+  y mostrar al perro junto a su casilla, sin que el formulario tenga que desplazarse.
+- **Aporte de la IA:** radios de duración en `Configuracion` y `ConfigurarTemporada`, grupos y
+  etiquetas centrados, píldora del perro con estado a color o apagado, ajuste de espacios para
+  pantallas bajas y borrado de los estilos de `select` y `.campo`.
+- **Verificado por el agente:** lint, tipos, unitarias y E2E. La prueba de presentación comprueba
+  que Eliminatoria, Liga y Configurar temporada no se desplazan en 1280 × 720, 1366 × 768 y
+  1920 × 1080; se revisaron sus capturas.
+- **Verificación personal del autor:** pendiente. Revisar el tamaño del perro y el centrado en la
+  pantalla de uso habitual.
+- **Publicación y commit:** pendientes; no se ejecutaron commits, push ni despliegues.
+
 ## Cómo añadir una entrada
 
 En cada cambio asistido se registra, de forma breve:

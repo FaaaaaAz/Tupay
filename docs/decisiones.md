@@ -1008,6 +1008,23 @@ Por eso el silbato se cortaba apenas empezaba. Ahora:
 confirmar la pausa no lo corta. La E2E de audio en juego comprueba que pausar suma un solo silbato y
 que después no queda ningún sonido activo.
 
+### La duración se elige con radios y las opciones van centradas
+
+**Decisión.** En Liga y en Configurar temporada, la duración real del partido se elige con radios,
+igual que los jugadores, la dificultad y la meta de goles. Todos los grupos de opciones, sus títulos
+y la etiqueta del estadio van centrados. La casilla del perro lleva su ilustración y se ve como una
+píldora: a color cuando el perro puede entrar y apagado cuando no.
+
+**Por qué.** El `select` era el único control nativo que quedaba en la configuración y su lista
+desplegable no seguía el estilo del juego. Con tres opciones, los radios muestran todo a la vista.
+Alineados a la izquierda, los grupos quedaban desparejos debajo de los carruseles, que están centrados.
+
+**Sin desplazamiento.** El perro y los radios agregan alto, y en 1280 × 720 el panel de Liga llegaba
+al borde. En pantallas de menos de 800 px de alto se achicaron el espacio entre filas, el margen de los
+títulos y el perro (2,4 rem en lugar de 3,4 rem). Se borraron los estilos de `select` y `.campo`, que
+ya no usaba nadie. La prueba de presentación ahora exige, en los tres tamaños, que Eliminatoria, Liga
+y Configurar temporada no se desplacen verticalmente.
+
 ## Decisiones de infraestructura
 
 ### Despliegue temprano
@@ -1093,3 +1110,4 @@ necesitara servicios adicionales.
 | El empate suena a aplausos | El resultado empatado era el único sin sonido. |
 | Ilustraciones en las tarjetas del menú y estadio de fondo en los paneles | Los iconos SVG y los patrones CSS se veían genéricos al lado del arte de la portada y el menú. |
 | Un árbitro reemplaza al símbolo de pausa y pausar suena a silbato | El «Ⅱ» era genérico; el silbato existente anuncia la pausa sin sumar archivos de audio. |
+| La duración se elige con radios y las opciones van centradas | El `select` desplegable no seguía el estilo del juego y los grupos alineados a la izquierda quedaban desparejos. |

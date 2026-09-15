@@ -241,7 +241,9 @@ El menú conserva su ilustración con viñeta, y cada tarjeta lleva su propia il
 (tapitas con la copa, el cronómetro, el calendario o el árbitro). Las tarjetas, los paneles y los
 modales comparten superficies azul nocturno, acentos dorados, radios y sombras definidos en
 `global.css`. Configuración, instrucciones, temporada y resultado comparten un mismo estadio
-nocturno de fondo, con viñeta, detrás de un panel algo translúcido. Las entradas y los estados de
+nocturno de fondo, con viñeta, detrás de un panel algo translúcido. En la configuración todas las
+opciones (jugadores, dificultad, meta de goles y duración) son radios centrados, y la casilla del
+perro lleva su ilustración. Los formularios entran enteros en pantalla, sin desplazarse. Las entradas y los estados de
 foco/selección son breves y respetan la preferencia de movimiento reducido.
 
 En la cancha, la flecha se acompaña de un anillo y un porcentaje de potencia. El poder activo
