@@ -138,7 +138,9 @@ export function Cancha({ partida, cuadro, rotacionPelota, puedeApuntar, tiroDePo
           const posicion = cuadro ? cuadro.tapitas[indice] : tapita.posicion;
           const activa = quieta && tapita.lado === partida.turno.lado;
           const apuntable = activa && puedeApuntar;
-          const clases = ["tapita", activa && "tapita--activa", apuntable && "tapita--apuntable"]
+          const clases = ["tapita", activa && "tapita--activa", apuntable && "tapita--apuntable",
+            apuntadoVigente?.tapita.id === tapita.id && "tapita--seleccionada",
+            apuntable && tiroDePoder && "tapita--poder"]
             .filter(Boolean)
             .join(" ");
           const tamano = geometria.tamanoTapita;
@@ -178,16 +180,27 @@ export function Cancha({ partida, cuadro, rotacionPelota, puedeApuntar, tiroDePo
           );
         })}
 
-        {perro && <Sprite href={IMAGENES.perro} centro={perro} tamano={geometria.tamanoPerro} testId="perro" />}
+        {perro && (
+          <g>
+            <ellipse className="perro__sombra" cx={perro.x} cy={perro.y + 17} rx="34" ry="12" />
+            <Sprite href={IMAGENES.perro} centro={perro} tamano={geometria.tamanoPerro} testId="perro" />
+          </g>
+        )}
 
         {pelotaAtrapada && (
-          <circle
+          <g>
+            <circle
             className="pelota__atrapada"
             cx={pelota.x}
             cy={pelota.y}
             r={cancha.radioPelota + 9}
             data-testid="pelota-atrapada"
-          />
+            />
+            <g className="pelota__aviso" transform={`translate(${Math.max(78, Math.min(cancha.ancho - 78, pelota.x))} ${Math.max(28, pelota.y - 42)})`}>
+              <rect x="-72" y="-17" width="144" height="29" rx="14" />
+              <text textAnchor="middle" y="3">{partida.pelota.golpesParaLiberar} {partida.pelota.golpesParaLiberar === 1 ? "golpe para salir" : "golpes para salir"}</text>
+            </g>
+          </g>
         )}
 
         {/* La pelota nunca se superpone con una tapita, así que puede ir encima: se ve en la boca del perro. */}
@@ -205,7 +218,8 @@ export function Cancha({ partida, cuadro, rotacionPelota, puedeApuntar, tiroDePo
         </g>
 
         {apuntadoVigente && (
-          <Flecha apuntado={apuntadoVigente} radio={cancha.radioTapita} poder={tiroDePoder} />
+          <Flecha apuntado={apuntadoVigente} radio={cancha.radioTapita} poder={tiroDePoder}
+            ancho={cancha.ancho} alto={cancha.alto} />
         )}
       </g>
     </svg>
@@ -240,7 +254,9 @@ function calcularTiro({ tapita, puntero }: Apuntado): { direccion: Vector; fuerz
   return { direccion, fuerza: Math.min(1, distancia / ARRASTRE_MAXIMO) };
 }
 
-function Flecha({ apuntado, radio, poder }: { apuntado: Apuntado; radio: number; poder: boolean }) {
+function Flecha({ apuntado, radio, poder, ancho, alto }: {
+  apuntado: Apuntado; radio: number; poder: boolean; ancho: number; alto: number;
+}) {
   const { tapita, puntero } = apuntado;
   const guia = (
     <line
@@ -269,12 +285,24 @@ function Flecha({ apuntado, radio, poder }: { apuntado: Apuntado; radio: number;
   const punta = [punto(hasta + 24), punto(hasta, 14), punto(hasta, -14)]
     .map(({ x, y }) => `${x},${y}`)
     .join(" ");
+  const porcentaje = Math.round(tiro.fuerza * 100);
+  const etiquetaX = Math.max(90, Math.min(ancho - 90, tapita.posicion.x));
+  const etiquetaY = tapita.posicion.y > alto - 105 ? tapita.posicion.y - radio - 50 : tapita.posicion.y + radio + 44;
 
   return (
     <g className={poder ? "apuntado apuntado--poder" : "apuntado"} data-testid="flecha">
       {guia}
+      <circle className="apuntado__carga-fondo" cx={tapita.posicion.x} cy={tapita.posicion.y} r={radio + 13} />
+      <circle className="apuntado__carga" cx={tapita.posicion.x} cy={tapita.posicion.y} r={radio + 13}
+        pathLength="100" strokeDasharray={`${porcentaje} 100`}
+        transform={`rotate(-90 ${tapita.posicion.x} ${tapita.posicion.y})`} />
       <line className="apuntado__flecha" x1={inicio.x} y1={inicio.y} x2={fin.x} y2={fin.y} />
       <polygon className="apuntado__punta" points={punta} />
+      <g className="apuntado__potencia" transform={`translate(${etiquetaX} ${etiquetaY})`}
+        role="meter" aria-label="Potencia del tiro" aria-valuemin={0} aria-valuemax={100} aria-valuenow={porcentaje}>
+        <rect x="-86" y="-20" width="172" height="38" rx="12" />
+        <text textAnchor="middle" y="4">{poder ? "PODER" : "POTENCIA"} · {porcentaje} %</text>
+      </g>
     </g>
   );
 }

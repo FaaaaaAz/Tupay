@@ -10,6 +10,7 @@ import type {
 import { BarraDeEmotes } from "../componentes/BarraDeEmotes";
 import { Cancha } from "../componentes/Cancha";
 import { Modal } from "../componentes/Modal";
+import { AvisoDeJugada } from "../componentes/AvisoDeJugada";
 import { equipoPorId } from "../hooks/useCatalogo";
 import { usePartida, type TiroDesdeLaCancha } from "../hooks/usePartida";
 import { IMAGEN_DE_ESCUDO } from "../recursos/indice";
@@ -91,6 +92,16 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
     describirEventos(juego.eventos, (lado) => equipoDe(lado).nombre) ??
     instruccion(juego.puedeTirar, juego.animando, jugadorDelTurno, equipoDe(ladoDelTurno).nombre, partida.pelota);
 
+  const gol = juego.eventos.find((evento) => evento.tipo === "gol");
+  const atrapada = juego.eventos.find((evento) => evento.tipo === "pelotaAtrapada");
+  const aviso = juego.cuadro?.perro
+    ? { tipo: "perro" as const, titulo: "¡El perro entró!", detalle: "Se lleva la pelota al otro lado" }
+    : juego.animando ? null
+    : gol ? { tipo: "gol" as const, titulo: "¡Gooool!", detalle: `${equipoDe(gol.lado).nombre}${terminada ? " · Final del partido" : " · ¡A seguir jugando!"}` }
+    : terminada ? { tipo: "final" as const, titulo: "Final del partido", detalle: "El resultado ya está confirmado" }
+    : atrapada ? { tipo: "charco" as const, titulo: "Pelota atrapada", detalle: `${atrapada.tipoCharco === "nieve" ? "Nieve" : "Agua"} · Golpéala para liberarla` }
+    : { tipo: "turno" as const, titulo: `Turno de ${equipoDe(ladoDelTurno).nombre}`, detalle: jugadorDelTurno.tipo === "humano" ? "Elige tu tapita y prepara el tiro" : "El rival prepara su jugada" };
+
   return (
     <main className={juego.pausada || modal ? "partida partida--pausada" : "partida"}>
       <header className="marcador">
@@ -102,7 +113,7 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
           {barraDeEmotes("local")}
         </EquipoEnMarcador>
         <div className="marcador__centro">
-          <span className="marcador__goles" data-testid="marcador">
+          <span key={`${partida.marcador.local}-${partida.marcador.visitante}`} className="marcador__goles" data-testid="marcador">
             {partida.marcador.local} – {partida.marcador.visitante}
           </span>
           <span className="marcador__detalle">
@@ -121,6 +132,10 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
       </header>
 
       <section className="partida__cancha">
+        {aviso && !juego.perdida && (
+          <AvisoDeJugada key={`${aviso.tipo}-${aviso.titulo}-${partida.marcador.local}-${partida.marcador.visitante}`}
+            {...aviso} pausado={juego.pausada || juego.cambiandoPausa || modal !== null} />
+        )}
         <Cancha
           partida={partida}
           cuadro={juego.cuadro}
@@ -133,7 +148,7 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
       </section>
 
       <footer className="partida__pie">
-        <p className="turno" data-testid="turno">
+        <p key={ladoDelTurno} className="turno" data-testid="turno">
           {terminada ? (
             "Partido terminado"
           ) : (
@@ -159,10 +174,12 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
           type="button"
           className="boton boton--secundario boton--poder"
           aria-pressed={poderVigente}
+          aria-label={`Tiro de poder (${jugadorDelTurno.tirosDePoder})`}
           disabled={!juego.puedeTirar || jugadorDelTurno.tirosDePoder === 0}
           onClick={() => { setTurnoDelPoder(partida.turno); setTiroDePoder(!poderVigente); }}
         >
           Tiro de poder ({jugadorDelTurno.tirosDePoder})
+          {poderVigente && <span className="poder-activado" aria-hidden="true">Activado · +50 %</span>}
         </button>
 
         <p className={juego.error ? "mensaje mensaje--error" : "mensaje"} role="status" data-testid="mensaje">

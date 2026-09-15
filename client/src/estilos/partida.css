@@ -6,7 +6,10 @@
 }
 
 .partida__acciones { display: flex; align-items: center; gap: 0.5rem; }
-.partida--pausada .cancha * { animation-play-state: paused; }
+.partida--pausada .cancha *,
+.partida--pausada .aviso-jugada,
+.partida--pausada .marcador *,
+.partida--pausada .partida__pie * { animation-play-state: paused !important; }
 .pelota__imagen {
   transform-box: fill-box;
   transform-origin: center;
@@ -88,6 +91,7 @@
 }
 
 .marcador__goles {
+  animation: marcar-gol 380ms ease-out;
   font-size: 2rem;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -197,6 +201,7 @@
 }
 
 .turno {
+  animation: entrar-turno 240ms ease-out;
   margin: 0;
   white-space: nowrap;
 }
@@ -260,6 +265,7 @@
 
 .tapita__emote {
   pointer-events: none;
+  animation: aparecer-emote 200ms ease-out;
 }
 
 .emotes {
@@ -307,4 +313,77 @@
   font-variant-numeric: tabular-nums;
   pointer-events: none;
   text-shadow: 0 1px 3px #000;
+}
+
+/* Respuesta de la jugada: capas pequeñas que nunca interceptan el puntero. */
+.aviso-jugada {
+  position: absolute;
+  z-index: var(--capa-aviso, 2);
+  top: 0.65rem;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: max-content;
+  max-width: calc(100% - 2rem);
+  padding: 0.65rem 1.2rem;
+  border: 1px solid var(--borde-acento, #f2c14e66);
+  border-radius: var(--radio-tarjeta, 1rem);
+  color: var(--crema);
+  background: #0a1c2eef;
+  box-shadow: 0 6px 24px #0005;
+  pointer-events: none;
+  animation: entrar-aviso 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.aviso-jugada strong, .aviso-jugada span:not(.aviso-jugada__simbolo) { display: block; }
+.aviso-jugada strong { font-size: 1rem; color: var(--dorado); }
+.aviso-jugada span:not(.aviso-jugada__simbolo) { font-size: 0.75rem; color: #d1dce5; margin-top: 0.15rem; }
+.aviso-jugada__simbolo { font-size: 1.5rem; color: var(--dorado); }
+.aviso-jugada--gol { border-color: var(--dorado); background: linear-gradient(110deg, #493815f2, #10273af5); }
+.aviso-jugada--gol strong { font-size: 1.55rem; text-transform: uppercase; letter-spacing: 0.12em; }
+.aviso-jugada--charco { border-color: #9adbf7; }
+.aviso-jugada--charco strong { color: #bfeaff; }
+.aviso-jugada--perro { border-color: #efb07a; }
+.tapita--seleccionada .tapita__brillo { animation: none; opacity: 1; stroke: white; stroke-width: 3; }
+.tapita--poder .tapita__brillo { stroke: #ffb45b; filter: drop-shadow(0 0 6px #ff972d); }
+.apuntado__guia { stroke-width: 4; }
+.apuntado__flecha { filter: drop-shadow(0 2px 2px #0008); }
+.apuntado__carga-fondo { fill: none; stroke: #071b31b8; stroke-width: 7; }
+.apuntado__carga { fill: none; stroke: #f2d572; stroke-width: 6; stroke-linecap: round; }
+.apuntado--poder .apuntado__carga { stroke: #ffae57; }
+.apuntado__potencia rect { fill: #071b31f2; stroke: #f2d572; stroke-width: 2; }
+.apuntado__potencia text { fill: #fff4d6; font-size: 15px; font-weight: 800; letter-spacing: 1px; }
+.apuntado--poder .apuntado__potencia rect { fill: #442415; stroke: #ffae57; }
+.boton--poder { position: relative; }
+.poder-activado {
+  position: absolute;
+  bottom: calc(100% + 0.6rem);
+  left: 50%;
+  translate: -50% 0;
+  width: max-content;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid #ffb55d;
+  border-radius: 0.5rem;
+  background: #422512;
+  color: #fff1d6;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+.boton--poder[aria-pressed="true"] { animation: activar-poder 240ms ease-out; }
+.pelota__aviso { pointer-events: none; animation: aparecer-emote 220ms ease-out; }
+.pelota__aviso rect { fill: #08283ef2; stroke: #bfeaff; stroke-width: 1.5; }
+.pelota__aviso text { fill: #e0f5ff; font-size: 14px; font-weight: 700; }
+.perro__sombra { fill: #0005; pointer-events: none; }
+.charco { animation: entrar-charco 400ms ease-out; }
+@keyframes entrar-aviso { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes entrar-turno { from { opacity: 0.4; transform: translateX(-5px); } to { opacity: 1; transform: none; } }
+@keyframes marcar-gol { 40% { color: var(--dorado); transform: scale(1.12); } }
+@keyframes activar-poder { 50% { transform: scale(1.05); } }
+@keyframes aparecer-emote { from { opacity: 0; } to { opacity: 1; } }
+@keyframes entrar-charco { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .partida *, .partida *::before, .partida *::after { animation: none !important; }
 }
