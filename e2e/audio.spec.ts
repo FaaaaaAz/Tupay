@@ -10,7 +10,7 @@ test("audio espera Iniciar, mantiene una música, persiste ajustes y permite sil
   page.on("console", (mensaje) => { if (mensaje.type() === "error") errores.push(mensaje.text()); });
   await observarAudio(page);
   const descargas: string[] = [];
-  page.on("request", (req) => { if (req.url().includes(".ogg")) descargas.push(req.url()); });
+  page.on("request", (req) => { if (/\.(ogg|mp3|wav)(\?|$)/.test(req.url())) descargas.push(req.url()); });
   await page.goto("/");
   await expect(page.getByTestId("estado-servidor")).toContainText("Servidor en línea");
   expect(await page.evaluate(() => window.audioPrueba.contextos)).toBe(0);
@@ -68,12 +68,12 @@ test("todos los recursos publicados se descargan, decodifican y contienen señal
   // no hay build local. El catálogo usa `import.meta.glob` inmediato, así que todas las URLs
   // con hash quedan dentro del script principal que carga `index.html`.
   const originales = readdirSync("client/src/recursos/audio", { recursive: true, encoding: "utf8" })
-    .filter((ruta) => ruta.endsWith(".ogg"));
+    .filter((ruta) => /\.(ogg|mp3|wav)$/.test(ruta));
   const html = await (await request.get("/")).text();
   const script = html.match(/<script[^>]+src="([^"]+\.js)"/)?.[1];
   expect(script, "index.html no carga ningún script").toBeTruthy();
   const codigo = await (await request.get(script ?? "")).text();
-  const archivos = [...new Set(codigo.match(/\/assets\/[\w.-]+\.ogg/g) ?? [])].map((url) => url.slice("/assets/".length));
+  const archivos = [...new Set(codigo.match(/\/assets\/[\w.-]+\.(?:ogg|mp3|wav)/g) ?? [])].map((url) => url.slice("/assets/".length));
   expect(archivos).toHaveLength(originales.length);
   await page.goto("/");
   const mediciones = [];

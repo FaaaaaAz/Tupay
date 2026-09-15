@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { abrirMenu, elegirEnElMenu, esPedido } from "./ayudantes.js";
+import { abrirMenu, elegirEnCarrusel, elegirEnElMenu, esPedido } from "./ayudantes.js";
 
 test("elegir dos veces el mismo equipo muestra el mensaje que respondió Express", async ({ page }) => {
   await abrirMenu(page);
   await elegirEnElMenu(page, "Eliminatoria");
-  await page.getByLabel("Rival").selectOption("bolivar");
+  await elegirEnCarrusel(page, "Rival", "bolivar");
 
   const creacion = page.waitForResponse(esPedido("POST", "/api/partidas"));
   await page.getByRole("button", { name: "Jugar" }).click();

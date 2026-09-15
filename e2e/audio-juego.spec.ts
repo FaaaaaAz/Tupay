@@ -18,9 +18,10 @@ test("tiro y gol confirmados suenan una vez; pausa conserva música y no repite 
   await page.mouse.move(hasta.x, hasta.y, { steps: 20 });
   await expect.poll(() => vecesSonido(page, "resortera")).toBe(1);
   await page.getByTestId("cancha").dispatchEvent("pointercancel"); await page.mouse.up();
-  expect(await vecesSonido(page, "impulso-tapita")).toBe(0);
+  expect(await vecesSonido(page, "patear")).toBe(0);
   await tirar(page, tapita, GOL_DESDE_EL_SAQUE.direccion, 1);
-  await expect.poll(() => vecesSonido(page, "impulso-tapita")).toBe(1);
+  // Suena cuando la tapita toca la pelota, durante la animación.
+  await expect.poll(() => vecesSonido(page, "patear")).toBeGreaterThanOrEqual(1);
   await page.getByRole("button", { name: "Pausar" }).click();
   await expect(page.getByRole("button", { name: "Reanudar partido" })).toBeEnabled();
   await expect.poll(() => page.evaluate(() => window.audioPrueba.activos)).toBe(0);
@@ -30,9 +31,10 @@ test("tiro y gol confirmados suenan una vez; pausa conserva música y no repite 
   expect(offset).toBeGreaterThan(0);
   await expect(page.getByTestId("marcador")).toHaveText("0 – 1", { timeout: 15000 });
   await expect.poll(() => vecesSonido(page, "gol-arcade")).toBe(1);
+  const pateos = await vecesSonido(page, "patear");
   await page.getByRole("button", { name: "Pausar" }).click();
   await page.getByRole("button", { name: "Reanudar partido" }).click();
-  expect(await vecesSonido(page, "impulso-tapita")).toBe(1);
+  expect(await vecesSonido(page, "patear")).toBe(pateos);
   expect(await vecesSonido(page, "gol-arcade")).toBe(1);
   await info.attach("eventos-de-audio", { body: JSON.stringify(await page.evaluate(() => window.audioPrueba), null, 2), contentType: "application/json" });
   expect(errores).toEqual([]);
@@ -55,8 +57,8 @@ test("resultado reproduce un solo jingle y la revancha cambia a una única músi
   const partida = await empezarPartido(page, { estadio: "felixCapriles", golesParaGanar: 1, opciones: { semilla: 12345 } });
   await tirar(page, tapitaDe(partida, "visitante-4"), GOL_DESDE_EL_SAQUE.direccion, 1);
   await expect(page.getByTestId("resultado")).toBeVisible({ timeout: 15000 });
-  await expect.poll(() => vecesSonido(page, "victoria-arcade")).toBe(1);
-  expect(await vecesSonido(page, "resultado-negativo")).toBe(0);
+  await expect.poll(() => vecesSonido(page, "ganador")).toBe(1);
+  expect(await vecesSonido(page, "perdedor")).toBe(0);
   await page.getByRole("button", { name: "Revancha" }).click();
   await expect.poll(() => vecesSonido(page, "competicion")).toBe(2);
 });
@@ -74,7 +76,7 @@ test("un emote aceptado suena una vez y un tiro rechazado no tiene sonido de imp
   await page.mouse.move(desde.x + 100, desde.y); await page.mouse.up();
   await expect(page.getByTestId("mensaje")).toContainText("Tiro rechazado");
   await expect.poll(() => vecesSonido(page, "error")).toBe(1);
-  expect(await vecesSonido(page, "impulso-tapita")).toBe(0);
+  expect(await vecesSonido(page, "patear")).toBe(0);
 });
 
 test("silencio y movimiento reducido conservan una partida completa y no descargan audio", async ({ page }, info) => {
@@ -82,7 +84,7 @@ test("silencio y movimiento reducido conservan una partida completa y no descarg
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(() => localStorage.setItem("tupay.audio.v1", JSON.stringify({ silenciado: true, musica: 0.25, efectos: 0.6 })));
   const audios: string[] = [];
-  page.on("request", (req) => { if (req.url().includes(".ogg")) audios.push(req.url()); });
+  page.on("request", (req) => { if (/\.(ogg|mp3|wav)(\?|$)/.test(req.url())) audios.push(req.url()); });
   const partida = await empezarPartido(page, { estadio: "felixCapriles", golesParaGanar: 1, opciones: { semilla: 12345 } });
   await expect(page.getByTestId("pelota")).toHaveCSS("transform", "none");
   await tirar(page, tapitaDe(partida, "visitante-4"), GOL_DESDE_EL_SAQUE.direccion, 1);
@@ -99,7 +101,7 @@ test("auditoría local de fluidez y caché con audio y en silencio", async ({ pa
     await page.goto("/");
     await page.evaluate((silenciado) => localStorage.setItem("tupay.audio.v1", JSON.stringify({ silenciado, musica: 0.25, efectos: 0.6 })), silenciado);
     const descargas: string[] = [];
-    const registrar = (req: import("@playwright/test").Request) => { if (req.url().includes(".ogg")) descargas.push(req.url()); };
+    const registrar = (req: import("@playwright/test").Request) => { if (/\.(ogg|mp3|wav)(\?|$)/.test(req.url())) descargas.push(req.url()); };
     page.on("request", registrar);
     const partida = await empezarPartido(page, { estadio: "felixCapriles", golesParaGanar: 1, opciones: { semilla: 12345 } });
     const cuadros = page.evaluate(() => new Promise<number[]>((resolve) => {

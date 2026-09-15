@@ -48,6 +48,16 @@ export async function elegirEnElMenu(page: Page, opcion: OpcionDelMenu): Promise
   await page.getByRole("button", { name: new RegExp(`^${opcion}`) }).click();
 }
 
+/** Avanza un carrusel (equipo o estadio) con su flecha hasta que muestra la opción pedida. */
+export async function elegirEnCarrusel(page: Page, etiqueta: string, id: string): Promise<void> {
+  const carrusel = page.getByRole("group", { name: etiqueta, exact: true });
+  for (let intento = 0; intento < 12; intento++) {
+    if ((await carrusel.getAttribute("data-valor")) === id) return;
+    await carrusel.getByRole("button", { name: "Siguiente" }).click();
+  }
+  await expect(carrusel).toHaveAttribute("data-valor", id);
+}
+
 /** Agrega opciones de prueba al pedido de creación de la partida. El servidor las valida igual que siempre. */
 export async function agregarOpcionesDePrueba(page: Page, opciones: OpcionesDePrueba): Promise<void> {
   await page.route("**/api/partidas", async (ruta) => {
@@ -64,7 +74,7 @@ export async function empezarPartido(page: Page, configuracion: ConfiguracionDeP
   await abrirMenu(page);
   await elegirEnElMenu(page, modo);
   if (jugadores === 2) await page.getByLabel("2 jugadores en este dispositivo").check();
-  if (estadio) await page.getByLabel("Estadio").selectOption(estadio);
+  if (estadio) await elegirEnCarrusel(page, "Estadio", estadio);
   if (golesParaGanar) {
     await page.getByRole("group", { name: "Meta de goles" }).getByLabel(String(golesParaGanar), { exact: true }).check();
   }

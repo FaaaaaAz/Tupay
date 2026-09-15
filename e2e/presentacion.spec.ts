@@ -60,6 +60,8 @@ test("la pausa conserva el aviso de turno y movimiento reducido elimina la anima
 });
 
 test("menú, configuración, temporada y resultado conservan el diseño en tres tamaños", async ({ page }, info) => {
+  // Juega tres partidos completos, uno por tamaño: necesita más que el tiempo de una prueba común.
+  test.slow();
   for (const [width, height] of [[1280, 720], [1366, 768], [1920, 1080]]) {
     await page.setViewportSize({ width, height });
     await abrirMenu(page);
