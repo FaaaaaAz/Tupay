@@ -123,8 +123,11 @@ export class MotorAudio {
       (canal === "musica" ? p.musica > 0 && !this.pausado : p.efectos > 0 && (canal === "interfaz" || !this.pausado));
   }
 
-  /** No encola efectos viejos: descarta cargas lentas, duplicados y ráfagas. */
-  async efecto(id: string, canalAlternativo?: "reacciones"): Promise<boolean> {
+  /**
+   * No encola efectos viejos: descarta cargas lentas, duplicados y ráfagas. Por `interfaz`, un sonido
+   * del juego puede sonar durante la pausa, como el silbato que la anuncia.
+   */
+  async efecto(id: string, canalAlternativo?: "reacciones" | "interfaz"): Promise<boolean> {
     const recurso = this.recursos[id];
     const canal = canalAlternativo ?? recurso?.canal;
     if (!recurso || !canal || canal === "musica" || !this.puedeSonar(canal)) return false;
@@ -141,7 +144,7 @@ export class MotorAudio {
         for (const [nodo, activo] of this.activos) if (activo.canal === "reacciones") { nodo.stop(); this.activos.delete(nodo); }
       }
       if (this.activos.size >= 4) return false;
-      const nodo = this.crearFuente(buffer, { ...recurso, canal, ganancia: canalAlternativo ? Math.min(0.25, recurso.ganancia) : recurso.ganancia });
+      const nodo = this.crearFuente(buffer, { ...recurso, canal, ganancia: canalAlternativo === "reacciones" ? Math.min(0.25, recurso.ganancia) : recurso.ganancia });
       this.activos.set(nodo, { id, canal });
       nodo.onended = () => { this.activos.delete(nodo); nodo.disconnect(); };
       nodo.start();
@@ -214,9 +217,10 @@ export class MotorAudio {
     this.activos.clear();
   }
 
+  /** Solo corta los efectos al entrar en pausa: confirmarla otra vez no apaga lo que suena en ella. */
   pausar(pausado: boolean) {
+    if (pausado && !this.pausado) this.detenerEfectos();
     this.pausado = pausado;
-    if (pausado) this.detenerEfectos();
     void this.actualizarMusica();
   }
 

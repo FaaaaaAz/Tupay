@@ -43,8 +43,14 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
   const jugadorDelTurno = partida[ladoDelTurno];
   const terminada = partida.estado === "finalizada" && !juego.animando;
   const finSonado = useRef(false);
+  const silbatoPendiente = useRef(false);
   useEffect(() => {
     audio.pausar(juego.pausada || juego.cambiandoPausa || juego.perdida || modal !== null);
+    // Después de pausar el audio del juego, así la pausa no corta el silbato que la anuncia.
+    if (silbatoPendiente.current && modal === "pausa") {
+      silbatoPendiente.current = false;
+      void audio.efecto("inicio", "interfaz");
+    }
   }, [juego.pausada, juego.cambiandoPausa, juego.perdida, modal]);
   useEffect(() => {
     if (!terminada || finSonado.current) return;
@@ -64,12 +70,18 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
     function tecla(evento: KeyboardEvent) {
       if (evento.key !== "Escape" || modal || juego.perdida || terminada || !juego.puedePausar) return;
       evento.preventDefault();
-      setModal("pausa");
-      void juego.cambiarPausa(true);
+      pausar();
     }
     window.addEventListener("keydown", tecla);
     return () => window.removeEventListener("keydown", tecla);
-  }, [juego, modal, terminada]);
+  });
+
+  /** Pausar desde el botón o con Esc: el árbitro toca el silbato. */
+  function pausar() {
+    silbatoPendiente.current = true;
+    setModal("pausa");
+    void juego.cambiarPausa(true);
+  }
 
   function tirar(tiro: TiroDesdeLaCancha) {
     juego.tirar({ ...tiro, tiroDePoder: poderVigente });
@@ -204,7 +216,7 @@ export function Partida({ partidaInicial, equipos, alTerminar, alSalir, esTempor
 
         <div className="partida__acciones">
           <button type="button" className="boton boton--secundario" disabled={!juego.puedePausar || terminada}
-            onClick={() => { setModal("pausa"); void juego.cambiarPausa(true); }}>
+            onClick={pausar}>
             <span aria-hidden="true">Ⅱ </span>Pausar
           </button>
           <button type="button" className="boton boton--enlace" disabled={!juego.puedePausar} onClick={salir}>Salir</button>
