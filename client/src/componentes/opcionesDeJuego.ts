@@ -1,10 +1,21 @@
 import type { EfectoEstadio, IdEmote } from "../../../compartido/catalogo.js";
 import type { Dificultad } from "../../../compartido/partida.js";
 
+/** El valor es la duración real del partido, en segundos. */
 export const DURACIONES_DE_LIGA = [
-  { segundos: 150, texto: "2 min 30 s" },
-  { segundos: 300, texto: "5 minutos" },
-  { segundos: 600, texto: "10 minutos" },
+  { valor: 150, texto: "2 min 30 s" },
+  { valor: 300, texto: "5 minutos" },
+  { valor: 600, texto: "10 minutos" },
+];
+
+export const JUGADORES_DE_PARTIDA: { valor: 1 | 2; texto: string }[] = [
+  { valor: 1, texto: "1 jugador contra el servidor" },
+  { valor: 2, texto: "2 jugadores en este dispositivo" },
+];
+
+export const JUGADORES_DE_TEMPORADA: { valor: 1 | 2; texto: string }[] = [
+  { valor: 1, texto: "1 jugador" },
+  { valor: 2, texto: "2 jugadores en este dispositivo" },
 ];
 
 export const DIFICULTADES: { valor: Dificultad; texto: string }[] = [

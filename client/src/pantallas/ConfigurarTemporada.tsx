@@ -2,10 +2,11 @@ import { useState, type FormEvent } from "react";
 import type { Equipo, IdEquipo } from "../../../compartido/catalogo.js";
 import type { Dificultad } from "../../../compartido/partida.js";
 import type { PeticionCrearTemporada } from "../../../compartido/temporada.js";
-import { DIFICULTADES, DURACIONES_DE_LIGA } from "../componentes/opcionesDeJuego";
+import { CasillaDelPerro } from "../componentes/CasillaDelPerro";
+import { GrupoDeOpciones } from "../componentes/GrupoDeOpciones";
+import { DIFICULTADES, DURACIONES_DE_LIGA, JUGADORES_DE_TEMPORADA } from "../componentes/opcionesDeJuego";
 import { SelectorDeEquipo } from "../componentes/SelectorDeEquipo";
 import { useCrearTemporada } from "../hooks/useCrearTemporada";
-import { IMAGENES } from "../recursos/indice";
 
 interface Props {
   equipos: Equipo[];
@@ -19,7 +20,8 @@ export function ConfigurarTemporada({ equipos, alEmpezar, alVolver }: Props) {
   const [segundo, setSegundo] = useState<IdEquipo>("theStrongest");
   const [dificultad, setDificultad] = useState<Dificultad>("medio");
   const [duracion, setDuracion] = useState(300);
-  const [perroActivo, setPerroActivo] = useState(true);
+  // Empieza desactivado: al activarlo se oye ladrar al perro.
+  const [perroActivo, setPerroActivo] = useState(false);
   const { crear, enviando, error } = useCrearTemporada();
 
   async function empezar(evento: FormEvent) {
@@ -50,17 +52,8 @@ export function ConfigurarTemporada({ equipos, alEmpezar, alVolver }: Props) {
           final el primero de la tabla es campeón.
         </p>
 
-        <fieldset className="grupo">
-          <legend>Jugadores</legend>
-          <label className="opcion">
-            <input type="radio" name="jugadores" checked={jugadores === 1} onChange={() => setJugadores(1)} />
-            1 jugador
-          </label>
-          <label className="opcion">
-            <input type="radio" name="jugadores" checked={jugadores === 2} onChange={() => setJugadores(2)} />
-            2 jugadores en este dispositivo
-          </label>
-        </fieldset>
+        <GrupoDeOpciones titulo="Jugadores" nombre="jugadores" opciones={JUGADORES_DE_TEMPORADA}
+          valor={jugadores} alCambiar={setJugadores} />
 
         <div className="equipos-temporada">
           <SelectorDeEquipo
@@ -74,41 +67,13 @@ export function ConfigurarTemporada({ equipos, alEmpezar, alVolver }: Props) {
           )}
         </div>
 
-        <fieldset className="grupo">
-          <legend>Dificultad de los rivales del servidor</legend>
-          {DIFICULTADES.map(({ valor, texto }) => (
-            <label key={valor} className="opcion">
-              <input
-                type="radio"
-                name="dificultad"
-                checked={dificultad === valor}
-                onChange={() => setDificultad(valor)}
-              />
-              {texto}
-            </label>
-          ))}
-        </fieldset>
+        <GrupoDeOpciones titulo="Dificultad de los rivales del servidor" nombre="dificultad" opciones={DIFICULTADES}
+          valor={dificultad} alCambiar={setDificultad} />
 
-        <fieldset className="grupo">
-          <legend>Duración real de cada partido</legend>
-          {DURACIONES_DE_LIGA.map(({ segundos, texto }) => (
-            <label key={segundos} className="opcion">
-              <input
-                type="radio"
-                name="duracion"
-                checked={duracion === segundos}
-                onChange={() => setDuracion(segundos)}
-              />
-              {texto}
-            </label>
-          ))}
-        </fieldset>
+        <GrupoDeOpciones titulo="Duración real de cada partido" nombre="duracion" opciones={DURACIONES_DE_LIGA}
+          valor={duracion} alCambiar={setDuracion} />
 
-        <label className="opcion opcion--perro">
-          <input type="checkbox" checked={perroActivo} onChange={(evento) => setPerroActivo(evento.target.checked)} />
-          <img src={IMAGENES.perro} alt="" />
-          El perro puede meterse a la cancha
-        </label>
+        <CasillaDelPerro activo={perroActivo} alCambiar={setPerroActivo} />
 
         {error && (
           <p className="mensaje mensaje--error" role="alert">

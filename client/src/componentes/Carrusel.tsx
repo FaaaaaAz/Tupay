@@ -1,5 +1,5 @@
 import { useState, type KeyboardEvent } from "react";
-import { audio } from "../audio/audio";
+import { sonarAlElegir } from "../audio/audio";
 
 export interface OpcionDeCarrusel<T extends string> {
   id: T;
@@ -35,9 +35,7 @@ export function Carrusel<T extends string>({ etiqueta, opciones, valor, alCambia
   function mover(paso: -1 | 1) {
     setDireccion(paso < 0 ? "anterior" : "siguiente");
     alCambiar(vecina(paso).id);
-    void audio.desbloquear().then((listo) => {
-      if (listo) void audio.efecto("clic");
-    });
+    sonarAlElegir("clic");
   }
 
   function tecla(evento: KeyboardEvent<HTMLDivElement>) {

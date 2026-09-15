@@ -1,14 +1,15 @@
 import { useState, type FormEvent } from "react";
 import type { Equipo, Estadio, IdEquipo, IdEstadio } from "../../../compartido/catalogo.js";
 import type { Dificultad, Modo, Partida, PeticionCrearPartida } from "../../../compartido/partida.js";
-import { DIFICULTADES, DURACIONES_DE_LIGA } from "../componentes/opcionesDeJuego";
+import { CasillaDelPerro } from "../componentes/CasillaDelPerro";
+import { GrupoDeOpciones } from "../componentes/GrupoDeOpciones";
+import { DIFICULTADES, DURACIONES_DE_LIGA, JUGADORES_DE_PARTIDA } from "../componentes/opcionesDeJuego";
 import { SelectorDeEquipo } from "../componentes/SelectorDeEquipo";
 import { SelectorDeEstadio } from "../componentes/SelectorDeEstadio";
 import { equipoPorId } from "../hooks/useCatalogo";
 import { useCrearPartida } from "../hooks/useCrearPartida";
-import { IMAGENES } from "../recursos/indice";
 
-const METAS_DE_GOLES = [1, 2, 3, 4, 5];
+const METAS_DE_GOLES = [1, 2, 3, 4, 5].map((meta) => ({ valor: meta, texto: String(meta) }));
 
 interface Props {
   modo: Modo;
@@ -27,7 +28,8 @@ export function Configuracion({ modo, equipos, estadios, alJugar, alVolver }: Pr
   const [estadioAMano, setEstadioAMano] = useState<IdEstadio | null>(null);
   const [golesParaGanar, setGolesParaGanar] = useState(3);
   const [duracion, setDuracion] = useState(300);
-  const [perroActivo, setPerroActivo] = useState(true);
+  // Empieza desactivado: al activarlo se oye ladrar al perro.
+  const [perroActivo, setPerroActivo] = useState(false);
   const { crear, enviando, error } = useCrearPartida();
 
   const estadioDelLocal = equipoPorId(equipos, local).estadio;
@@ -61,33 +63,12 @@ export function Configuracion({ modo, equipos, estadios, alJugar, alVolver }: Pr
           <h1>{modo === "eliminatoria" ? "Eliminatoria" : "Liga"}</h1>
         </header>
 
-        <fieldset className="grupo">
-          <legend>Jugadores</legend>
-          <label className="opcion">
-            <input type="radio" name="jugadores" checked={jugadores === 1} onChange={() => setJugadores(1)} />
-            1 jugador contra el servidor
-          </label>
-          <label className="opcion">
-            <input type="radio" name="jugadores" checked={jugadores === 2} onChange={() => setJugadores(2)} />
-            2 jugadores en este dispositivo
-          </label>
-        </fieldset>
+        <GrupoDeOpciones titulo="Jugadores" nombre="jugadores" opciones={JUGADORES_DE_PARTIDA}
+          valor={jugadores} alCambiar={setJugadores} />
 
         {jugadores === 1 && (
-          <fieldset className="grupo">
-            <legend>Dificultad del servidor</legend>
-            {DIFICULTADES.map(({ valor, texto }) => (
-              <label key={valor} className="opcion">
-                <input
-                  type="radio"
-                  name="dificultad"
-                  checked={dificultad === valor}
-                  onChange={() => setDificultad(valor)}
-                />
-                {texto}
-              </label>
-            ))}
-          </fieldset>
+          <GrupoDeOpciones titulo="Dificultad del servidor" nombre="dificultad" opciones={DIFICULTADES}
+            valor={dificultad} alCambiar={setDificultad} />
         )}
 
         <div className="enfrentamiento">
@@ -114,42 +95,14 @@ export function Configuracion({ modo, equipos, estadios, alJugar, alVolver }: Pr
         />
 
         {modo === "eliminatoria" ? (
-          <fieldset className="grupo">
-            <legend>Meta de goles</legend>
-            {METAS_DE_GOLES.map((meta) => (
-              <label key={meta} className="opcion">
-                <input
-                  type="radio"
-                  name="meta"
-                  checked={golesParaGanar === meta}
-                  onChange={() => setGolesParaGanar(meta)}
-                />
-                {meta}
-              </label>
-            ))}
-          </fieldset>
+          <GrupoDeOpciones titulo="Meta de goles" nombre="meta" opciones={METAS_DE_GOLES}
+            valor={golesParaGanar} alCambiar={setGolesParaGanar} />
         ) : (
-          <fieldset className="grupo">
-            <legend>Duración real del partido</legend>
-            {DURACIONES_DE_LIGA.map(({ segundos, texto }) => (
-              <label key={segundos} className="opcion">
-                <input
-                  type="radio"
-                  name="duracion"
-                  checked={duracion === segundos}
-                  onChange={() => setDuracion(segundos)}
-                />
-                {texto}
-              </label>
-            ))}
-          </fieldset>
+          <GrupoDeOpciones titulo="Duración real del partido" nombre="duracion" opciones={DURACIONES_DE_LIGA}
+            valor={duracion} alCambiar={setDuracion} />
         )}
 
-        <label className="opcion opcion--perro">
-          <input type="checkbox" checked={perroActivo} onChange={(evento) => setPerroActivo(evento.target.checked)} />
-          <img src={IMAGENES.perro} alt="" />
-          El perro puede meterse a la cancha
-        </label>
+        <CasillaDelPerro activo={perroActivo} alCambiar={setPerroActivo} />
 
         {error && (
           <p className="mensaje mensaje--error" role="alert">
